@@ -29,6 +29,10 @@ class TimeEntry extends OrganizationModel
         'sunday_minutes',
         'holiday_minutes',
         'evidential_minutes',
+        'evidential_manual',
+        'evidential_code',
+        'evidential_note',
+        'evidential_cost_center_id',
         'absence_code',
         'absence_minutes',
         'status',
@@ -48,6 +52,7 @@ class TimeEntry extends OrganizationModel
             'planned_end' => 'datetime',
             'status' => TimeEntryStatus::class,
             'exception_resolved_at' => 'datetime',
+            'evidential_manual' => 'boolean',
         ];
     }
 
@@ -64,6 +69,11 @@ class TimeEntry extends OrganizationModel
     public function resolvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'exception_resolved_by');
+    }
+
+    public function evidentialCostCenter(): BelongsTo
+    {
+        return $this->belongsTo(CostCenter::class, 'evidential_cost_center_id');
     }
 
     public function totalHours(): float

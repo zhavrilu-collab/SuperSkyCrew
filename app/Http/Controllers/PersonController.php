@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ContractType;
+use App\Enums\EmploymentInstrument;
+use App\Enums\FamilyRight;
 use App\Enums\PersonStatus;
 use App\Models\Department;
 use App\Models\JobPosition;
@@ -11,6 +13,7 @@ use App\Models\OrganizationUser;
 use App\Models\Person;
 use App\Rules\ValidOib;
 use App\Services\DepartmentScopeService;
+use App\Services\EmploymentContractService;
 use App\Services\ExpiryWarningService;
 use App\Services\OrganizationRbacService;
 use Illuminate\Http\RedirectResponse;
@@ -25,6 +28,7 @@ class PersonController extends Controller
         private readonly OrganizationRbacService $rbac,
         private readonly ExpiryWarningService $expiries,
         private readonly DepartmentScopeService $scope,
+        private readonly EmploymentContractService $contracts,
     ) {}
 
     public function index(Request $request): View
@@ -93,7 +97,7 @@ class PersonController extends Controller
             ->with('status', 'Kartica je ažurirana.');
     }
 
-    public function hire(string $slug, Person $person): RedirectResponse
+    public function hire(Request $request, string $slug, Person $person): RedirectResponse
     {
         $this->assertPerson($person);
         $organization = app('currentOrganization');
@@ -109,6 +113,7 @@ class PersonController extends Controller
             'status' => PersonStatus::Employee,
             'started_at' => $person->started_at?->toDateString() ?? now()->toDateString(),
         ]);
+        $this->contracts->seedIfMissing($person->fresh(), $request->user());
 
         return redirect()
             ->route('organization.people.edit', [$organization->slug, $person])
@@ -120,7 +125,7 @@ class PersonController extends Controller
         $this->assertPerson($person);
         $this->authorizeReview($person);
 
-        $person->load(['location', 'department', 'jobPosition', 'costCenter', 'qualifications']);
+        $person->load(['location', 'department', 'jobPosition', 'costCenter', 'qualifications', 'employmentContracts']);
 
         return view('organization.people.review', [
             'organization' => app('currentOrganization'),
@@ -178,7 +183,7 @@ class PersonController extends Controller
         }
 
         if ($person) {
-            $person->load('qualifications');
+            $person->load(['qualifications', 'employmentContracts']);
         }
 
         return view('organization.people.form', [
@@ -193,6 +198,8 @@ class PersonController extends Controller
             'statuses' => PersonStatus::cases(),
             'contracts' => ContractType::cases(),
             'qualificationKinds' => \App\Enums\QualificationKind::cases(),
+            'instrumentKinds' => EmploymentInstrument::cases(),
+            'familyRights' => FamilyRight::cases(),
         ]);
     }
 
@@ -202,6 +209,9 @@ class PersonController extends Controller
     private function validated(Request $request, ?Person $person = null): array
     {
         $organization = app('currentOrganization');
+
+        $iban = strtoupper(preg_replace('/\s+/', '', (string) $request->input('iban', '')) ?? '');
+        $request->merge(['iban' => $iban === '' ? null : $iban]);
 
         $data = $request->validate([
             'first_name' => ['required', 'string', 'max:100'],
@@ -249,6 +259,15 @@ class PersonController extends Controller
                 Rule::exists('organization_users', 'user_id')->where('organization_id', $organization->id),
             ],
             'annual_leave_days' => ['nullable', 'integer', 'min:0', 'max:50'],
+            'iban' => ['nullable', 'string', 'max:34', 'regex:/^[A-Za-z]{2}[0-9]{2}[A-Za-z0-9]{11,30}$/'],
+            'pay_coefficient' => ['nullable', 'numeric', 'min:0', 'max:99.9999'],
+            'allowance_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'prior_service_months' => ['nullable', 'integer', 'min:0', 'max:720'],
+            'children_count' => ['nullable', 'integer', 'min:0', 'max:20'],
+            'dependents_count' => ['nullable', 'integer', 'min:0', 'max:20'],
+            'tax_relief_note' => ['nullable', 'string', 'max:255'],
+            'family_right' => ['nullable', Rule::enum(FamilyRight::class)],
+            'znr_exam_required' => ['nullable', 'boolean'],
             'clock_pin' => [
                 'nullable',
                 'digits_between:4,6',
@@ -258,11 +277,19 @@ class PersonController extends Controller
             ],
         ]);
 
-        foreach (['location_id', 'department_id', 'job_position_id', 'cost_center_id', 'user_id', 'manager_user_id', 'oib', 'contract_type', 'clock_pin'] as $empty) {
+        foreach (['location_id', 'department_id', 'job_position_id', 'cost_center_id', 'user_id', 'manager_user_id', 'oib', 'contract_type', 'clock_pin', 'iban', 'family_right', 'tax_relief_note', 'pay_coefficient', 'allowance_percent', 'prior_service_months'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }
         }
+
+        if (! empty($data['iban'])) {
+            $data['iban'] = strtoupper(preg_replace('/\s+/', '', (string) $data['iban']));
+        }
+
+        $data['znr_exam_required'] = $request->boolean('znr_exam_required');
+        $data['children_count'] = (int) ($data['children_count'] ?? 0);
+        $data['dependents_count'] = (int) ($data['dependents_count'] ?? 0);
 
         if (! empty($data['job_position_id'])) {
             $position = JobPosition::query()

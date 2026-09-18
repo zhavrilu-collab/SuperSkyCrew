@@ -9,6 +9,7 @@ enum ExpiryKind: string
     case Certificate = 'certificate';
     case Qualification = 'qualification';
     case FixedTerm = 'fixed_term';
+    case Trial = 'trial';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum ExpiryKind: string
             self::Certificate => 'Certifikat / atest',
             self::Qualification => 'Obrazovanje / certifikat',
             self::FixedTerm => 'UOR na određeno',
+            self::Trial => 'Probni rad',
         };
     }
 }

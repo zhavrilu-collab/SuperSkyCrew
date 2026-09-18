@@ -118,6 +118,7 @@ class ScheduleTest extends TestCase
 
     public function test_late_punch_is_flagged_but_accepted(): void
     {
+        $this->travelTo('2026-09-18 12:00:00');
         [$owner, $organization, $person] = $this->seedPerson();
         $shift = Shift::factory()->create([
             'organization_id' => $organization->id,

@@ -156,6 +156,35 @@ class TimeEntryRebuilderTest extends TestCase
 
         $this->assertSame(\App\Enums\ExceptionCode::MonthlyFund->value, $result['entry']->exception_code);
         $this->assertSame(540, $result['entry']->total_minutes);
+        $this->assertSame(540, $result['entry']->evidential_minutes);
+        $this->assertSame('RD', $result['entry']->evidential_code);
+        $this->assertFalse($result['entry']->evidential_manual);
+    }
+
+    public function test_manual_evidential_hours_survive_rebuild(): void
+    {
+        [$user, $person] = $this->seedPerson();
+        $clock = app(ClockService::class);
+
+        $clock->punch($person, $user, $this->punch(PunchType::In, '2026-09-18 08:00:00'));
+        $result = $clock->punch($person, $user, $this->punch(PunchType::Out, '2026-09-18 16:00:00'));
+        $entry = $result['entry'];
+        $entry->evidential_minutes = 450;
+        $entry->evidential_code = 'RD';
+        $entry->evidential_note = 'Zaokruživanje';
+        $entry->evidential_manual = true;
+        $entry->save();
+
+        $rebuilt = app(\App\Services\TimeEntryRebuilder::class)->rebuild(
+            $person,
+            \Carbon\Carbon::parse('2026-09-18'),
+        );
+
+        $this->assertSame(480, $rebuilt->total_minutes);
+        $this->assertSame(450, $rebuilt->evidential_minutes);
+        $this->assertSame('RD', $rebuilt->evidential_code);
+        $this->assertTrue($rebuilt->evidential_manual);
+        $this->assertSame('Zaokruživanje', $rebuilt->evidential_note);
     }
 
     /**

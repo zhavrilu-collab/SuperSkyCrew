@@ -24,6 +24,7 @@
                     <th>Početak</th>
                     <th>Završetak</th>
                     <th>Ukupno</th>
+                    <th>Evidenc.</th>
                     <th>Prekovr.</th>
                     <th>Odsutnost</th>
                     <th>Status</th>
@@ -44,16 +45,8 @@
                         <td>{{ $shift ? $shift->shortCode().' '.$shift->clockRange() : '—' }}</td>
                         <td>{{ $entry?->started_at?->timezone(config('app.timezone'))->format('H:i') ?: '—' }}</td>
                         <td>{{ $entry?->ended_at?->timezone(config('app.timezone'))->format('H:i') ?: '—' }}</td>
-                        <td>
-                            @if($entry)
-                                {{ number_format($entry->total_minutes / 60, 1) }} h
-                                @if($entry->exception_code)
-                                    <span class="text-danger">!</span>
-                                @endif
-                            @else
-                                —
-                            @endif
-                        </td>
+                        <td>{{ $entry ? number_format($entry->total_minutes / 60, 1).' h'.($entry->exception_code ? ' !' : '') : '—' }}</td>
+                        <td>{{ $entry ? number_format($entry->evidential_minutes / 60, 1).' h'.($entry->evidential_code ? ' · '.$entry->evidential_code : '') : '—' }}</td>
                         <td>{{ $entry && $entry->overtime_minutes ? $entry->overtime_minutes.' min' : '—' }}</td>
                         <td>{{ $entry?->absence_code ?: '—' }}</td>
                         <td>{{ $entry?->status->label() ?: '—' }}</td>

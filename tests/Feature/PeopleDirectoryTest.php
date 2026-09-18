@@ -111,6 +111,11 @@ class PeopleDirectoryTest extends TestCase
         $this->assertSame(PersonStatus::Employee, $candidate->status);
         $this->assertNotNull($candidate->started_at);
         $this->assertSame(now()->toDateString(), $candidate->started_at->toDateString());
+        $this->assertDatabaseHas('employment_contracts', [
+            'person_id' => $candidate->id,
+            'kind' => \App\Enums\EmploymentInstrument::EmploymentContract->value,
+            'is_current' => 1,
+        ]);
     }
 
     public function test_employee_cannot_hire_candidate(): void

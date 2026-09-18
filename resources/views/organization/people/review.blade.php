@@ -77,15 +77,42 @@
         <li class="list-group-item d-flex justify-content-between"><span>Naziv radnog mjesta / vrsta rada</span><strong>{{ $person->jobPosition?->summary() ?: ($person->job_title ?: '—') }}{{ $person->location ? ' · '.$person->location->name : '' }}</strong></li>
         <li class="list-group-item d-flex justify-content-between"><span>Odjel</span><strong>{{ $person->department?->name ?: '—' }}</strong></li>
         <li class="list-group-item d-flex justify-content-between"><span>Mjesto troška</span><strong>{{ $person->costCenter?->summary() ?: '—' }}</strong></li>
-        <li class="list-group-item d-flex justify-content-between"><span>Vrsta ugovora o radu</span><strong>{{ $person->contract_type?->label() ?: '—' }}</strong></li>
+        <li class="list-group-item d-flex justify-content-between"><span>Vrsta ugovora o radu</span><strong>{{ $person->currentContract()?->contract_type?->label() ?: ($person->contract_type?->label() ?: '—') }}</strong></li>
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between">
+                <span>Ugovori i aneksi</span>
+                @if($person->employmentContracts->isEmpty())
+                    <strong>nema ugovora u dosjeu</strong>
+                @endif
+            </div>
+            @if($person->employmentContracts->isNotEmpty())
+                <ul class="mb-0 mt-2 ps-3">
+                    @foreach($person->employmentContracts as $item)
+                        <li>{{ $item->summary() }}{{ $item->is_current ? ' · važeći' : '' }}</li>
+                    @endforeach
+                </ul>
+            @endif
+        </li>
         <li class="list-group-item d-flex justify-content-between"><span>Datum i razlog prestanka</span><strong>{{ $person->ended_at ? $person->ended_at->format('d.m.Y.').($person->ended_reason ? ' · '.$person->ended_reason : '') : '—' }}</strong></li>
         <li class="list-group-item d-flex justify-content-between"><span>Prijava / promjena na obvezna osiguranja</span><strong>{{ $person->insurance_filed_at?->format('d.m.Y.') ?: '—' }}</strong></li>
     </ol>
 
-    <h2 class="h6">Ostali rokovi (čl. 3. st. 2.)</h2>
+    <h2 class="h6">Ostali podaci od kojih ovise prava (čl. 3. st. 2.)</h2>
     <dl class="row">
+        <dt class="col-sm-4">IBAN</dt>
+        <dd class="col-sm-8">{{ $person->iban ?: '—' }}</dd>
+        <dt class="col-sm-4">Koeficijent / dodaci</dt>
+        <dd class="col-sm-8">{{ $person->pay_coefficient !== null ? $person->pay_coefficient : '—' }}{{ $person->allowance_percent !== null ? ' · dodaci '.$person->allowance_percent.' %' : '' }}</dd>
+        <dt class="col-sm-4">Staž prije ovog poslodavca</dt>
+        <dd class="col-sm-8">{{ $person->priorServiceLabel() }}</dd>
+        <dt class="col-sm-4">Djeca (GO) / uzdržavani</dt>
+        <dd class="col-sm-8">{{ $person->children_count }} / {{ $person->dependents_count }}</dd>
+        <dt class="col-sm-4">Olakšica</dt>
+        <dd class="col-sm-8">{{ $person->tax_relief_note ?: '—' }}</dd>
+        <dt class="col-sm-4">Rodiljna / roditeljska</dt>
+        <dd class="col-sm-8">{{ $person->family_right?->label() ?: '—' }}</dd>
         <dt class="col-sm-4">Liječnički pregled</dt>
-        <dd class="col-sm-8">{{ $person->medical_expires_at?->format('d.m.Y.') ?: '—' }}</dd>
+        <dd class="col-sm-8">{{ $person->medical_expires_at?->format('d.m.Y.') ?: '—' }}{{ $person->znr_exam_required ? ' · ZNR obavezan' : '' }}</dd>
         <dt class="col-sm-4">Certifikat / atest</dt>
         <dd class="col-sm-8">{{ $person->certificate_expires_at?->format('d.m.Y.') ?: '—' }}</dd>
     </dl>

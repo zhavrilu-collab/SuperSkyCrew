@@ -77,13 +77,20 @@
                         <dd class="col-5">{{ $entry->plannedShift?->clockRange() ?: ($plannedShift?->clockRange() ?: '—') }}</dd>
                         <dt class="col-7">Početak</dt><dd class="col-5">{{ $entry->started_at?->timezone(config('app.timezone'))->format('H:i') ?: '—' }}</dd>
                         <dt class="col-7">Završetak</dt><dd class="col-5">{{ $entry->ended_at?->timezone(config('app.timezone'))->format('H:i') ?: '—' }}</dd>
-                        <dt class="col-7">Ukupno</dt><dd class="col-5">{{ number_format($entry->total_minutes / 60, 2) }} h</dd>
+                        <dt class="col-7">Ukupno (realizacija)</dt><dd class="col-5">{{ number_format($entry->total_minutes / 60, 2) }} h</dd>
                         <dt class="col-7">Pauza</dt><dd class="col-5">{{ $entry->break_minutes }} min</dd>
                         <dt class="col-7">Noć</dt><dd class="col-5">{{ $entry->night_minutes }} min</dd>
                         <dt class="col-7">Prekovremeni</dt><dd class="col-5">{{ $entry->overtime_minutes }} min</dd>
                         <dt class="col-7">Nedjelja</dt><dd class="col-5">{{ $entry->sunday_minutes }} min</dd>
                         <dt class="col-7">Blagdan</dt><dd class="col-5">{{ $entry->holiday_minutes }} min</dd>
-                        <dt class="col-7">Evidencijski</dt><dd class="col-5">{{ number_format($entry->evidential_minutes / 60, 2) }} h</dd>
+                        <dt class="col-7">Evidencijski</dt>
+                        <dd class="col-5">
+                            {{ number_format($entry->evidential_minutes / 60, 2) }} h
+                            {{ $entry->evidential_code ? ' · '.$entry->evidential_code : '' }}
+                            {{ $entry->evidential_manual ? ' · ručno' : '' }}
+                        </dd>
+                        <dt class="col-7">Mjesto troška</dt>
+                        <dd class="col-5">{{ $entry->evidentialCostCenter?->summary() ?: ($person->costCenter?->summary() ?: '—') }}</dd>
                         <dt class="col-7">Odsutnost</dt><dd class="col-5">{{ $entry->absence_code ? $entry->absence_code.' ('.$entry->absence_minutes.' min)' : '—' }}</dd>
                         <dt class="col-7">Status</dt><dd class="col-5">{{ $entry->status->label() }}</dd>
                         <dt class="col-7">Iznimka</dt>
@@ -113,6 +120,53 @@
                 @endif
             </div>
         </div>
+
+        @if($canEditEvidential ?? false)
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white fw-semibold">Evidencijski sati (plaća)</div>
+            <div class="card-body">
+                <p class="small text-muted">Realizacija ostaje iz puncha. HR korekcija ide u izvoz za plaće (šifra × sati × MT) i ostaje nakon ponovnog izračuna.</p>
+                <form method="POST" action="{{ route('organization.timesheet.evidential', [$organization->slug, $person, $day->toDateString()]) }}" class="row g-3">
+                    @csrf
+                    <div class="col-md-4">
+                        <label class="form-label" for="evidential_minutes">Minute</label>
+                        <input type="number" min="0" max="1440" class="form-control" name="evidential_minutes" id="evidential_minutes" required value="{{ old('evidential_minutes', $entry?->evidential_minutes ?? 0) }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="evidential_code">Šifra</label>
+                        <select class="form-select" name="evidential_code" id="evidential_code" required>
+                            @foreach($codes as $code)
+                                <option value="{{ $code->code }}" @selected((string) old('evidential_code', $entry?->evidential_code ?: ($entry?->absence_code ?: 'RD')) === $code->code)>{{ $code->code }} · {{ $code->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="evidential_cost_center_id">Mjesto troška</label>
+                        <select class="form-select" name="evidential_cost_center_id" id="evidential_cost_center_id">
+                            <option value="">—</option>
+                            @foreach($costCenters as $costCenter)
+                                <option value="{{ $costCenter->id }}" @selected((string) old('evidential_cost_center_id', $entry?->evidential_cost_center_id ?: $person->cost_center_id) === (string) $costCenter->id)>{{ $costCenter->summary() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="evidential_note">Razlog</label>
+                        <input class="form-control" name="evidential_note" id="evidential_note" required maxlength="255" value="{{ old('evidential_note', $entry?->evidential_note) }}" placeholder="npr. zaokruživanje na puni sat">
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Spremi evidenciju</button>
+                    </div>
+                </form>
+                @if($entry?->evidential_manual)
+                    <form method="POST" action="{{ route('organization.timesheet.evidential', [$organization->slug, $person, $day->toDateString()]) }}" class="mt-2">
+                        @csrf
+                        <input type="hidden" name="revert" value="1">
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">Vrati na realizaciju</button>
+                    </form>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 @endsection

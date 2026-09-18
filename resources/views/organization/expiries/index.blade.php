@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-4">
     <h1 class="h4 mb-1">Upozorenja isteka</h1>
-    <p class="text-muted mb-0">UOR na određeno, dozvola, liječnički, certifikat i kvalifikacije u sljedećih 30 dana (pragovi 5 / 10 / 20 / 30).</p>
+    <p class="text-muted mb-1">UOR na određeno, probni rad, dozvola, liječnički, certifikat i kvalifikacije u sljedećih 30 dana (pragovi 5 / 10 / 20 / 30).</p>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -42,7 +42,7 @@
                             @if($item['kind'] === \App\Enums\ExpiryKind::Medical)
                                 <a class="btn btn-outline-primary btn-sm" href="{{ route('organization.people.referral', [$organization->slug, $item['person']]) }}">Uputnica</a>
                             @endif
-                            @if($item['kind'] === \App\Enums\ExpiryKind::FixedTerm)
+                            @if(in_array($item['kind'], [\App\Enums\ExpiryKind::FixedTerm, \App\Enums\ExpiryKind::Trial], true))
                                 <a class="btn btn-outline-primary btn-sm" href="{{ route('organization.people.contract', [$organization->slug, $item['person']]) }}">UOR</a>
                             @endif
                         </td>

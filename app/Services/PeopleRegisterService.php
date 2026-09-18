@@ -86,6 +86,46 @@ class PeopleRegisterService
     }
 
     /**
+     * @return list<string>
+     */
+    public function payrollHeaders(): array
+    {
+        return [
+            'Prezime', 'Ime', 'OIB', 'IBAN', 'Koeficijent', 'Dodaci %',
+            'Staž prije (mj.)', 'Djeca (GO)', 'Uzdržavani', 'Olakšica',
+            'Obiteljsko pravo', 'ZNR pregled obavezan', 'Radno mjesto', 'Mjesto troška',
+        ];
+    }
+
+    /**
+     * @return list<list<string>>
+     */
+    public function payrollRows(Collection $people): array
+    {
+        $rows = [];
+        foreach ($people as $person) {
+            $rows[] = [
+                $person->last_name,
+                $person->first_name,
+                $person->oib ?: '',
+                $person->iban ?: '',
+                $person->pay_coefficient !== null ? (string) $person->pay_coefficient : '',
+                $person->allowance_percent !== null ? (string) $person->allowance_percent : '',
+                $person->prior_service_months !== null ? (string) $person->prior_service_months : '',
+                (string) ($person->children_count ?? 0),
+                (string) ($person->dependents_count ?? 0),
+                $person->tax_relief_note ?: '',
+                $person->family_right?->label() ?: '',
+                $person->znr_exam_required ? 'da' : 'ne',
+                $person->jobLabel(),
+                $person->costCenter?->summary() ?: '',
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
      * @return list<list<string>>
      */
     public function csvRows(Collection $people): array

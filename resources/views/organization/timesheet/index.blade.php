@@ -18,6 +18,7 @@
         @endif
         @if($canPayroll)
             <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.export', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">Izvoz CSV</a>
+            <a class="btn btn-outline-primary" href="{{ route('organization.people.payroll', $organization->slug) }}">Podaci za plaće</a>
         @endif
     </form>
 </div>
@@ -80,7 +81,7 @@
                             @php($shift = $plan[$person->id][$day->toDateString()] ?? null)
                             <td class="text-center">
                                 <a href="{{ route('organization.timesheet.day', [$organization->slug, $person, $day->toDateString()]) }}" class="{{ $entry ? '' : 'text-muted text-decoration-none' }}">
-                                    {{ $entry && $entry->absence_code ? $entry->absence_code : ($entry ? number_format($entry->total_minutes / 60, 1) : ($shift ? $shift->shortCode() : '·')) }}{{ $entry && $entry->exception_code ? ' !' : '' }}
+                                    {{ $entry && $entry->absence_code ? $entry->absence_code : ($entry ? number_format(($entry->evidential_minutes ?: $entry->total_minutes) / 60, 1) : ($shift ? $shift->shortCode() : '·')) }}{{ $entry && $entry->evidential_manual ? '*' : '' }}{{ $entry && $entry->exception_code ? ' !' : '' }}
                                 </a>
                             </td>
                         @endforeach

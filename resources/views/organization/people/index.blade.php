@@ -19,6 +19,7 @@
         </form>
         <a href="{{ route('organization.people.book', $organization->slug) }}" class="btn btn-outline-secondary">Matična knjiga</a>
         <a href="{{ route('organization.people.turnover', $organization->slug) }}" class="btn btn-outline-secondary">Fluktuacija</a>
+        <a href="{{ route('organization.people.payroll', $organization->slug) }}" class="btn btn-outline-secondary">Place</a>
         <a href="{{ route('organization.people.export', $organization->slug) }}" class="btn btn-outline-secondary">Izvoz CSV</a>
         <a href="{{ route('organization.structure.index', $organization->slug) }}" class="btn btn-outline-secondary">Struktura</a>
         <a href="{{ route('organization.people.create', $organization->slug) }}" class="btn btn-primary">Nova osoba</a>

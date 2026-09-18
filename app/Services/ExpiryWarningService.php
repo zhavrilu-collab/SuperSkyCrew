@@ -24,7 +24,7 @@ class ExpiryWarningService
 
         $people = Person::query()
             ->forOrganization($organization)
-            ->with('qualifications')
+            ->with(['qualifications', 'employmentContracts'])
             ->whereNotIn('status', [PersonStatus::Former->value, PersonStatus::Candidate->value])
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -102,8 +102,9 @@ class ExpiryWarningService
      */
     private function datesFor(Person $person): array
     {
-        $contractEnd = null;
-        if ($person->contract_type === ContractType::FixedTerm && $person->ended_at) {
+        $current = $person->currentContract();
+        $contractEnd = $current?->ends_at?->copy()->startOfDay();
+        if ($contractEnd === null && $person->contract_type === ContractType::FixedTerm && $person->ended_at) {
             $contractEnd = $person->ended_at->copy()->startOfDay();
         }
 
@@ -112,6 +113,7 @@ class ExpiryWarningService
             [ExpiryKind::Medical, $person->medical_expires_at?->copy()->startOfDay()],
             [ExpiryKind::Certificate, $person->certificate_expires_at?->copy()->startOfDay()],
             [ExpiryKind::FixedTerm, $contractEnd],
+            [ExpiryKind::Trial, $current?->trial_ends_at?->copy()->startOfDay()],
         ];
     }
 

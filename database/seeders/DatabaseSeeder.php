@@ -17,6 +17,7 @@ use App\Models\OrganizationUser;
 use App\Models\Person;
 use App\Models\Shift;
 use App\Models\User;
+use App\Services\EmploymentContractService;
 use App\Services\HrSetupService;
 use Illuminate\Database\Seeder;
 
@@ -55,6 +56,15 @@ class DatabaseSeeder extends Seeder
             ['email' => 'radnik@hr.test'],
             [
                 'name' => 'Ivan Horvat',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $accountant = User::query()->updateOrCreate(
+            ['email' => 'knjigovo@hr.test'],
+            [
+                'name' => 'Lana Knjigovođa',
                 'password' => 'password',
                 'email_verified_at' => now(),
             ],
@@ -107,6 +117,10 @@ class DatabaseSeeder extends Seeder
         OrganizationUser::query()->updateOrCreate(
             ['organization_id' => $activeOrg->id, 'user_id' => $worker->id],
             ['role' => OrganizationRole::Employee],
+        );
+        OrganizationUser::query()->updateOrCreate(
+            ['organization_id' => $activeOrg->id, 'user_id' => $accountant->id],
+            ['role' => OrganizationRole::Accountant],
         );
 
         $location = Location::query()->updateOrCreate(
@@ -214,8 +228,21 @@ class DatabaseSeeder extends Seeder
                 'annual_leave_days' => 20,
                 'clock_pin' => '2222',
                 'medical_expires_at' => now()->addDays(10)->toDateString(),
+                'iban' => 'HR1210010051863000160',
+                'pay_coefficient' => 1.15,
+                'allowance_percent' => 10,
+                'prior_service_months' => 36,
+                'children_count' => 1,
+                'dependents_count' => 1,
+                'tax_relief_note' => '1 dijete',
+                'znr_exam_required' => true,
             ],
         );
+
+        $contracts = app(EmploymentContractService::class);
+        foreach (Person::query()->where('organization_id', $activeOrg->id)->get() as $person) {
+            $contracts->seedIfMissing($person);
+        }
 
         app(HrSetupService::class)->provision($activeOrg);
 

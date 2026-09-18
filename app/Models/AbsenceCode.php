@@ -9,6 +9,7 @@ class AbsenceCode extends OrganizationModel
         'code',
         'name',
         'category',
+        'kind',
         'paid',
         'consumes_annual_leave',
         'is_system',
@@ -29,6 +30,7 @@ class AbsenceCode extends OrganizationModel
             'leave' => 'text-bg-info',
             'sick' => 'text-bg-danger',
             'holiday' => 'text-bg-secondary',
+            'presence' => 'text-bg-success',
             default => 'text-bg-warning',
         };
     }

@@ -71,6 +71,7 @@ class StaffRequestController extends Controller
             'absenceCodes' => AbsenceCode::query()
                 ->forOrganization($organization)
                 ->where('code', '!=', 'GO')
+                ->where('kind', '!=', 'presence')
                 ->orderBy('code')
                 ->get(),
             'punches' => Punch::query()

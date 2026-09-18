@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ContractType;
+use App\Enums\FamilyRight;
 use App\Enums\PersonStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,6 +39,15 @@ class Person extends OrganizationModel
         'medical_expires_at',
         'certificate_expires_at',
         'annual_leave_days',
+        'iban',
+        'pay_coefficient',
+        'allowance_percent',
+        'prior_service_months',
+        'children_count',
+        'dependents_count',
+        'tax_relief_note',
+        'family_right',
+        'znr_exam_required',
         'clock_pin',
     ];
 
@@ -53,6 +63,13 @@ class Person extends OrganizationModel
             'work_permit_expires_at' => 'date',
             'medical_expires_at' => 'date',
             'certificate_expires_at' => 'date',
+            'pay_coefficient' => 'decimal:4',
+            'allowance_percent' => 'decimal:2',
+            'prior_service_months' => 'integer',
+            'children_count' => 'integer',
+            'dependents_count' => 'integer',
+            'family_right' => FamilyRight::class,
+            'znr_exam_required' => 'boolean',
         ];
     }
 
@@ -111,6 +128,17 @@ class Person extends OrganizationModel
         return $this->hasMany(Qualification::class)->orderBy('expires_at')->orderBy('title');
     }
 
+    public function employmentContracts(): HasMany
+    {
+        return $this->hasMany(EmploymentContract::class)->orderByDesc('starts_at')->orderByDesc('id');
+    }
+
+    public function currentContract(): ?EmploymentContract
+    {
+        return $this->employmentContracts->firstWhere('is_current', true)
+            ?? $this->employmentContracts->first();
+    }
+
     public function fullName(): string
     {
         return trim($this->first_name.' '.$this->last_name);
@@ -134,5 +162,24 @@ class Person extends OrganizationModel
     public function jobLabel(): string
     {
         return $this->jobPosition?->name ?: ($this->job_title ?: '—');
+    }
+
+    public function priorServiceLabel(): string
+    {
+        if ($this->prior_service_months === null) {
+            return '—';
+        }
+
+        $years = intdiv((int) $this->prior_service_months, 12);
+        $months = ((int) $this->prior_service_months) % 12;
+        $parts = [];
+        if ($years > 0) {
+            $parts[] = $years.' g.';
+        }
+        if ($months > 0 || $years === 0) {
+            $parts[] = $months.' mj.';
+        }
+
+        return implode(' ', $parts);
     }
 }

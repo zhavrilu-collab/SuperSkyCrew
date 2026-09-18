@@ -159,6 +159,54 @@
                 <label class="form-label" for="clock_pin">PIN za kiosk</label>
                 <input class="form-control" name="clock_pin" id="clock_pin" value="{{ old('clock_pin', $person?->clock_pin) }}" maxlength="6" inputmode="numeric">
             </div>
+            <div class="col-12">
+                <hr class="mt-2 mb-1">
+                <h2 class="h6 mb-1">Podaci za plaće i prava (čl. 3. st. 2.)</h2>
+                <p class="small text-muted mb-0">Unos, ne obračun. IBAN i koeficijent idu u izvoz za računovodstvo.</p>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="iban">IBAN</label>
+                <input class="form-control" name="iban" id="iban" value="{{ old('iban', $person?->iban) }}" maxlength="34" placeholder="HR12…" autocomplete="off">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="pay_coefficient">Koeficijent</label>
+                <input type="number" step="0.0001" min="0" max="99.9999" class="form-control" name="pay_coefficient" id="pay_coefficient" value="{{ old('pay_coefficient', $person?->pay_coefficient) }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="allowance_percent">Dodaci %</label>
+                <input type="number" step="0.01" min="0" max="100" class="form-control" name="allowance_percent" id="allowance_percent" value="{{ old('allowance_percent', $person?->allowance_percent) }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="prior_service_months">Staž prije (mj.)</label>
+                <input type="number" min="0" max="720" class="form-control" name="prior_service_months" id="prior_service_months" value="{{ old('prior_service_months', $person?->prior_service_months) }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="children_count">Djeca (GO)</label>
+                <input type="number" min="0" max="20" class="form-control" name="children_count" id="children_count" value="{{ old('children_count', $person?->children_count ?? 0) }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="dependents_count">Uzdržavani</label>
+                <input type="number" min="0" max="20" class="form-control" name="dependents_count" id="dependents_count" value="{{ old('dependents_count', $person?->dependents_count ?? 0) }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="tax_relief_note">Olakšica / napomena</label>
+                <input class="form-control" name="tax_relief_note" id="tax_relief_note" value="{{ old('tax_relief_note', $person?->tax_relief_note) }}" maxlength="255" placeholder="npr. 1 dijete, invaliditet">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="family_right">Rodiljna / roditeljska</label>
+                <select class="form-select" name="family_right" id="family_right">
+                    <option value="">nije aktivno</option>
+                    @foreach($familyRights as $right)
+                        <option value="{{ $right->value }}" @selected(old('family_right', $person?->family_right?->value) === $right->value)>{{ $right->label() }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="znr_exam_required" id="znr_exam_required" value="1" @checked(old('znr_exam_required', $person?->znr_exam_required))>
+                    <label class="form-check-label" for="znr_exam_required">Obavezan ZNR pregled</label>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card-footer bg-white d-flex gap-2">
@@ -171,6 +219,104 @@
         <a class="btn btn-outline-secondary" href="{{ route('organization.people.index', $organization->slug) }}">Odustani</a>
     </div>
 </form>
+@if($person)
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white fw-semibold">Ugovori i aneksi</div>
+        <div class="card-body">
+            <div class="table-responsive mb-4">
+                <table class="table table-sm mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Vrsta</th>
+                            <th>Broj</th>
+                            <th>Trajanje</th>
+                            <th>Probni</th>
+                            <th>Sati/tj.</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($person->employmentContracts as $item)
+                            <tr>
+                                <td>{{ $item->kind->label() }}{{ $item->is_current ? ' · važeći' : '' }}{{ $item->contract_type ? ' · '.$item->contract_type->label() : '' }}</td>
+                                <td>{{ $item->number ?: '—' }}</td>
+                                <td>{{ $item->starts_at->format('d.m.Y.') }}{{ $item->ends_at ? ' – '.$item->ends_at->format('d.m.Y.') : '' }}</td>
+                                <td>{{ $item->trial_ends_at?->format('d.m.Y.') ?: '—' }}</td>
+                                <td>{{ $item->weekly_hours ?: '—' }}</td>
+                                <td class="text-end">
+                                    <form method="POST" action="{{ route('organization.contracts.destroy', [$organization->slug, $person, $item]) }}" onsubmit="return confirm('Ukloniti ovaj ugovor?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-outline-danger btn-sm" type="submit">Ukloni</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="6" class="text-muted">Još nema ugovora. Ispis UOR-a i istek određenog čitaju važeći slog.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <form method="POST" action="{{ route('organization.contracts.store', [$organization->slug, $person]) }}" class="row g-3">
+                @csrf
+                <div class="col-md-3">
+                    <label class="form-label" for="instrument_kind">Isprava</label>
+                    <select class="form-select" name="kind" id="instrument_kind" required>
+                        @foreach($instrumentKinds as $kind)
+                            <option value="{{ $kind->value }}" @selected(old('kind', 'uor') === $kind->value)>{{ $kind->label() }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="instrument_contract_type">Vrsta</label>
+                    <select class="form-select" name="contract_type" id="instrument_contract_type">
+                        <option value="">—</option>
+                        @foreach($contracts as $contract)
+                            <option value="{{ $contract->value }}" @selected(old('contract_type', $person->contract_type?->value) === $contract->value)>{{ $contract->label() }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="instrument_number">Broj</label>
+                    <input class="form-control" name="number" id="instrument_number" value="{{ old('number') }}" maxlength="64" placeholder="auto ako prazno">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="instrument_weekly_hours">Sati tjedno</label>
+                    <input type="number" min="1" max="60" class="form-control" name="weekly_hours" id="instrument_weekly_hours" value="{{ old('weekly_hours', 40) }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="instrument_signed_at">Potpis</label>
+                    <input type="date" class="form-control" name="signed_at" id="instrument_signed_at" value="{{ old('signed_at', $person->started_at?->toDateString() ?? now()->toDateString()) }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="instrument_starts_at">Početak</label>
+                    <input type="date" class="form-control" name="starts_at" id="instrument_starts_at" value="{{ old('starts_at', $person->started_at?->toDateString() ?? now()->toDateString()) }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="instrument_ends_at">Istek (određeno)</label>
+                    <input type="date" class="form-control" name="ends_at" id="instrument_ends_at" value="{{ old('ends_at') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="instrument_trial_ends_at">Probni rad do</label>
+                    <input type="date" class="form-control" name="trial_ends_at" id="instrument_trial_ends_at" value="{{ old('trial_ends_at') }}">
+                </div>
+                <div class="col-md-9">
+                    <label class="form-label" for="instrument_note">Napomena</label>
+                    <input class="form-control" name="note" id="instrument_note" value="{{ old('note') }}" maxlength="255">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="is_current" id="instrument_is_current" value="1" @checked(old('is_current', '1'))>
+                        <label class="form-check-label" for="instrument_is_current">Važeći</label>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-outline-primary" type="submit">Dodaj ugovor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endif
 @if($person)
     <div class="card border-0 shadow-sm mt-4">
         <div class="card-header bg-white fw-semibold">Obrazovanje i certifikati (čl. 3. st. 1. t. 8.)</div>

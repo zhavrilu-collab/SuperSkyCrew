@@ -8,6 +8,7 @@ enum DocumentKind: string
     case TimeRecord = 'evidencija_rv';
     case LeaveDecision = 'rjesenje_go';
     case EmploymentContract = 'uor';
+    case ContractAnnex = 'aneks';
     case MedicalReferral = 'uputnica';
     case Other = 'ostalo';
 
@@ -18,6 +19,7 @@ enum DocumentKind: string
             self::TimeRecord => 'Evidencija radnog vremena',
             self::LeaveDecision => 'Rješenje o GO',
             self::EmploymentContract => 'Ugovor o radu',
+            self::ContractAnnex => 'Aneks ugovora',
             self::MedicalReferral => 'Uputnica za liječnički',
             self::Other => 'Ostalo',
         };

@@ -83,4 +83,41 @@ class PeopleRegisterController extends Controller
             'rate' => $rate,
         ]);
     }
+
+    public function payroll(Request $request): View
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'payroll.export');
+        $on = Carbon::parse($request->input('na', now()->toDateString()), config('app.timezone'))->startOfDay();
+        $people = $this->register->activeOn($organization, $on);
+
+        return view('organization.people.payroll', [
+            'organization' => $organization,
+            'on' => $on,
+            'people' => $people,
+            'canEditPeople' => $this->rbac->can($organization->id, (int) Auth::id(), 'people.access'),
+        ]);
+    }
+
+    public function payrollExport(Request $request): StreamedResponse
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'payroll.export');
+        $on = Carbon::parse($request->input('na', now()->toDateString()), config('app.timezone'))->startOfDay();
+        $people = $this->register->activeOn($organization, $on);
+        $rows = $this->register->payrollRows($people);
+        $filename = 'podaci-za-place-'.$on->toDateString().'.csv';
+
+        return response()->streamDownload(function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, $this->register->payrollHeaders(), ';');
+            foreach ($rows as $row) {
+                fputcsv($handle, $row, ';');
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
 }

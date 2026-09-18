@@ -30,7 +30,7 @@
     <p class="text-end">Klasa: {{ $number }}<br>
         {{ $issuedAt->timezone(config('app.timezone'))->format('d.m.Y.') }}@if($organization->city) · {{ $organization->city }}@endif</p>
 
-    <h1 class="h4 text-center mt-4 mb-4">UGOVOR O RADU</h1>
+    <h1 class="h4 text-center mt-4 mb-4">{{ $printTitle }}</h1>
 
     <p>sklopljen između:</p>
     <p><strong>Poslodavac:</strong> {{ $organization->name }}@if($organization->oib), OIB {{ $organization->oib }}@endif
@@ -48,23 +48,13 @@
         Odjel: <strong>{{ $person->department?->name ?: 'nije dodijeljen' }}</strong>.</p>
 
     <h2 class="h6">Članak 2. Trajanje i početak rada</h2>
-    <p>Radni odnos počinje <strong>{{ $person->started_at?->format('d.m.Y.') ?: 'datumom potpisa' }}</strong>.
-        @if($person->contract_type === \App\Enums\ContractType::FixedTerm && $person->ended_at)
-            Ugovor se sklapa na određeno vrijeme, do <strong>{{ $person->ended_at->format('d.m.Y.') }}</strong>.
-        @elseif($person->contract_type === \App\Enums\ContractType::FixedTerm)
-            Ugovor se sklapa na određeno vrijeme.
-        @else
-            Ugovor se sklapa na neodređeno vrijeme, osim ako je na kartici navedena druga vrsta.
-        @endif
+    <p>{{ $durationText }}
+        {{ $trialText }}
     </p>
 
     <h2 class="h6">Članak 3. Radno vrijeme</h2>
     <p>
-        @if($person->contract_type === \App\Enums\ContractType::PartTime)
-            Radnik radi nepuno radno vrijeme. Raspored i fond sati utvrđuju se aneksom odnosno rasporedom rada.
-        @else
-            Puno radno vrijeme iznosi 40 sati tjedno, u pravilu 8 sati dnevno, ako internim aktom ili rasporedom nije drukčije određeno.
-        @endif
+        {{ $hoursText }}
         Evidencija radnog vremena vodi se prema Pravilniku NN 55/2024.
     </p>
 

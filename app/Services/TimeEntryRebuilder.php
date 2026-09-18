@@ -82,6 +82,9 @@ class TimeEntryRebuilder
         $overtime = max($overtime, $approvedOvertime);
         $sunday = $day->isSunday() ? $totalMinutes : 0;
         $holiday = CroatianHolidays::isHoliday($day) ? $totalMinutes : 0;
+        $manual = (bool) ($existing?->evidential_manual);
+        $defaultEvidential = (int) ($existing?->absence_minutes ?: $totalMinutes);
+        $defaultCode = $existing?->absence_code ?: ($totalMinutes > 0 ? 'RD' : null);
 
         $exception ??= $this->dailyRestException($person, $firstIn);
         $exception ??= $this->monthlyFundException($person, $day, $totalMinutes, $existing?->id);
@@ -113,7 +116,13 @@ class TimeEntryRebuilder
             'approved_overtime_minutes' => $approvedOvertime,
             'sunday_minutes' => $sunday,
             'holiday_minutes' => $holiday,
-            'evidential_minutes' => $totalMinutes,
+            'evidential_minutes' => $manual ? (int) $existing->evidential_minutes : $defaultEvidential,
+            'evidential_manual' => $manual,
+            'evidential_code' => $manual ? $existing->evidential_code : $defaultCode,
+            'evidential_note' => $manual ? $existing->evidential_note : null,
+            'evidential_cost_center_id' => $manual
+                ? $existing->evidential_cost_center_id
+                : ($existing?->evidential_cost_center_id ?: $person->cost_center_id),
             'absence_code' => $existing?->absence_code,
             'absence_minutes' => $existing?->absence_minutes ?? 0,
             'status' => $status,

@@ -15,10 +15,12 @@ use App\Services\DepartmentScopeService;
 use App\Services\OrganizationRbacService;
 use App\Services\PeriodLockService;
 use App\Services\ShiftResolver;
+use App\Services\TimeEntryRebuilder;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -30,6 +32,7 @@ class TimesheetController extends Controller
         private readonly PeriodLockService $locks,
         private readonly DepartmentScopeService $scope,
         private readonly ShiftResolver $shifts,
+        private readonly TimeEntryRebuilder $rebuilder,
     ) {}
 
     public function index(Request $request): View
@@ -107,6 +110,7 @@ class TimesheetController extends Controller
         $entry = TimeEntry::query()
             ->where('person_id', $person->id)
             ->whereDate('work_date', $day->toDateString())
+            ->with('evidentialCostCenter')
             ->first();
 
         $punches = Punch::query()
@@ -120,6 +124,15 @@ class TimesheetController extends Controller
         $userId = (int) Auth::id();
         $canOpenTimesheet = $this->rbac->can($organization->id, $userId, 'time.access')
             || $this->rbac->can($organization->id, $userId, 'payroll.export');
+        $canEditEvidential = $this->rbac->can($organization->id, $userId, 'time.lock') && ! $locked;
+        $person->loadMissing('costCenter');
+        $costCenters = $this->scope->costCentersOn($organization, $day);
+        if ($entry?->evidentialCostCenter && ! $costCenters->contains('id', $entry->evidential_cost_center_id)) {
+            $costCenters->push($entry->evidentialCostCenter);
+        }
+        if ($person->costCenter && ! $costCenters->contains('id', $person->cost_center_id)) {
+            $costCenters->push($person->costCenter);
+        }
 
         return view('organization.timesheet.day', [
             'organization' => $organization,
@@ -131,7 +144,10 @@ class TimesheetController extends Controller
             'canResolve' => $this->rbac->can($organization->id, $userId, 'time.access') && ($entry?->hasOpenException() ?? false),
             'periodLocked' => $locked,
             'canOpenTimesheet' => $canOpenTimesheet,
+            'canEditEvidential' => $canEditEvidential,
             'plannedShift' => $this->shifts->forPersonOn($person, $day),
+            'codes' => AbsenceCode::query()->forOrganization($organization)->orderBy('kind')->orderBy('code')->get(),
+            'costCenters' => $costCenters,
         ]);
     }
 
@@ -201,6 +217,59 @@ class TimesheetController extends Controller
         return back()->with('status', 'Ručni unos je zabilježen.');
     }
 
+    public function storeEvidential(Request $request, string $slug, Person $person, string $date): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'time.lock');
+        abort_unless($person->organization_id === $organization->id, 404);
+
+        $day = Carbon::parse($date, config('app.timezone'))->startOfDay();
+        abort_if($this->locks->isLocked($organization->id, $day), 403, 'Razdoblje je zaključano.');
+
+        $entry = $this->rebuilder->rebuild($person, $day);
+        abort_if($entry->isLocked(), 403, 'Slog je zaključan.');
+
+        if ($request->boolean('revert')) {
+            $entry->evidential_manual = false;
+            $entry->evidential_note = null;
+            $entry->save();
+            $this->rebuilder->rebuild($person, $day);
+
+            return back()->with('status', 'Evidencijski sati vraćeni na realizaciju.');
+        }
+
+        $data = $request->validate([
+            'evidential_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+            'evidential_code' => [
+                'required',
+                'string',
+                'max:16',
+                Rule::exists('absence_codes', 'code')->where('organization_id', $organization->id),
+            ],
+            'evidential_cost_center_id' => [
+                'nullable',
+                Rule::exists('cost_centers', 'id')->where('organization_id', $organization->id),
+            ],
+            'evidential_note' => ['required', 'string', 'max:255'],
+        ]);
+
+        foreach (['evidential_cost_center_id'] as $empty) {
+            if (($data[$empty] ?? null) === '') {
+                $data[$empty] = null;
+            }
+        }
+
+        $entry->fill([
+            'evidential_minutes' => $data['evidential_minutes'],
+            'evidential_code' => $data['evidential_code'],
+            'evidential_cost_center_id' => ($data['evidential_cost_center_id'] ?? null) ?: $person->cost_center_id,
+            'evidential_note' => $data['evidential_note'],
+            'evidential_manual' => true,
+        ])->save();
+
+        return back()->with('status', 'Evidencijski sati su spremljeni.');
+    }
+
     public function lock(Request $request): RedirectResponse
     {
         $organization = app('currentOrganization');
@@ -256,9 +325,9 @@ class TimesheetController extends Controller
             $handle = fopen('php://output', 'w');
             fwrite($handle, "\xEF\xBB\xBF");
             fputcsv($handle, [
-                'Osoba', 'Datum', 'Početak', 'Završetak', 'Ukupno min', 'Pauza min',
+                'Osoba', 'Datum', 'Početak', 'Završetak', 'Realizirano min', 'Pauza min',
                 'Noć min', 'Prekovremeni min', 'Nedjelja min', 'Blagdan min',
-                'Odsutnost', 'Odsutnost min', 'Evidencijski min', 'Status', 'Iznimka',
+                'Odsutnost', 'Odsutnost min', 'Šifra', 'Evidencijski min', 'Mjesto troška', 'Status', 'Iznimka',
             ], ';');
             foreach ($rows as $row) {
                 fputcsv($handle, $row, ';');
@@ -289,7 +358,7 @@ class TimesheetController extends Controller
     private function reportRows(int $organizationId, Carbon $from, Carbon $to): array
     {
         $entries = TimeEntry::query()
-            ->with('person')
+            ->with(['person.costCenter', 'evidentialCostCenter'])
             ->where('organization_id', $organizationId)
             ->whereDate('work_date', '>=', $from->toDateString())
             ->whereDate('work_date', '<=', $to->toDateString())
@@ -300,6 +369,7 @@ class TimesheetController extends Controller
         $tz = config('app.timezone');
         $rows = [];
         foreach ($entries as $entry) {
+            $costCenter = $entry->evidentialCostCenter ?: $entry->person?->costCenter;
             $rows[] = [
                 $entry->person?->fullName() ?? '',
                 $entry->work_date->toDateString(),
@@ -313,7 +383,9 @@ class TimesheetController extends Controller
                 $entry->holiday_minutes,
                 $entry->absence_code,
                 $entry->absence_minutes,
+                $entry->evidential_code,
                 $entry->evidential_minutes,
+                $costCenter?->summary() ?? '',
                 $entry->status->label(),
                 $entry->exception_code,
             ];
