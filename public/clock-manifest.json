@@ -1,0 +1,8 @@
+{
+    "name": "HR SaaS prijava",
+    "short_name": "Prijava",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#212529",
+    "theme_color": "#212529"
+}
