@@ -25,6 +25,24 @@ C:\xampp\php\php.exe artisan serve --host=127.0.0.1 --port=8004
 
 U `.env` za lokalni login bez redirecta na konzolu: `IDENTITY_CORE_AUTH_ENABLED=false` i `IDENTITY_UNIFIED_LOGIN_ENABLED=false`.
 
+## Demo tenant (sve uloge)
+
+```powershell
+C:\xampp\php\php.exe artisan hr:seed-demo
+```
+
+Na VPS-u: `cd /var/www/hr-saas && php artisan hr:seed-demo`
+
+| Uloga | E-mail | Lozinka |
+|---|---|---|
+| Vlasnik | `vlasnik@hr-demo.superskytech.com` | `DemoHr.2026` |
+| HR | `hr@hr-demo.superskytech.com` | `DemoHr.2026` |
+| Voditelj | `voditelj@hr-demo.superskytech.com` | `DemoHr.2026` |
+| Računovodstvo | `knjigovo@hr-demo.superskytech.com` | `DemoHr.2026` |
+| Radnik | `radnik@hr-demo.superskytech.com` | `DemoHr.2026` |
+
+Organizacija: **Demo HR d.o.o.** (`/demo-hr`). Premium paket, kadar, šihterica (14.–18. 9. 2026), otvoreni GO za voditelja i prekovremeni.
+
 ## Produkcija
 
 Isti VPS kao Udruga SaaS i konzola. Checklist: [`DEPLOY.md`](DEPLOY.md).
