@@ -17,7 +17,9 @@ BACKUP="/home/ubuntu/deploy-backups/$TS"
 
 fix_app_permissions() {
   local app="$1"
-  mkdir -p "$app/storage/logs" "$app/storage/framework/cache" "$app/storage/framework/sessions" "$app/storage/framework/views" "$app/bootstrap/cache"
+  mkdir -p "$app/storage/logs" "$app/storage/framework/cache/data" "$app/storage/framework/sessions" "$app/storage/framework/views" "$app/storage/app/private" "$app/storage/app/public" "$app/bootstrap/cache"
+  # php-fpm radi kao www-data; ubuntu smije chmod jer je vlasnik.
+  chmod -R a+rwX "$app/storage" "$app/bootstrap/cache"
   if [[ -w "$app/bootstrap/cache" && -w "$app/storage/logs" ]]; then
     return 0
   fi

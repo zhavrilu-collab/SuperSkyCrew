@@ -137,7 +137,7 @@ IDENTITY_MICROSOFT_OAUTH_ENABLED=false
 IDENTITY_UNIFIED_LOGIN_ENABLED=true
 EOF
   chown ubuntu:ubuntu "$HR_APP/.env"
-  chmod 600 "$HR_APP/.env"
+  chmod 644 "$HR_APP/.env"
 fi
 
 if [[ -f "$ADMIN_APP/.env" ]]; then
