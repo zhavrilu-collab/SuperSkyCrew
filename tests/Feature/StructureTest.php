@@ -42,7 +42,8 @@ class StructureTest extends TestCase
             ]))
             ->assertOk()
             ->assertSee('Struktura organizacije')
-            ->assertSee('Stanje na dan');
+            ->assertSee('Stanje na dan')
+            ->assertSee('Poslovna struktura');
 
         $this->actingAs($owner)
             ->post(route('organization.structure.departments.store', $organization->slug), [
@@ -74,9 +75,9 @@ class StructureTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->get($this->ustrojUrl($organization, '2026-09-18'))
+            ->get($this->ustrojUrl($organization, '2026-09-18', 'funkcijska'))
             ->assertOk()
-            ->assertSee('Shema')
+            ->assertSee('Funkcijski ustroj')
             ->assertSee('Operativa')
             ->assertSee('org-kutija', false);
 
@@ -366,11 +367,81 @@ class StructureTest extends TestCase
             ->assertSessionHasErrors('parent_id');
 
         $this->actingAs($owner)
-            ->get($this->ustrojUrl($organization, now()->toDateString(), 'shema'))
+            ->get($this->ustrojUrl($organization, now()->toDateString(), 'funkcijska'))
             ->assertOk()
             ->assertSee('Uprava')
             ->assertSee('Operativa plus')
             ->assertSee('Novi odjel');
+    }
+
+    public function test_owner_can_build_legal_entity_work_center_and_enterprise_tree(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+
+        $this->actingAs($owner)
+            ->post(route('organization.structure.legal-entities.store', $organization->slug), [
+                'name' => 'Podružnica Split d.o.o.',
+                'code' => 'ST',
+                'city' => 'Split',
+                'country' => 'Hrvatska',
+                'valid_from' => '2026-01-01',
+            ])
+            ->assertRedirect();
+
+        $this->actingAs($owner)
+            ->post(route('organization.structure.work-centers.store', $organization->slug), [
+                'name' => 'Split',
+                'code' => 'ST-POS',
+                'city' => 'Split',
+                'valid_from' => '2026-01-01',
+            ])
+            ->assertRedirect();
+
+        $root = \App\Models\EnterpriseUnit::query()->where('organization_id', $organization->id)->whereNull('parent_id')->first();
+        $this->assertNotNull($root);
+
+        $this->actingAs($owner)
+            ->post(route('organization.structure.enterprise-units.store', $organization->slug), [
+                'name' => 'Split',
+                'parent_id' => $root->id,
+                'valid_from' => '2026-01-01',
+            ])
+            ->assertRedirect();
+
+        $split = \App\Models\EnterpriseUnit::query()->where('organization_id', $organization->id)->where('name', 'Split')->first();
+        $this->assertNotNull($split);
+
+        $this->actingAs($owner)
+            ->from(route('organization.settings.index', ['slug' => $organization->slug, 'tab' => 'organizacija', 'section' => 'ustroj']))
+            ->put(route('organization.structure.enterprise-units.update', [$organization->slug, $root]), [
+                'name' => $root->name,
+                'parent_id' => $split->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHasErrors('parent_id');
+
+        $this->actingAs($owner)
+            ->get($this->ustrojUrl($organization, '2026-09-18', 'poslovna'))
+            ->assertOk()
+            ->assertSee('Split')
+            ->assertSee('Funkcijski ustroj');
+
+        $this->actingAs($owner)
+            ->get($this->ustrojUrl($organization, '2026-09-18', 'pravne'))
+            ->assertOk()
+            ->assertSee('Podružnica Split d.o.o.');
+    }
+
+    public function test_organigram_shows_manager_reporting_line(): void
+    {
+        [$owner, $manager, $organization, $own, $other] = $this->seedScopedOrg();
+
+        $this->actingAs($owner)
+            ->get($this->ustrojUrl($organization, now()->toDateString(), 'organigram'))
+            ->assertOk()
+            ->assertSee('Iva Operativa')
+            ->assertSee('Marta Uprava')
+            ->assertSee('org-kutija-osoba', false);
     }
 
     /**

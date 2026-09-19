@@ -33,11 +33,14 @@ use App\Services\DepartmentScopeService;
 use App\Services\HrSetupService;
 use App\Services\LeaveService;
 use App\Services\OrganizationRbacService;
+use App\Services\OrganizationStructureService;
 use App\Services\PeopleImportService;
 use App\Services\RetentionService;
 use App\Support\DocumentMergeFields;
 use App\Support\OrganizationThemes;
+use App\Support\PersonReportingTree;
 use App\Support\SettingsCatalog;
+use App\Support\StructureCatalog;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,6 +60,7 @@ class OrganizationSettingsController extends Controller
         private readonly RetentionService $retention,
         private readonly AuditService $audit,
         private readonly LeaveService $leave,
+        private readonly OrganizationStructureService $structure,
     ) {}
 
     public function index(Request $request): View
@@ -641,23 +645,94 @@ class OrganizationSettingsController extends Controller
         }
 
         if ($tab === SettingsCatalog::TAB_ORGANIZACIJA && $section === 'ustroj') {
+            $this->structure->ensure($organization);
             $on = Carbon::parse(
                 filled($request->input('na')) ? $request->input('na') : now()->toDateString(),
                 config('app.timezone')
             )->startOfDay();
-            $katalog = in_array($request->input('katalog'), ['shema', 'odjeli', 'mjesta', 'troskovi'], true)
-                ? (string) $request->input('katalog')
-                : 'shema';
-            $departments = $this->scope->departmentsOn($organization, $on);
+            $katalog = StructureCatalog::resolve($request->input('katalog'));
+            $departments = $this->scope->departmentsOn($organization, $on)->load('enterpriseUnit');
             $positions = $this->scope->positionsOn($organization, $on);
             $costCenters = $this->scope->costCentersOn($organization, $on);
+            $legalEntities = $this->scope->legalEntitiesOn($organization, $on);
+            $workCenters = $this->scope->workCentersOn($organization, $on);
+            $enterpriseUnits = $this->scope->enterpriseUnitsOn($organization, $on);
             $q = trim((string) $request->input('q', ''));
             $selectedPosition = null;
-            if ($katalog === 'mjesta') {
+            if ($katalog === StructureCatalog::MJESTA) {
                 $mjestoId = (int) $request->input('mjesto');
                 $selectedPosition = $mjestoId > 0
                     ? $positions->firstWhere('id', $mjestoId)
                     : $positions->first();
+            }
+
+            $selectedUnitId = (int) $request->input('jedinica');
+            $selectedUnit = $selectedUnitId > 0
+                ? $enterpriseUnits->firstWhere('id', $selectedUnitId)
+                : $enterpriseUnits->first(fn ($unit) => $unit->parent_id === null) ?? $enterpriseUnits->first();
+            $unitIds = $selectedUnit
+                ? $this->structure->descendantUnitIds($selectedUnit, $enterpriseUnits)
+                : $enterpriseUnits->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+            $functionalDepartments = $departments->filter(
+                fn ($department) => in_array((int) $department->enterprise_unit_id, $unitIds, true)
+            )->values();
+
+            $selectedDepartmentId = (int) $request->input('odjel');
+            $selectedDepartment = $selectedDepartmentId > 0
+                ? $departments->firstWhere('id', $selectedDepartmentId)
+                : null;
+
+            $people = Person::query()
+                ->forOrganization($organization)
+                ->with(['employmentContracts', 'user', 'department.enterpriseUnit', 'jobPosition', 'legalEntity', 'workCenter'])
+                ->orderBy('last_name')
+                ->orderBy('first_name')
+                ->get();
+
+            $chartPeople = $people->filter(function (Person $person) use ($on, $unitIds, $selectedDepartment) {
+                if ($person->status === \App\Enums\PersonStatus::Candidate || $person->status === \App\Enums\PersonStatus::Former) {
+                    return false;
+                }
+                if ($person->ended_at && $person->ended_at->toDateString() < $on->toDateString()) {
+                    return false;
+                }
+                if ($person->department_id && ! in_array((int) $person->department?->enterprise_unit_id, $unitIds, true)) {
+                    return false;
+                }
+                if ($selectedDepartment && (int) $person->department_id !== (int) $selectedDepartment->id) {
+                    return false;
+                }
+
+                return true;
+            })->values();
+
+            $osobaId = (int) $request->input('osoba');
+            if ($osobaId > 0) {
+                $focus = $chartPeople->firstWhere('id', $osobaId);
+                if ($focus) {
+                    $chartPeople = $chartPeople->filter(function (Person $person) use ($focus, $chartPeople) {
+                        if ((int) $person->id === (int) $focus->id) {
+                            return true;
+                        }
+                        $cursor = $person;
+                        $guard = 0;
+                        $byUser = $chartPeople->filter(fn (Person $row) => $row->user_id)->keyBy(fn (Person $row) => (int) $row->user_id);
+                        while ($cursor->manager_user_id && $guard < 20) {
+                            $manager = $byUser->get((int) $cursor->manager_user_id);
+                            if ($manager === null) {
+                                return false;
+                            }
+                            if ((int) $manager->id === (int) $focus->id) {
+                                return true;
+                            }
+                            $cursor = $manager;
+                            $guard++;
+                        }
+
+                        return false;
+                    })->values();
+                }
             }
 
             return [
@@ -665,11 +740,22 @@ class OrganizationSettingsController extends Controller
                 'katalog' => $katalog,
                 'q' => $q,
                 'selectedPosition' => $selectedPosition,
+                'selectedUnit' => $selectedUnit,
+                'selectedDepartment' => $selectedDepartment,
+                'selectedPersonId' => $osobaId > 0 ? $osobaId : null,
                 'departments' => $departments,
+                'functionalDepartments' => $functionalDepartments,
                 'departmentRows' => \App\Support\DepartmentTree::flatten($departments),
+                'functionalDepartmentRows' => \App\Support\DepartmentTree::flatten($functionalDepartments),
                 'positions' => $positions,
                 'costCenters' => $costCenters,
-                'people' => Person::query()->forOrganization($organization)->with(['employmentContracts'])->orderBy('last_name')->get(),
+                'legalEntities' => $legalEntities,
+                'workCenters' => $workCenters,
+                'enterpriseUnits' => $enterpriseUnits,
+                'enterpriseForest' => \App\Support\OrgTree::forest($enterpriseUnits),
+                'people' => $people,
+                'chartForest' => PersonReportingTree::forest($chartPeople),
+                'locations' => Location::query()->forOrganization($organization)->where('is_active', true)->orderBy('name')->get(),
                 'managers' => OrganizationUser::query()
                     ->with('user')
                     ->where('organization_id', $organization->id)

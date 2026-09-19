@@ -66,6 +66,11 @@ class Location extends OrganizationModel
         return $this->hasMany(Person::class);
     }
 
+    public function workCenters(): HasMany
+    {
+        return $this->hasMany(WorkCenter::class);
+    }
+
     public function hasCoordinates(): bool
     {
         return $this->latitude !== null && $this->longitude !== null && $this->radius_meters;

@@ -2,22 +2,25 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use App\Support\HasValidityDates;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Department extends OrganizationModel
+class LegalEntity extends OrganizationModel
 {
     use HasFactory;
+    use HasValidityDates;
 
     protected $fillable = [
         'organization_id',
         'parent_id',
-        'enterprise_unit_id',
-        'manager_user_id',
         'name',
         'code',
+        'oib',
+        'street',
+        'city',
+        'country',
         'valid_from',
         'valid_to',
     ];
@@ -30,11 +33,6 @@ class Department extends OrganizationModel
         ];
     }
 
-    public function enterpriseUnit(): BelongsTo
-    {
-        return $this->belongsTo(EnterpriseUnit::class);
-    }
-
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
@@ -45,9 +43,14 @@ class Department extends OrganizationModel
         return $this->hasMany(self::class, 'parent_id');
     }
 
-    public function manager(): BelongsTo
+    public function workCenters(): HasMany
     {
-        return $this->belongsTo(User::class, 'manager_user_id');
+        return $this->hasMany(WorkCenter::class);
+    }
+
+    public function enterpriseUnits(): HasMany
+    {
+        return $this->hasMany(EnterpriseUnit::class);
     }
 
     public function people(): HasMany
@@ -55,23 +58,21 @@ class Department extends OrganizationModel
         return $this->hasMany(Person::class);
     }
 
-    public function jobPositions(): HasMany
+    public function costCenters(): HasMany
     {
-        return $this->hasMany(JobPosition::class);
+        return $this->hasMany(CostCenter::class);
     }
 
-    public function isValidOn(Carbon $date): bool
+    public function summary(): string
     {
-        $day = $date->toDateString();
-
-        if ($this->valid_from && $this->valid_from->toDateString() > $day) {
-            return false;
+        $parts = [$this->name];
+        if ($this->code) {
+            $parts[] = $this->code;
+        }
+        if ($this->oib) {
+            $parts[] = 'OIB '.$this->oib;
         }
 
-        if ($this->valid_to && $this->valid_to->toDateString() < $day) {
-            return false;
-        }
-
-        return true;
+        return implode(' · ', $parts);
     }
 }

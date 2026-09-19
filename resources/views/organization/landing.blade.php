@@ -178,6 +178,14 @@
                     <span class="badge-modul">Aktivno</span>
                 </a>
             </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <a href="{{ route('organization.settings.index', ['slug' => $organization->slug, 'tab' => 'organizacija', 'section' => 'ustroj', 'katalog' => 'organigram']) }}" class="kartica-modula">
+                    <span class="ikona" aria-hidden="true">🏛</span>
+                    <h3>Ustroj</h3>
+                    <p>Poslovna i funkcijska struktura, radna mjesta i organigram.</p>
+                    <span class="badge-modul">Aktivno</span>
+                </a>
+            </div>
             @endif
             @if($canTime && ! $isWorker)
             <div class="col-12 col-sm-6 col-md-4">

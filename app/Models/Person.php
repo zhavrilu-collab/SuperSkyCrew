@@ -25,6 +25,8 @@ class Person extends OrganizationModel
         'department_id',
         'job_position_id',
         'cost_center_id',
+        'legal_entity_id',
+        'work_center_id',
         'first_name',
         'last_name',
         'oib',
@@ -132,6 +134,16 @@ class Person extends OrganizationModel
     public function costCenter(): BelongsTo
     {
         return $this->belongsTo(CostCenter::class);
+    }
+
+    public function legalEntity(): BelongsTo
+    {
+        return $this->belongsTo(LegalEntity::class);
+    }
+
+    public function workCenter(): BelongsTo
+    {
+        return $this->belongsTo(WorkCenter::class);
     }
 
     public function punches(): HasMany

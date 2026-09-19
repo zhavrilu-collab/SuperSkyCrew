@@ -118,6 +118,21 @@ class Organization extends Model
         return $this->hasMany(CostCenter::class);
     }
 
+    public function legalEntities(): HasMany
+    {
+        return $this->hasMany(LegalEntity::class);
+    }
+
+    public function workCenters(): HasMany
+    {
+        return $this->hasMany(WorkCenter::class);
+    }
+
+    public function enterpriseUnits(): HasMany
+    {
+        return $this->hasMany(EnterpriseUnit::class);
+    }
+
     public function shifts(): HasMany
     {
         return $this->hasMany(Shift::class);

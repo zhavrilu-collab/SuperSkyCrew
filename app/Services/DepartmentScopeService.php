@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Enums\OrganizationRole;
 use App\Models\CostCenter;
 use App\Models\Department;
+use App\Models\EnterpriseUnit;
 use App\Models\JobPosition;
+use App\Models\LegalEntity;
 use App\Models\Organization;
 use App\Models\Person;
+use App\Models\WorkCenter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -159,6 +162,7 @@ class DepartmentScopeService
 
         return CostCenter::query()
             ->forOrganization($organization)
+            ->with('legalEntity')
             ->where(function (Builder $query) use ($day) {
                 $query->whereNull('valid_from')->orWhereDate('valid_from', '<=', $day);
             })
@@ -167,5 +171,55 @@ class DepartmentScopeService
             })
             ->orderBy('code')
             ->get();
+    }
+
+    /**
+     * @return Collection<int, LegalEntity>
+     */
+    public function legalEntitiesOn(Organization $organization, Carbon $date): Collection
+    {
+        return $this->validOn(LegalEntity::query()->forOrganization($organization), $date)
+            ->with('parent')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, WorkCenter>
+     */
+    public function workCentersOn(Organization $organization, Carbon $date): Collection
+    {
+        return $this->validOn(WorkCenter::query()->forOrganization($organization), $date)
+            ->with(['legalEntity', 'location'])
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, EnterpriseUnit>
+     */
+    public function enterpriseUnitsOn(Organization $organization, Carbon $date): Collection
+    {
+        return $this->validOn(EnterpriseUnit::query()->forOrganization($organization), $date)
+            ->with(['legalEntity', 'workCenter', 'parent'])
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @return Builder<\Illuminate\Database\Eloquent\Model>
+     */
+    private function validOn(Builder $query, Carbon $date): Builder
+    {
+        $day = $date->toDateString();
+
+        return $query
+            ->where(function (Builder $inner) use ($day) {
+                $inner->whereNull('valid_from')->orWhereDate('valid_from', '<=', $day);
+            })
+            ->where(function (Builder $inner) use ($day) {
+                $inner->whereNull('valid_to')->orWhereDate('valid_to', '>=', $day);
+            });
     }
 }

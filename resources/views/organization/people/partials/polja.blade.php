@@ -71,6 +71,24 @@
             </select>
         </div>
         <div class="col-md-3">
+            <label class="form-label" for="legal_entity_id">Pravna osoba</label>
+            <select class="form-select" name="legal_entity_id" id="legal_entity_id">
+                <option value="">—</option>
+                @foreach($legalEntities as $legalEntity)
+                    <option value="{{ $legalEntity->id }}" @selected((string) old('legal_entity_id', $person->legal_entity_id) === (string) $legalEntity->id)>{{ $legalEntity->summary() }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="work_center_id">Poslovnica</label>
+            <select class="form-select" name="work_center_id" id="work_center_id">
+                <option value="">—</option>
+                @foreach($workCenters as $workCenter)
+                    <option value="{{ $workCenter->id }}" @selected((string) old('work_center_id', $person->work_center_id) === (string) $workCenter->id)>{{ $workCenter->summary() }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
             <label class="form-label" for="job_position_id">Radno mjesto (šifrarnik)</label>
             <select class="form-select" name="job_position_id" id="job_position_id">
                 <option value="">—</option>

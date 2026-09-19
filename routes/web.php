@@ -98,6 +98,15 @@ Route::prefix('{slug}')
         Route::post('/struktura/mjesta-troska', [\App\Http\Controllers\StructureController::class, 'storeCostCenter'])->name('organization.structure.cost-centers.store');
         Route::put('/struktura/mjesta-troska/{costCenter}', [\App\Http\Controllers\StructureController::class, 'updateCostCenter'])->name('organization.structure.cost-centers.update');
         Route::delete('/struktura/mjesta-troska/{costCenter}', [\App\Http\Controllers\StructureController::class, 'destroyCostCenter'])->name('organization.structure.cost-centers.destroy');
+        Route::post('/struktura/pravne-osobe', [\App\Http\Controllers\StructureController::class, 'storeLegalEntity'])->name('organization.structure.legal-entities.store');
+        Route::put('/struktura/pravne-osobe/{legalEntity}', [\App\Http\Controllers\StructureController::class, 'updateLegalEntity'])->name('organization.structure.legal-entities.update');
+        Route::delete('/struktura/pravne-osobe/{legalEntity}', [\App\Http\Controllers\StructureController::class, 'destroyLegalEntity'])->name('organization.structure.legal-entities.destroy');
+        Route::post('/struktura/poslovnice', [\App\Http\Controllers\StructureController::class, 'storeWorkCenter'])->name('organization.structure.work-centers.store');
+        Route::put('/struktura/poslovnice/{workCenter}', [\App\Http\Controllers\StructureController::class, 'updateWorkCenter'])->name('organization.structure.work-centers.update');
+        Route::delete('/struktura/poslovnice/{workCenter}', [\App\Http\Controllers\StructureController::class, 'destroyWorkCenter'])->name('organization.structure.work-centers.destroy');
+        Route::post('/struktura/poslovne-jedinice', [\App\Http\Controllers\StructureController::class, 'storeEnterpriseUnit'])->name('organization.structure.enterprise-units.store');
+        Route::put('/struktura/poslovne-jedinice/{enterpriseUnit}', [\App\Http\Controllers\StructureController::class, 'updateEnterpriseUnit'])->name('organization.structure.enterprise-units.update');
+        Route::delete('/struktura/poslovne-jedinice/{enterpriseUnit}', [\App\Http\Controllers\StructureController::class, 'destroyEnterpriseUnit'])->name('organization.structure.enterprise-units.destroy');
         Route::get('/kadrovi', [\App\Http\Controllers\PersonController::class, 'index'])->name('organization.people.index');
         Route::get('/kadrovi/novi', [\App\Http\Controllers\PersonController::class, 'create'])->name('organization.people.create');
         Route::get('/kadrovi/maticna-knjiga', [\App\Http\Controllers\PeopleRegisterController::class, 'book'])->name('organization.people.book');

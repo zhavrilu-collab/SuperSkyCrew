@@ -2,20 +2,24 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use App\Support\HasValidityDates;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class CostCenter extends OrganizationModel
+class WorkCenter extends OrganizationModel
 {
     use HasFactory;
+    use HasValidityDates;
 
     protected $fillable = [
         'organization_id',
         'legal_entity_id',
-        'code',
+        'location_id',
         'name',
+        'code',
+        'street',
+        'city',
         'valid_from',
         'valid_to',
     ];
@@ -33,28 +37,23 @@ class CostCenter extends OrganizationModel
         return $this->belongsTo(LegalEntity::class);
     }
 
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function enterpriseUnits(): HasMany
+    {
+        return $this->hasMany(EnterpriseUnit::class);
+    }
+
     public function people(): HasMany
     {
         return $this->hasMany(Person::class);
     }
 
-    public function isValidOn(Carbon $date): bool
-    {
-        $day = $date->toDateString();
-
-        if ($this->valid_from && $this->valid_from->toDateString() > $day) {
-            return false;
-        }
-
-        if ($this->valid_to && $this->valid_to->toDateString() < $day) {
-            return false;
-        }
-
-        return true;
-    }
-
     public function summary(): string
     {
-        return $this->code.' · '.$this->name;
+        return $this->code ? $this->code.' · '.$this->name : $this->name;
     }
 }

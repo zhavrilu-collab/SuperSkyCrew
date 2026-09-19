@@ -43,6 +43,15 @@ class DemoTenantSeederTest extends TestCase
         $this->assertTrue(password_verify(DemoTenantSeeder::PASSWORD, $worker->password));
 
         $this->assertGreaterThanOrEqual(8, Person::query()->where('organization_id', $organization->id)->count());
+        $this->assertDatabaseHas('legal_entities', [
+            'organization_id' => $organization->id,
+            'code' => 'SJ',
+        ]);
+        $this->assertDatabaseHas('work_centers', [
+            'organization_id' => $organization->id,
+            'code' => 'ZG',
+            'name' => 'Zagreb',
+        ]);
         $this->assertDatabaseHas('people', [
             'organization_id' => $organization->id,
             'status' => PersonStatus::Candidate->value,

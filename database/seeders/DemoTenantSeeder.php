@@ -20,6 +20,7 @@ use App\Models\Department;
 use App\Models\GrantEntry;
 use App\Models\GrantProject;
 use App\Models\JobPosition;
+use App\Models\LegalEntity;
 use App\Models\Location;
 use App\Models\OpenShift;
 use App\Models\Organization;
@@ -28,12 +29,14 @@ use App\Models\Person;
 use App\Models\Punch;
 use App\Models\Shift;
 use App\Models\User;
+use App\Models\WorkCenter;
 use App\Models\WorkflowRequest;
 use App\Services\ClockService;
 use App\Services\CoreAuthService;
 use App\Services\EmploymentContractService;
 use App\Services\HrSetupService;
 use App\Services\LeaveService;
+use App\Services\OrganizationStructureService;
 use App\Services\PersonEngagementService;
 use App\Services\WorkflowEngine;
 use App\Support\CroatianOib;
@@ -123,6 +126,25 @@ class DemoTenantSeeder extends Seeder
                 'allow_offline' => true,
             ],
         );
+
+        $rootUnit = app(OrganizationStructureService::class)->ensure($organization);
+        $legal = LegalEntity::query()->forOrganization($organization)->orderBy('id')->first();
+        $zagreb = WorkCenter::query()->updateOrCreate(
+            ['organization_id' => $organization->id, 'code' => 'ZG'],
+            [
+                'name' => 'Zagreb',
+                'legal_entity_id' => $legal?->id,
+                'location_id' => $location->id,
+                'city' => 'Zagreb',
+                'street' => 'Ilica 1',
+                'valid_from' => now()->subYears(3)->toDateString(),
+            ],
+        );
+        $rootUnit->update([
+            'legal_entity_id' => $legal?->id,
+            'work_center_id' => $zagreb->id,
+            'name' => $organization->name,
+        ]);
 
         $uprava = Department::query()->updateOrCreate(
             ['organization_id' => $organization->id, 'code' => 'UPR'],
@@ -360,7 +382,13 @@ class DemoTenantSeeder extends Seeder
         $contracts = app(EmploymentContractService::class);
         $engagements = app(PersonEngagementService::class);
         Person::query()->where('organization_id', $organization->id)->orderBy('id')->get()
-            ->each(function (Person $person) use ($contracts, $engagements) {
+            ->each(function (Person $person) use ($contracts, $engagements, $legal, $zagreb) {
+                if (! $person->legal_entity_id || ! $person->work_center_id) {
+                    $person->forceFill([
+                        'legal_entity_id' => $person->legal_entity_id ?: $legal?->id,
+                        'work_center_id' => $person->work_center_id ?: $zagreb->id,
+                    ])->save();
+                }
                 $contracts->seedIfMissing($person);
                 $engagements->sync($person);
             });

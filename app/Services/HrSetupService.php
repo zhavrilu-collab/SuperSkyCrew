@@ -24,6 +24,7 @@ class HrSetupService
         $this->seedDocumentTemplates($organization);
         $this->seedWorkflows($organization);
         $this->seedLeaveTenureRules($organization);
+        app(OrganizationStructureService::class)->ensure($organization);
     }
 
     private function seedAbsenceCodes(Organization $organization): void

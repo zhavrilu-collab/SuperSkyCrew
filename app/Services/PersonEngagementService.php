@@ -18,6 +18,8 @@ class PersonEngagementService
         'job_position_id',
         'location_id',
         'cost_center_id',
+        'legal_entity_id',
+        'work_center_id',
         'manager_user_id',
         'job_title',
     ];
@@ -109,6 +111,8 @@ class PersonEngagementService
             'job_position_id' => $person->job_position_id,
             'location_id' => $person->location_id,
             'cost_center_id' => $person->cost_center_id,
+            'legal_entity_id' => $person->legal_entity_id,
+            'work_center_id' => $person->work_center_id,
             'manager_user_id' => $person->manager_user_id,
             'job_title' => $person->job_title,
         ];
@@ -124,6 +128,8 @@ class PersonEngagementService
             && (int) ($row->job_position_id ?? 0) === (int) ($snapshot['job_position_id'] ?? 0)
             && (int) ($row->location_id ?? 0) === (int) ($snapshot['location_id'] ?? 0)
             && (int) ($row->cost_center_id ?? 0) === (int) ($snapshot['cost_center_id'] ?? 0)
+            && (int) ($row->legal_entity_id ?? 0) === (int) ($snapshot['legal_entity_id'] ?? 0)
+            && (int) ($row->work_center_id ?? 0) === (int) ($snapshot['work_center_id'] ?? 0)
             && (int) ($row->manager_user_id ?? 0) === (int) ($snapshot['manager_user_id'] ?? 0)
             && (string) ($row->job_title ?? '') === (string) ($snapshot['job_title'] ?? '');
     }

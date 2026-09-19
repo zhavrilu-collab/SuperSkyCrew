@@ -258,6 +258,7 @@ class PersonController extends Controller
             ->values();
 
         $on = now()->timezone(config('app.timezone'));
+        app(\App\Services\OrganizationStructureService::class)->ensure($organization);
         $departments = $this->scope->departmentsOn($organization, $on);
         if ($person?->department && ! $departments->contains('id', $person->department_id)) {
             $departments->push($person->department);
@@ -270,9 +271,17 @@ class PersonController extends Controller
         if ($person?->costCenter && ! $costCenters->contains('id', $person->cost_center_id)) {
             $costCenters->push($person->costCenter);
         }
+        $legalEntities = $this->scope->legalEntitiesOn($organization, $on);
+        if ($person?->legalEntity && ! $legalEntities->contains('id', $person->legal_entity_id)) {
+            $legalEntities->push($person->legalEntity);
+        }
+        $workCenters = $this->scope->workCentersOn($organization, $on);
+        if ($person?->workCenter && ! $workCenters->contains('id', $person->work_center_id)) {
+            $workCenters->push($person->workCenter);
+        }
 
         if ($person) {
-            $person->load(['qualifications', 'employmentContracts', 'documents.documentType', 'user', 'manager', 'department', 'jobPosition', 'location', 'costCenter', 'engagements.department', 'engagements.jobPosition', 'engagements.location', 'engagements.costCenter', 'engagements.changedByUser', 'interviewNotes.interviewer', 'interviewNotes.author']);
+            $person->load(['qualifications', 'employmentContracts', 'documents.documentType', 'user', 'manager', 'department', 'jobPosition', 'location', 'costCenter', 'legalEntity', 'workCenter', 'engagements.department', 'engagements.jobPosition', 'engagements.location', 'engagements.costCenter', 'engagements.changedByUser', 'interviewNotes.interviewer', 'interviewNotes.author']);
             app(\App\Services\HrSetupService::class)->provision($organization);
         }
 
@@ -285,6 +294,8 @@ class PersonController extends Controller
             'departments' => $departments,
             'positions' => $positions,
             'costCenters' => $costCenters,
+            'legalEntities' => $legalEntities,
+            'workCenters' => $workCenters,
             'users' => $users->unique('id')->values(),
             'managers' => $managers,
             'statuses' => $this->selectableStatuses($organization, $person),
@@ -376,6 +387,14 @@ class PersonController extends Controller
                 'nullable',
                 Rule::exists('cost_centers', 'id')->where('organization_id', $organization->id),
             ],
+            'legal_entity_id' => [
+                'nullable',
+                Rule::exists('legal_entities', 'id')->where('organization_id', $organization->id),
+            ],
+            'work_center_id' => [
+                'nullable',
+                Rule::exists('work_centers', 'id')->where('organization_id', $organization->id),
+            ],
             'user_id' => [
                 'nullable',
                 Rule::exists('organization_users', 'user_id')->where('organization_id', $organization->id),
@@ -407,7 +426,7 @@ class PersonController extends Controller
             ],
         ]);
 
-        foreach (['location_id', 'department_id', 'job_position_id', 'cost_center_id', 'user_id', 'manager_user_id', 'oib', 'contract_type', 'clock_pin', 'iban', 'family_right', 'tax_relief_note', 'pay_coefficient', 'allowance_percent', 'prior_service_months', 'fo_kind', 'instrument_title', 'host_employer'] as $empty) {
+        foreach (['location_id', 'department_id', 'job_position_id', 'cost_center_id', 'legal_entity_id', 'work_center_id', 'user_id', 'manager_user_id', 'oib', 'contract_type', 'clock_pin', 'iban', 'family_right', 'tax_relief_note', 'pay_coefficient', 'allowance_percent', 'prior_service_months', 'fo_kind', 'instrument_title', 'host_employer'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }
@@ -439,9 +458,16 @@ class PersonController extends Controller
         if (! empty($data['department_id']) && empty($data['manager_user_id'])) {
             $department = Department::query()
                 ->where('organization_id', $organization->id)
+                ->with('enterpriseUnit')
                 ->find($data['department_id']);
             if ($department?->manager_user_id) {
                 $data['manager_user_id'] = $department->manager_user_id;
+            }
+            if (empty($data['legal_entity_id']) && $department?->enterpriseUnit?->legal_entity_id) {
+                $data['legal_entity_id'] = $department->enterpriseUnit->legal_entity_id;
+            }
+            if (empty($data['work_center_id']) && $department?->enterpriseUnit?->work_center_id) {
+                $data['work_center_id'] = $department->enterpriseUnit->work_center_id;
             }
         }
 

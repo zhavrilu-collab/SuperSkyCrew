@@ -357,6 +357,7 @@
         cursor: pointer;
         color: inherit;
         padding: 0;
+        position: relative;
     }
     .org-kutija:hover { border-color: var(--primarna-zelena); }
     .org-kutija-kapa {
@@ -368,8 +369,34 @@
         line-height: 1.3;
     }
     .org-kutija-root .org-kutija-kapa { background: var(--primarna-tamna); border-bottom: 3px solid var(--zlatna-tradicija); }
+    .org-kutija-funkcijska .org-kutija-kapa { background: var(--primarna-tamna); }
+    .org-kutija-mjesto .org-kutija-kapa { background: var(--zlatna-tradicija); color: var(--tekst-tamni); }
+    .org-kutija-osoba { width: 210px; cursor: pointer; }
     .org-kutija-tijelo { padding: 8px 10px 10px; font-size: 12px; color: #5a6a5a; }
     .org-kutija-tijelo strong { display: block; color: var(--tekst-tamni); font-weight: 600; }
+    .org-kutija-akcije {
+        display: none;
+        position: absolute;
+        inset: auto 6px 6px 6px;
+        gap: 4px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .org-kutija:hover .org-kutija-akcije { display: flex; }
+    .org-kutija:hover .org-kutija-tijelo { padding-bottom: 2.4rem; }
+    .org-kutija-akcije .btn { font-size: 11px; padding: .15rem .4rem; }
+    .org-kutija-osoba-tijelo { display: flex; gap: 8px; align-items: flex-start; }
+    .org-inicijali {
+        flex-shrink: 0;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: var(--svijetlo-zelena);
+        color: var(--primarna-zelena);
+        font-weight: 700;
+        font-size: 12px;
+        border: 1px solid rgba(212, 175, 55, 0.45);
+    }
 
     .profil-osobe { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 1rem; align-items: start; }
     @media (max-width: 991px) { .profil-osobe { grid-template-columns: 1fr; } }

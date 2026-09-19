@@ -16,6 +16,8 @@ class PersonEngagement extends OrganizationModel
         'job_position_id',
         'location_id',
         'cost_center_id',
+        'legal_entity_id',
+        'work_center_id',
         'manager_user_id',
         'job_title',
         'valid_from',
@@ -55,6 +57,16 @@ class PersonEngagement extends OrganizationModel
     public function costCenter(): BelongsTo
     {
         return $this->belongsTo(CostCenter::class);
+    }
+
+    public function legalEntity(): BelongsTo
+    {
+        return $this->belongsTo(LegalEntity::class);
+    }
+
+    public function workCenter(): BelongsTo
+    {
+        return $this->belongsTo(WorkCenter::class);
     }
 
     public function manager(): BelongsTo
