@@ -20,6 +20,7 @@ use App\Services\DepartmentScopeService;
 use App\Services\EmploymentContractService;
 use App\Services\ExpiryWarningService;
 use App\Services\LeaveService;
+use App\Services\ClockQrService;
 use App\Services\OrganizationRbacService;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +38,7 @@ class PersonController extends Controller
         private readonly EmploymentContractService $contracts,
         private readonly AuditService $audit,
         private readonly LeaveService $leave,
+        private readonly ClockQrService $clockQr,
     ) {}
 
     public function index(Request $request): View
@@ -148,6 +150,28 @@ class PersonController extends Controller
         return redirect()
             ->route('organization.people.edit', [$organization->slug, $person])
             ->with('status', 'Kandidat je prenesen u kadar.');
+    }
+
+    public function rotateQr(Request $request, string $slug, Person $person): RedirectResponse
+    {
+        $this->assertPerson($person);
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
+
+        $this->clockQr->rotate($person);
+        $this->audit->record(
+            $organization,
+            AuditAction::ClockQrRotate,
+            $request->user(),
+            'Obnovljen QR kiosk kod: '.$person->fullName(),
+            $person,
+            Person::class,
+            $person->id,
+        );
+
+        return redirect()
+            ->route('organization.people.badge', [$organization->slug, $person])
+            ->with('status', 'Novi QR kod je spreman. Stari više ne vrijedi.');
     }
 
     public function review(string $slug, Person $person): View

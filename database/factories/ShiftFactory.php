@@ -23,6 +23,7 @@ class ShiftFactory extends Factory
             'ends_at' => '16:00:00',
             'break_minutes' => 30,
             'is_night' => false,
+            'is_shift' => false,
         ];
     }
 }

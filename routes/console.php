@@ -2,8 +2,10 @@
 
 use App\Enums\OrganizationStatus;
 use App\Models\Organization;
+use App\Services\PeriodLockService;
 use App\Services\ReminderService;
 use App\Services\RetentionService;
+use App\Services\TimeCloseService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
@@ -24,3 +26,15 @@ Artisan::command('hr:reminders', function (ReminderService $reminders) {
     $count = $reminders->runAll();
     $this->info('Poslano podsjetnika: '.$count);
 })->purpose('E-mail: istek dokumenata, zaboravljena odjava, nekompletan slog 5. i 7. dana')->daily();
+
+Artisan::command('hr:close-time', function (TimeCloseService $closer, PeriodLockService $locks) {
+    $closed = 0;
+    $locked = 0;
+    Organization::query()->where('status', OrganizationStatus::Active)->orderBy('id')->each(function (Organization $organization) use ($closer, $locks, &$closed, &$locked) {
+        $closed += $closer->closeYesterday($organization);
+        if ($locks->lockPreviousIfDue($organization) !== null) {
+            $locked++;
+        }
+    });
+    $this->info('Zatvoreno dana: '.$closed.'; zaključano razdoblja: '.$locked);
+})->purpose('Zatvori jučerašnje slogove (missing out) i automatski zaključaj prethodni mjesec')->daily();

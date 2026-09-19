@@ -333,7 +333,7 @@
             <tbody>
                 @forelse($shifts as $shift)
                     <tr>
-                        <td>{{ $shift->code ? $shift->code.' · ' : '' }}{{ $shift->name }}{{ $shift->is_night ? ' · noć' : '' }}</td>
+                        <td>{{ $shift->code ? $shift->code.' · ' : '' }}{{ $shift->name }}{{ $shift->is_shift ? ' · smjena' : '' }}{{ $shift->is_night ? ' · noć' : '' }}</td>
                         <td>{{ $shift->clockRange() }}</td>
                         <td>{{ $shift->break_minutes }} min</td>
                         <td class="text-end">
@@ -377,6 +377,10 @@
                 <input type="number" min="0" max="240" class="form-control" name="break_minutes" id="break_minutes" value="30">
             </div>
             <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_shift" id="is_shift" value="1">
+                    <label class="form-check-label" for="is_shift">Smjenski rad (svi sati tog dana)</label>
+                </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="is_night" id="is_night" value="1">
                     <label class="form-check-label" for="is_night">Noćna smjena</label>
@@ -504,6 +508,7 @@
                             {{ $location->name }}
                             @if($location->kioskUrl())
                                 <div><a class="small" href="{{ $location->kioskUrl() }}" target="_blank" rel="noopener">Otvori kiosk</a></div>
+                                <div><a class="small" href="{{ route('organization.settings.locations.kiosk-qr', [$organization->slug, $location]) }}">QR za tablet</a></div>
                             @endif
                         </td>
                         <td>
@@ -700,8 +705,44 @@
             </tbody>
         </table>
     </div>
+@elseif($tab === 'vrijeme' && $section === 'zakljucavanje')
+    <p class="text-muted small mb-3">
+        Unos sloga je zakonski do 7. dana od dana na koji se podatak odnosi (NN 55/2024).
+        Job <code>hr:close-time</code> svake noći zatvara jučerašnje otvorene prijave (iznimka zaboravljene odjave)
+        i, od odabranog dana u mjesecu, zaključava <strong>prethodni</strong> mjesec. Ručno zaključavanje na šihterici i dalje radi.
+    </p>
+    <form method="POST" action="{{ route('organization.settings.period-lock', $organization->slug) }}">
+        @csrf
+        @method('PUT')
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="period_lock_day">Dan automatskog zaključavanja</label>
+                <select class="form-select" name="period_lock_day" id="period_lock_day">
+                    <option value="0" @selected((int) old('period_lock_day', $organization->period_lock_day ?? 8) === 0)>Isključeno (samo ručno)</option>
+                    @for($day = 1; $day <= 28; $day++)
+                        <option value="{{ $day }}" @selected((int) old('period_lock_day', $organization->period_lock_day ?? 8) === $day)>
+                            {{ $day }}. u mjesecu{{ $day === 8 ? ' (preporučeno)' : '' }}
+                        </option>
+                    @endfor
+                </select>
+                <div class="form-text">8. je dan nakon zakonskog roka za zadnji dan prethodnog mjeseca.</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">Inspekcijski ispis</label>
+                <div class="form-check mt-2">
+                    <input type="hidden" name="show_clock_bounds" value="0">
+                    <input class="form-check-input" type="checkbox" name="show_clock_bounds" value="1" id="show_clock_bounds" @checked(old('show_clock_bounds', $organization->show_clock_bounds ?? true))>
+                    <label class="form-check-label" for="show_clock_bounds">Prikaži početak i završetak rada (čl. 13. t. 3.–4.)</label>
+                </div>
+                <div class="form-text">Punch se uvijek bilježi. Na zakonskom ispisu sati početka/kraja idu samo ako je to ugovoreno.</div>
+            </div>
+        </div>
+        <div class="forma-podnozje">
+            <button class="btn btn-primary" type="submit">Spremi</button>
+        </div>
+    </form>
 @elseif($tab === 'vrijeme' && $section === 'obavijesti')
-    <p class="text-muted small mb-3">Dnevni job <code>hr:reminders</code> šalje e-mail u temi organizacije. Isti zapis se ne ponavlja (jednom po primatelju i događaju). Zahtjevi i dalje idu odmah iz radnog slijeda.</p>
+    <p class="text-muted small mb-3">Dnevni job <code>hr:reminders</code> šalje e-mail u temi organizacije (najprije zatvori jučerašnje slogove). Isti zapis se ne ponavlja (jednom po primatelju i događaju). Zahtjevi i dalje idu odmah iz radnog slijeda. Zaključavanje mjeseca: Vrijeme → Zaključavanje (<code>hr:close-time</code>).</p>
     <div class="table-responsive table-responsive-no-sticky mb-4">
         <table class="table table-sm mb-0">
             <thead>
@@ -805,6 +846,8 @@
     <div class="d-flex flex-column gap-2 align-items-start">
         <a class="btn btn-outline-primary" href="{{ route('organization.people.export', $organization->slug) }}">Izvoz kadra (CSV)</a>
         <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.export', $organization->slug) }}">Izvoz šihterice (CSV)</a>
+        <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.fund', $organization->slug) }}">Mjesečni fond</a>
+        <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.payroll-hours', $organization->slug) }}">Sati za plaće</a>
         <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.inspection', $organization->slug) }}">Inspekcijski paket</a>
         <a class="btn btn-outline-primary" href="{{ route('organization.settings.index', ['slug' => $organization->slug, 'tab' => 'podaci', 'section' => 'trag']) }}">Revizijski trag</a>
     </div>

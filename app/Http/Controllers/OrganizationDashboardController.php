@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\PunchType;
 use App\Models\Location;
 use App\Models\OrganizationUser;
 use App\Models\Person;
-use App\Models\Punch;
 use App\Models\TimeEntry;
 use App\Models\WorkflowRequest;
+use App\Services\ClockService;
 use App\Services\DepartmentScopeService;
 use App\Services\ExpiryWarningService;
 use App\Services\LeaveService;
@@ -23,6 +22,7 @@ class OrganizationDashboardController extends Controller
         private readonly LeaveService $leave,
         private readonly ExpiryWarningService $expiries,
         private readonly DepartmentScopeService $scope,
+        private readonly ClockService $clock,
     ) {}
 
     public function __invoke(string $slug): View
@@ -35,16 +35,8 @@ class OrganizationDashboardController extends Controller
         $this->scope->restrictPeopleQuery($peopleQuery, $organization, $userId);
         $scopedPeople = $peopleQuery->get();
         $people = Person::query()->forOrganization($organization)->get();
-        $present = Punch::query()
-            ->forOrganization($organization)
-            ->whereDoesntHave('corrections')
-            ->whereIn('person_id', $scopedPeople->pluck('id'))
-            ->orderByDesc('occurred_at_device')
-            ->orderByDesc('id')
-            ->get()
-            ->unique('person_id')
-            ->filter(fn (Punch $punch) => in_array($punch->type, [PunchType::In, PunchType::BreakStart, PunchType::BreakEnd], true))
-            ->count();
+        $presentPeople = $this->clock->presentPeople($organization, $scopedPeople->pluck('id'));
+        $present = $presentPeople->count();
 
         $ownPerson = $people->first(fn (Person $person) => (int) $person->user_id === $userId);
         $pendingApprovals = 0;
@@ -66,6 +58,7 @@ class OrganizationDashboardController extends Controller
             'teamCount' => OrganizationUser::query()->where('organization_id', $organization->id)->count(),
             'peopleCount' => $people->count(),
             'presentCount' => $present,
+            'presentPeople' => $presentPeople,
             'hasOwnPerson' => $ownPerson !== null,
             'ownPerson' => $ownPerson,
             'leave' => $ownPerson ? $this->leave->snapshot($ownPerson) : null,

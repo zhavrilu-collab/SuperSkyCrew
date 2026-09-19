@@ -70,14 +70,9 @@ Obvezna/izvještajna polja:
    - štrajk
    - lockout
 
-Posebni sati (čl. 13. st. 2.), uvijek se vode jer ovise prava iz radnog odnosa:
-
-- noć (22:00–06:00)
-- prekovremeni
-- smjenski
-- dvokratni
-- blagdan / zakonom utvrđeni neradni dan
-- nedjelja
+- Posebni sati: noć, prekovremeni, smjenski, **dvokratni** (dva zatvorena intervala u danu), blagdan, nedjelja.
+- Zastoj, terenski i pripravnost unosi HR/voditelj na danu (ne iz puncha).
+- Iznimka **prijava izvan zone** diže se kad punch ima `geofence_result=fail`.
 
 Status: `draft` (dan u tijeku) → `complete` (parovi zatvoreni ili odsutnost popunjena) → `locked` (HR zatvorio razdoblje ili prošao rok 7 dana uz automatiku + upozorenje).
 
@@ -93,14 +88,14 @@ Izuzeci:
 Pokreće se nakon puncha i noćnim jobom.
 
 1. Spoji parove in/out i pauze.
-2. Izračunaj ukupno, noć, prekovremene iznad ugovorenog dnevnog/tjednog fonda.
+2. Izračunaj ukupno, noć, prekovremene iznad ugovorenog dnevnog fonda (tjedni sati s UOR-a / 5, inače 8 h).
 3. Upiši TimeEntry.
 4. Označi iznimke:
    - missing out
    - overlapping
    - punch izvan geofence
    - kašnjenje vs plan/raspored
-   - rad na blagdan/nedjelju
+   - rad na blagdan/nedjelju (queue ako ima punch; sati su i u slogu)
    - narušen dnevni odmor
    - odstupanje od mjesečnog fonda
 
@@ -112,7 +107,7 @@ Središnji ekran back-officea: retci = osobe (filtar odjel/lokacija), stupci = d
 
 - Korisnički šifrarnik vrsta prisutnosti/odsutnosti (kratica mora imati pisano značenje, čl. 18. st. 2.).
 - Klik na ćeliju otvara punchove tog dana, TimeEntry i evidencijske sate.
-- Plan se može prenijeti u šihtericu (dan / tjedan / mjesec).
+- Plan se prenosi u šihtericu (prikazani raspon ili tjedan na rasporedu): evidencijski sati RD iz smjene, samo za dane bez prijave. Punch, odsutnost, ručna evidencija i zaključano razdoblje se ne diraju. Prazne ćelije i bez prijenosa pokazuju kod smjene.
 - Zaključano razdoblje je read-only osim storna.
 
 ## Kalendari i smjene
@@ -124,7 +119,7 @@ Središnji ekran back-officea: retci = osobe (filtar odjel/lokacija), stupci = d
 3. Odjel
 4. Organizacija (default + blagdani RH)
 
-Svaki kalendar ima smjene (početak, kraj, pauza, noćna oznaka). Plan rada po radniku/odjelu šalje se e-mailom. Prijava se uspoređuje s planom za kašnjenje, ali punch se ne odbija samo zato što je izvan plana (osim stroge geofence na lokaciji).
+Svaki kalendar ima smjene (početak, kraj, pauza, noćna i **smjenska** oznaka). Smjenski sati = ukupno tog dana ako je planirana smjena označena kao smjenski rad. Plan rada po radniku/odjelu šalje se e-mailom. Prijava se uspoređuje s planom za kašnjenje, ali punch se ne odbija samo zato što je izvan plana (osim stroge geofence na lokaciji).
 
 ## Godišnji odmor i odsutnosti
 
@@ -137,17 +132,17 @@ Svaki kalendar ima smjene (početak, kraj, pauza, noćna oznaka). Plan rada po r
 
 ## Izvještaji v1
 
-- Dnevni/mjesečni slog NN 55/2024 (PDF + Excel), po radniku i zbirno
-- Pregled za radnika (pravo uvida, čl. 20. + čl. 5.)
+- Dnevni/mjesečni slog NN 55/2024 (ispis + Excel/CSV), po radniku i zbirno; početak/kraj samo ako je uključeno u Postavke → Vrijeme → Zaključavanje
+- Pregled za radnika (pravo uvida, čl. 20. — Moj tjedan + ispis)
 - Inspekcijski paket: pisani pregled + slog RV + evidencija predaje
 - Stanje GO po godini i radniku
-- Odstupanje od mjesečnog fonda
-- Tko je trenutno na poslu
-- Priprema sati za plaće (CSV/API): evidencijske šifre × sati × MT
+- Odstupanje od mjesečnog fonda (Šihterica → Fond): ugovoreni tjedni sati s važećeg UOR-a (inače 40), ostvareno vs fond do danas
+- Tko je trenutno na poslu (nadzorna ploča + oznaka u šihterici)
+- Priprema sati za plaće: evidencijske šifre × sati × MT (HTML + CSV + `GET /{slug}/api/payroll/hours`)
 
 ## Jobovi
 
 - Zatvaranje jučerašnjeg dana, oznaka missing out (pri rebuildu sloga)
-- `hr:reminders` (dnevno): istek dokumenata, zaboravljena odjava, nekompletan slog 5. i 7. dana
+- `hr:reminders` (dnevno): prvo zatvori jučer (missing out), zatim istek dokumenata, zaboravljena odjava, nekompletan slog 5. i 7. dana
 - Upozorenje dnevnog odmora (iznimka na slogu)
-- Zaključavanje razdoblja po kalendaru plaće organizacije
+- `hr:close-time` (dnevno): zatvaranje jučerašnjeg dana + zaključavanje prethodnog mjeseca od `period_lock_day` (zadano 8.; 0 = samo ručno)

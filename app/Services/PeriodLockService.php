@@ -51,7 +51,7 @@ class PeriodLockService
         }
     }
 
-    public function lock(Organization $organization, int $year, int $month, User $actor): PeriodLock
+    public function lock(Organization $organization, int $year, int $month, ?User $actor): PeriodLock
     {
         if ($month < 1 || $month > 12) {
             throw ValidationException::withMessages(['month' => 'Neispravan mjesec.']);
@@ -82,7 +82,7 @@ class PeriodLockService
             'organization_id' => $organization->id,
             'year' => $year,
             'month' => $month,
-            'locked_by_user_id' => $actor->id,
+            'locked_by_user_id' => $actor?->id,
             'locked_at' => now(),
         ]);
 
@@ -90,14 +90,34 @@ class PeriodLockService
             $organization,
             AuditAction::PeriodLock,
             $actor,
-            'Zaključano razdoblje '.$lock->label(),
+            ($actor === null ? 'Automatski zaključano razdoblje ' : 'Zaključano razdoblje ').$lock->label(),
             null,
             PeriodLock::class,
             $lock->id,
-            ['year' => $year, 'month' => $month],
+            ['year' => $year, 'month' => $month, 'automatic' => $actor === null],
         );
 
         return $lock;
+    }
+
+    public function lockPreviousIfDue(Organization $organization, ?CarbonInterface $now = null): ?PeriodLock
+    {
+        $day = (int) ($organization->period_lock_day ?? 0);
+        if ($day < 1 || $day > 28) {
+            return null;
+        }
+
+        $today = Carbon::parse(($now ?? now())->toDateString(), config('app.timezone'))->startOfDay();
+        if ((int) $today->day < $day) {
+            return null;
+        }
+
+        $previous = $today->copy()->startOfMonth()->subMonth();
+        if ($this->forMonth($organization, (int) $previous->year, (int) $previous->month) !== null) {
+            return null;
+        }
+
+        return $this->lock($organization, (int) $previous->year, (int) $previous->month, null);
     }
 
     public function forMonth(Organization $organization, int $year, int $month): ?PeriodLock

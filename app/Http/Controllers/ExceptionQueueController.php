@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AuditAction;
+use App\Enums\ExceptionCode;
 use App\Models\Person;
 use App\Models\TimeEntry;
 use App\Services\AuditService;
@@ -38,6 +39,8 @@ class ExceptionQueueController extends Controller
         }
 
         $resolved = $request->boolean('resolved');
+        $code = (string) $request->input('code', '');
+        $codeFilter = ExceptionCode::tryFrom($code);
         $userId = (int) Auth::id();
         $visibleIds = $this->visiblePersonIds($organization, $userId);
 
@@ -47,6 +50,7 @@ class ExceptionQueueController extends Controller
             ->whereIn('person_id', $visibleIds)
             ->whereDate('work_date', '>=', $from->toDateString())
             ->whereDate('work_date', '<=', $to->toDateString())
+            ->when($codeFilter, fn ($query) => $query->where('exception_code', $codeFilter->value))
             ->when(
                 $resolved,
                 fn ($query) => $query->whereNotNull('exception_code')->whereNotNull('exception_resolved_at'),
@@ -62,6 +66,8 @@ class ExceptionQueueController extends Controller
             'from' => $from,
             'to' => $to,
             'resolved' => $resolved,
+            'codeFilter' => $codeFilter?->value ?? '',
+            'exceptionCodes' => ExceptionCode::cases(),
             'canResolve' => $this->rbac->can($organization->id, $userId, 'time.access'),
         ]);
     }

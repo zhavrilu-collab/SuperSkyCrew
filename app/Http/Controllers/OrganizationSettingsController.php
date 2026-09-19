@@ -454,6 +454,22 @@ class OrganizationSettingsController extends Controller
         return back()->with('status', 'Preračunato je '.$count.' fondova GO (bez ručnih kartica).');
     }
 
+    public function updatePeriodLock(Request $request): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
+
+        $data = $request->validate([
+            'period_lock_day' => ['required', 'integer', 'min:0', 'max:28'],
+        ]);
+        $organization->update([
+            'period_lock_day' => (int) $data['period_lock_day'],
+            'show_clock_bounds' => $request->boolean('show_clock_bounds'),
+        ]);
+
+        return back()->with('status', 'Kalendar zaključavanja i izvještaj su spremljeni.');
+    }
+
     public function storeAbsenceCode(Request $request): RedirectResponse
     {
         $organization = app('currentOrganization');
@@ -557,6 +573,22 @@ class OrganizationSettingsController extends Controller
         $location->save();
 
         return back()->with('status', 'Lokacija je ažurirana.');
+    }
+
+    public function kioskPoster(string $slug, Location $location): View
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
+        abort_unless($location->organization_id === $organization->id, 404);
+        $location->setRelation('organization', $organization);
+        $url = $location->kioskUrl();
+        abort_unless($url, 404);
+
+        return view('organization.settings.kiosk-poster', [
+            'organization' => $organization,
+            'location' => $location,
+            'kioskUrl' => $url,
+        ]);
     }
 
     private function assertCanOpen(int $organizationId, int $userId): void

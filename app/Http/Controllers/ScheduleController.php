@@ -11,6 +11,7 @@ use App\Models\Person;
 use App\Models\Shift;
 use App\Services\DepartmentScopeService;
 use App\Services\OrganizationRbacService;
+use App\Services\PlanTransferService;
 use App\Services\ShiftResolver;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -26,6 +27,7 @@ class ScheduleController extends Controller
         private readonly OrganizationRbacService $rbac,
         private readonly DepartmentScopeService $scope,
         private readonly ShiftResolver $resolver,
+        private readonly PlanTransferService $planTransfer,
     ) {}
 
     public function index(Request $request): View
@@ -142,6 +144,33 @@ class ScheduleController extends Controller
         return back()->with('status', 'Plan tjedna poslan je na '.$sent.' '.$word.'.');
     }
 
+    public function transferPlan(Request $request): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->authorizeSend($organization->id);
+        $userId = (int) Auth::id();
+
+        $from = Carbon::parse($request->input('from', now()->startOfWeek(Carbon::MONDAY)->toDateString()), config('app.timezone'))
+            ->startOfWeek(Carbon::MONDAY);
+        $to = $from->copy()->endOfWeek(Carbon::SUNDAY);
+
+        $peopleQuery = Person::query()
+            ->forOrganization($organization)
+            ->clockEligible()
+            ->orderBy('last_name')
+            ->orderBy('first_name');
+        $this->scope->restrictPeopleQuery($peopleQuery, $organization, $userId);
+
+        $count = $this->planTransfer->transfer($organization, $peopleQuery->get(), $from, $to, $request->user());
+
+        return back()->with(
+            'status',
+            $count === 0
+                ? 'Nema dana za prijenos (sve već ima prijavu, odsutnost ili je zaključano).'
+                : 'Plan tjedna je prenesen u šihtericu ('.$count.' slogova).',
+        );
+    }
+
     public function storeShift(Request $request): RedirectResponse
     {
         $organization = app('currentOrganization');
@@ -154,10 +183,12 @@ class ScheduleController extends Controller
             'ends_at' => ['required', 'date_format:H:i'],
             'break_minutes' => ['nullable', 'integer', 'min:0', 'max:240'],
             'is_night' => ['nullable', 'boolean'],
+            'is_shift' => ['nullable', 'boolean'],
         ]);
         $data['organization_id'] = $organization->id;
         $data['break_minutes'] = (int) ($data['break_minutes'] ?? 0);
         $data['is_night'] = $request->boolean('is_night');
+        $data['is_shift'] = $request->boolean('is_shift');
         if (($data['code'] ?? '') === '') {
             $data['code'] = null;
         }

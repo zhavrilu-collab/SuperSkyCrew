@@ -66,6 +66,20 @@
     @endif
 </div>
 
+@if(($canAccessTime || $canExportPayroll) && $presentPeople->isNotEmpty())
+<div class="kartica-kontejner mb-3">
+    <div class="fw-semibold text-tema mb-2">Trenutno na poslu</div>
+    <ul class="list-unstyled mb-0">
+        @foreach($presentPeople as $row)
+            <li class="d-flex justify-content-between gap-2 py-1 border-bottom">
+                <span>{{ $row['person']->fullName() }}</span>
+                <span class="text-muted small">{{ $row['punch']->type->label() }} · {{ $row['punch']->occurred_at_device->timezone(config('app.timezone'))->format('H:i') }}</span>
+            </li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
 <div class="row g-3">
     @if($canAccessTime || $canExportPayroll)
     <div class="col-md-4">

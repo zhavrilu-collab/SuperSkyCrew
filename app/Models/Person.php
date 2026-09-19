@@ -6,6 +6,7 @@ use App\Enums\ContractType;
 use App\Enums\FamilyRight;
 use App\Enums\OtherFoKind;
 use App\Enums\PersonStatus;
+use App\Services\ClockQrService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -89,6 +90,16 @@ class Person extends OrganizationModel
             'executive_autonomy' => 'boolean',
             'cv_uploaded_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Person $person) {
+            if (filled($person->clock_qr) || ! $person->organization_id) {
+                return;
+            }
+            $person->clock_qr = app(ClockQrService::class)->uniqueToken((int) $person->organization_id);
+        });
     }
 
     public function user(): BelongsTo

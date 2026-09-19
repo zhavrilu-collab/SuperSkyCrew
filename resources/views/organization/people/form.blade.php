@@ -160,6 +160,9 @@
             </ul>
             <div class="d-grid gap-2 mt-3">
                 <a class="btn btn-outline-primary btn-sm" href="{{ route('organization.people.review', [$organization->slug, $person]) }}">Pisani pregled</a>
+                @if($person->isClockEligible())
+                    <a class="btn btn-outline-primary btn-sm" href="{{ route('organization.people.badge', [$organization->slug, $person]) }}">Iskaznica (QR)</a>
+                @endif
                 @if($person->status->usesEmploymentContract())
                     <a class="btn btn-outline-primary btn-sm" href="{{ route('organization.people.contract', [$organization->slug, $person]) }}">UOR</a>
                 @endif

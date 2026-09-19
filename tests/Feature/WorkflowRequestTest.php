@@ -49,7 +49,13 @@ class WorkflowRequestTest extends TestCase
             'current_role' => OrganizationRole::Manager->value,
         ]);
 
-        Notification::assertSentTo($owner, WorkflowRequestNotification::class);
+        Notification::assertSentTo($owner, function (WorkflowRequestNotification $notification) use ($owner, $organization) {
+            $mail = $notification->toMail($owner);
+
+            return $notification->event === 'waiting'
+                && str_contains($mail->actionUrl, '/'.$organization->slug.'/odobrenja')
+                && ! str_contains($mail->actionUrl, '/odobrenja/'.$notification->request->id);
+        });
 
         $zahtjev = \App\Models\WorkflowRequest::query()->first();
 

@@ -43,12 +43,14 @@ class ScheduleTest extends TestCase
                 'starts_at' => '08:00',
                 'ends_at' => '16:00',
                 'break_minutes' => 30,
+                'is_shift' => '1',
             ])
             ->assertRedirect();
 
         $shift = Shift::query()->first();
         $this->assertNotNull($shift);
         $this->assertStringStartsWith('08:00', (string) $shift->starts_at);
+        $this->assertTrue($shift->is_shift);
 
         $this->actingAs($owner)
             ->post(route('organization.schedule.rules.store', $organization->slug), [
@@ -71,7 +73,9 @@ class ScheduleTest extends TestCase
                 'section' => 'smjene',
             ]))
             ->assertOk()
-            ->assertSee('P1');
+            ->assertSee('P1')
+            ->assertSee('Smjenski rad')
+            ->assertSee('smjena');
 
         $this->actingAs($owner)
             ->get(route('organization.settings.index', [
@@ -205,6 +209,85 @@ class ScheduleTest extends TestCase
             ->assertSee('P1');
     }
 
+    public function test_owner_can_transfer_week_plan_into_timesheet(): void
+    {
+        [$owner, $organization, $person] = $this->seedPerson();
+        $shift = Shift::factory()->create([
+            'organization_id' => $organization->id,
+            'code' => 'P1',
+            'starts_at' => '08:00:00',
+            'ends_at' => '16:00:00',
+            'break_minutes' => 30,
+            'is_shift' => true,
+        ]);
+        CalendarRule::factory()->create([
+            'organization_id' => $organization->id,
+            'level' => CalendarLevel::Organization,
+            'shift_id' => $shift->id,
+            'weekday' => 5,
+        ]);
+
+        $this->actingAs($owner)
+            ->post(route('organization.schedule.plan.transfer', $organization->slug), [
+                'from' => '2026-09-14',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('time_entries', [
+            'person_id' => $person->id,
+            'planned_shift_id' => $shift->id,
+            'evidential_minutes' => 450,
+            'evidential_code' => 'RD',
+            'shift_minutes' => 450,
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('organization.timesheet.index', [
+                $organization->slug,
+                'from' => '2026-09-18',
+                'to' => '2026-09-18',
+            ]))
+            ->assertOk()
+            ->assertSee('Prenesi plan')
+            ->assertSee('7.5');
+    }
+
+    public function test_plan_transfer_skips_days_with_punches(): void
+    {
+        [$owner, $organization, $person] = $this->seedPerson();
+        $shift = Shift::factory()->create([
+            'organization_id' => $organization->id,
+            'starts_at' => '08:00:00',
+            'ends_at' => '16:00:00',
+            'break_minutes' => 30,
+        ]);
+        CalendarRule::factory()->create([
+            'organization_id' => $organization->id,
+            'level' => CalendarLevel::Organization,
+            'shift_id' => $shift->id,
+            'weekday' => 5,
+        ]);
+
+        app(ClockService::class)->punch($person, $owner, [
+            'type' => PunchType::In->value,
+            'occurred_at' => '2026-09-18 08:00:00',
+            'channel' => ClockChannel::Manager->value,
+            'reason' => 'Prijava',
+        ]);
+
+        $this->actingAs($owner)
+            ->post(route('organization.timesheet.plan', $organization->slug), [
+                'from' => '2026-09-18',
+                'to' => '2026-09-18',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('time_entries', [
+            'person_id' => $person->id,
+            'evidential_minutes' => 450,
+        ]);
+    }
+
     public function test_employee_cannot_manage_schedule_and_manager_can_view(): void
     {
         [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
@@ -223,6 +306,12 @@ class ScheduleTest extends TestCase
 
         $this->actingAs($employee)
             ->get(route('organization.schedule.index', $organization->slug))
+            ->assertForbidden();
+
+        $this->actingAs($employee)
+            ->post(route('organization.schedule.plan.transfer', $organization->slug), [
+                'from' => '2026-09-14',
+            ])
             ->assertForbidden();
 
         $this->actingAs($manager)

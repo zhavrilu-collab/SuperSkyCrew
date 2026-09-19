@@ -98,6 +98,60 @@ class ExceptionQueueTest extends TestCase
             ->assertSee('Iznimke (7 d.)');
     }
 
+    public function test_holiday_work_appears_in_queue_and_can_be_filtered(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+        $person = Person::factory()->create([
+            'organization_id' => $organization->id,
+            'first_name' => 'Borna',
+            'last_name' => 'Blagdan',
+            'status' => PersonStatus::Employee,
+        ]);
+
+        app(ClockService::class)->punch($person, $owner, [
+            'type' => PunchType::In->value,
+            'occurred_at' => '2026-05-01 08:00:00',
+            'channel' => ClockChannel::Manager->value,
+            'reason' => 'Test',
+        ]);
+        app(ClockService::class)->punch($person, $owner, [
+            'type' => PunchType::Out->value,
+            'occurred_at' => '2026-05-01 16:00:00',
+            'channel' => ClockChannel::Manager->value,
+            'reason' => 'Test',
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('organization.exceptions.index', [
+                'slug' => $organization->slug,
+                'from' => '2026-05-01',
+                'to' => '2026-05-01',
+            ]))
+            ->assertOk()
+            ->assertSee('Borna Blagdan')
+            ->assertSee('Rad na blagdan');
+
+        $this->actingAs($owner)
+            ->get(route('organization.exceptions.index', [
+                'slug' => $organization->slug,
+                'from' => '2026-05-01',
+                'to' => '2026-05-01',
+                'code' => ExceptionCode::SundayWork->value,
+            ]))
+            ->assertOk()
+            ->assertDontSee('Borna Blagdan');
+
+        $this->actingAs($owner)
+            ->get(route('organization.exceptions.index', [
+                'slug' => $organization->slug,
+                'from' => '2026-05-01',
+                'to' => '2026-05-01',
+                'code' => ExceptionCode::HolidayWork->value,
+            ]))
+            ->assertOk()
+            ->assertSee('Borna Blagdan');
+    }
+
     public function test_employee_cannot_open_queue_and_accountant_cannot_resolve(): void
     {
         [$employee, $organization] = $this->seedMember(OrganizationRole::Employee);

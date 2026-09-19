@@ -58,7 +58,7 @@
             setTimeout(function () { document.querySelector('form[action*="odjava-ekrana"]').submit(); }, 45000);
         </script>
     @else
-        <h1 class="h3 mb-4">Unesite PIN</h1>
+        <h1 class="h3 mb-4">PIN ili QR</h1>
         <form method="POST" action="{{ route('organization.kiosk.identify', [$organization->slug, $location->kiosk_token]) }}" id="pin-form">
             @csrf
             <input type="password" inputmode="numeric" name="pin" id="pin" class="form-control form-control-lg text-center pin-dots mb-4" maxlength="6" autocomplete="off" required>
@@ -71,6 +71,13 @@
                 <div class="col-4"><button class="btn btn-primary w-100 pin-btn" type="submit">OK</button></div>
             </div>
         </form>
+        <form method="POST" action="{{ route('organization.kiosk.identify', [$organization->slug, $location->kiosk_token]) }}" id="qr-form" class="mt-4">
+            @csrf
+            <label class="form-label text-white-50" for="qr">Iskaznica</label>
+            <video id="qr-video" class="w-100 rounded mb-2 d-none" playsinline muted></video>
+            <input class="form-control form-control-lg mb-2" name="qr" id="qr" autocomplete="off" placeholder="QR kod / USB skener">
+            <button class="btn btn-outline-light w-100" type="button" id="qr-kamera">Kamera</button>
+        </form>
         <script>
             const pin = document.getElementById('pin');
             document.querySelectorAll('[data-digit]').forEach(function (btn) {
@@ -82,6 +89,7 @@
                 pin.value = pin.value.slice(0, -1);
             });
         </script>
+        <script src="{{ asset('js/kiosk-scan.js') }}"></script>
     @endif
 </div>
 </body>

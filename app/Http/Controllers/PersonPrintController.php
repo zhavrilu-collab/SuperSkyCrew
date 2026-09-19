@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ContractType;
 use App\Enums\EmploymentInstrument;
 use App\Models\Person;
+use App\Services\ClockQrService;
 use App\Services\OrganizationRbacService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -13,6 +14,7 @@ class PersonPrintController extends Controller
 {
     public function __construct(
         private readonly OrganizationRbacService $rbac,
+        private readonly ClockQrService $clockQr,
     ) {}
 
     public function contract(string $slug, Person $person): View
@@ -77,6 +79,21 @@ class PersonPrintController extends Controller
             'person' => $person,
             'exporter' => Auth::user(),
             'exportedAt' => now(),
+        ]);
+    }
+
+    public function badge(string $slug, Person $person): View
+    {
+        $this->assertPerson($person);
+        $this->authorizeSelfOrPeople($person);
+        abort_unless($person->isClockEligible(), 404);
+        $person->load(['location', 'department', 'jobPosition', 'organization']);
+
+        return view('organization.people.badge', [
+            'organization' => app('currentOrganization'),
+            'person' => $person,
+            'payload' => $this->clockQr->payload($person),
+            'canRotate' => $this->rbac->can(app('currentOrganization')->id, (int) Auth::id(), 'people.access'),
         ]);
     }
 

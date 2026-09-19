@@ -121,6 +121,14 @@ class ExpiryAndWeekTest extends TestCase
             ->assertSee('8.0');
 
         $this->actingAs($employee)
+            ->get(route('organization.timesheet.mine', [$organization->slug, 'ispis' => 1]))
+            ->assertOk()
+            ->assertSee('Uvid u evidenciju radnog vremena')
+            ->assertSee('Čl. 20.')
+            ->assertSee('Ana Kovač')
+            ->assertDontSee('Spremi punch');
+
+        $this->actingAs($employee)
             ->get(route('organization.timesheet.day', [$organization->slug, $own, now()->toDateString()]))
             ->assertOk()
             ->assertSee('Dnevni slog')

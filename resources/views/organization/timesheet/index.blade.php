@@ -12,12 +12,26 @@
     <form class="d-flex gap-2 flex-wrap" method="GET">
         <input type="date" class="form-control" name="from" value="{{ $from->toDateString() }}">
         <input type="date" class="form-control" name="to" value="{{ $to->toDateString() }}">
+        <select class="form-select" name="odjel" style="min-width: 10rem">
+            <option value="">Svi odjeli</option>
+            @foreach($departments as $department)
+                <option value="{{ $department->id }}" @selected((int) $departmentId === (int) $department->id)>{{ $department->name }}</option>
+            @endforeach
+        </select>
+        <select class="form-select" name="lokacija" style="min-width: 10rem">
+            <option value="">Sve lokacije</option>
+            @foreach($locations as $location)
+                <option value="{{ $location->id }}" @selected((int) $locationId === (int) $location->id)>{{ $location->name }}</option>
+            @endforeach
+        </select>
         <button class="btn btn-outline-secondary">Prikaži</button>
         <a class="btn btn-outline-primary" href="{{ route('organization.exceptions.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">Iznimke</a>
+        <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.fund', [$organization->slug, 'mjesec' => $from->format('Y-m')]) }}">Fond</a>
         @if($canInspect)
             <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.inspection', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">Inspekcija</a>
         @endif
         @if($canPayroll)
+            <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.payroll-hours', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">Sati za plaće</a>
             <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.export', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">Izvoz CSV</a>
             <a class="btn btn-outline-primary" href="{{ route('organization.people.payroll', $organization->slug) }}">Podaci za plaće</a>
         @endif
@@ -32,27 +46,52 @@
         @endif
         @if($periodLock->lockedBy)
             · {{ $periodLock->lockedBy->name }}
+        @else
+            · automatika
         @endif
         . Punchovi i odsutnosti se ne mogu mijenjati.
     </div>
-@elseif($canLock)
+@elseif($canLock || $canManual)
     <div class="kartica-kontejner mb-4">
         <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
-                <div class="fw-semibold">Zaključaj {{ sprintf('%02d/%d', $from->month, $from->year) }}</div>
-                <div class="small text-muted">
-                    Nakon zaključavanja slogovi NN 55/2024 više se ne smiju mijenjati.
-                    @if($exceptionCount > 0)
-                        Otvoreno je još <a href="{{ route('organization.exceptions.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">{{ $exceptionCount }} iznimki</a> u prikazu.
-                    @endif
-                </div>
+                @if($canLock)
+                    <div class="fw-semibold">Zaključaj {{ sprintf('%02d/%d', $from->month, $from->year) }}</div>
+                    <div class="small text-muted">
+                        Nakon zaključavanja slogovi NN 55/2024 više se ne smiju mijenjati.
+                        @if($exceptionCount > 0)
+                            Otvoreno je još <a href="{{ route('organization.exceptions.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">{{ $exceptionCount }} iznimki</a> u prikazu.
+                        @endif
+                    </div>
+                @elseif($canManual)
+                    <div class="fw-semibold">Plan → šihterica</div>
+                    <div class="small text-muted">Evidencijski sati iz smjene za dane bez prijave, u prikazanom rasponu.</div>
+                @endif
             </div>
-            <form method="POST" action="{{ route('organization.timesheet.lock', $organization->slug) }}">
-                @csrf
-                <input type="hidden" name="year" value="{{ $from->year }}">
-                <input type="hidden" name="month" value="{{ $from->month }}">
-                <button class="btn btn-dark" type="submit">Zaključaj razdoblje</button>
-            </form>
+            <div class="d-flex flex-wrap gap-2">
+                @if($canManual)
+                    <form method="POST" action="{{ route('organization.timesheet.plan', $organization->slug) }}">
+                        @csrf
+                        <input type="hidden" name="from" value="{{ $from->toDateString() }}">
+                        <input type="hidden" name="to" value="{{ $to->toDateString() }}">
+                        @if($departmentId)
+                            <input type="hidden" name="odjel" value="{{ $departmentId }}">
+                        @endif
+                        @if($locationId)
+                            <input type="hidden" name="lokacija" value="{{ $locationId }}">
+                        @endif
+                        <button class="btn btn-outline-primary" type="submit">Prenesi plan</button>
+                    </form>
+                @endif
+                @if($canLock)
+                    <form method="POST" action="{{ route('organization.timesheet.lock', $organization->slug) }}">
+                        @csrf
+                        <input type="hidden" name="year" value="{{ $from->year }}">
+                        <input type="hidden" name="month" value="{{ $from->month }}">
+                        <button class="btn btn-dark" type="submit">Zaključaj razdoblje</button>
+                    </form>
+                @endif
+            </div>
         </div>
     </div>
 @endif
@@ -69,7 +108,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($people as $person)
+                @forelse($people as $person)
                     <tr>
                         <td>
                             {{ $person->fullName() }}
@@ -87,7 +126,11 @@
                             </td>
                         @endforeach
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="{{ 1 + count($days) }}" class="text-muted">Nema osoba za odabrani filtar.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

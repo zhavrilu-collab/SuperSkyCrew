@@ -7,17 +7,23 @@
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div class="page-heading mb-0">
         <h1>Queue iznimki</h1>
-        <p class="text-muted mb-0">Nekompletni slogovi, kašnjenje vs plan, dnevni odmor (12 h) i odstupanje od mjesečnog fonda. Današnje otvorene prijave nisu u redu.</p>
+        <p class="text-muted mb-0">Nekompletni slogovi, kašnjenje, dnevni odmor, fond, rad na blagdanu ili u nedjelju. Današnje otvorene prijave nisu u redu.</p>
     </div>
     <form class="d-flex gap-2 flex-wrap" method="GET">
         <input type="date" class="form-control" name="from" value="{{ $from->toDateString() }}">
         <input type="date" class="form-control" name="to" value="{{ $to->toDateString() }}">
+        <select class="form-select" name="code" onchange="this.form.submit()">
+            <option value="">Sve iznimke</option>
+            @foreach($exceptionCodes as $item)
+                <option value="{{ $item->value }}" @selected($codeFilter === $item->value)>{{ $item->label() }}</option>
+            @endforeach
+        </select>
         <input type="hidden" name="resolved" value="{{ $resolved ? 1 : 0 }}">
         <button class="btn btn-outline-secondary">Prikaži</button>
         @if($resolved)
-            <a class="btn btn-outline-primary" href="{{ route('organization.exceptions.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">Otvorene</a>
+            <a class="btn btn-outline-primary" href="{{ route('organization.exceptions.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString(), 'code' => $codeFilter]) }}">Otvorene</a>
         @else
-            <a class="btn btn-outline-primary" href="{{ route('organization.exceptions.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString(), 'resolved' => 1]) }}">Riješene</a>
+            <a class="btn btn-outline-primary" href="{{ route('organization.exceptions.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString(), 'code' => $codeFilter, 'resolved' => 1]) }}">Riješene</a>
         @endif
     </form>
 </div>

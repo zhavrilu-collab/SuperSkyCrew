@@ -17,6 +17,8 @@ Ne spremati presliku osobne iskaznice osim uz zaseban pravni temelj (AZOP).
 
 ## Faza 1 — v1 (go-live)
 
+
+
 ### Kadar
 
 - Kartica čl. 3., ugovori i aneksi, probni rad, olakšice, podaci za plaće (unos, ne obračun)
@@ -41,9 +43,9 @@ Detalj: [05-kadar-i-uskladenost.md](05-kadar-i-uskladenost.md).
 - Puni dnevni slog čl. 13. + posebni sati (noć, prekovremeni, smjena, dvokratni, blagdan, nedjelja)
 - Kalendari na 4 razine + smjene; plan → šihterica; e-mail plana
 - GO: kriteriji/staž, staro pa novo, rješenje, kalendar
-- Zaključavanje razdoblja, kontrola mjesečnog fonda, upozorenje dnevnog odmora
+- Zaključavanje razdoblja, kontrola mjesečnog fonda (ugovoreni tjedni sati), upozorenje dnevnog odmora
 - Live dashboard (tko je na poslu, iznimke)
-- Inspekcijski izvoz; CSV/API priprema za vanjski obračun
+- Inspekcijski izvoz; CSV/API priprema za vanjski obračun (šifra × sati × MT)
 - Geofence i nepromjenjivi punch
 
 Detalj: [03-evidencija-radnog-vremena.md](03-evidencija-radnog-vremena.md), [04-kanali-prijave.md](04-kanali-prijave.md).
@@ -61,16 +63,30 @@ Zahtjevi za GO, ostale odsutnosti, prekovremeni i korekciju puncha. Detalj: [06-
 - Linije (proizvodnja) samo ako kupac traži
 - Push obavijesti
 
+
+
 ## Faza 3 — naknade
 
 - Vlastiti obračun plaće i JOPPD samo ako se kasnije odluči
 - Putni nalozi / veza na terenske sate
 
+
+
 ## Faza 4 — talent i ZNR platforma
 
-- Puni ATS, onboarding/offboarding zaduženja imovine
-- KPI, ankete, LMS
-- Puna ZNR evidencija ispitivanja i radnog okoliša (u v1 samo isteci pregleda na kartici)
+```
+Puni ATS, onboarding/offboarding zaduženja imovine
+```
+
+```
+KPI, ankete, LMS
+```
+
+```
+Puna ZNR evidencija ispitivanja i radnog okoliša (u v1 samo isteci pregleda na kartici)
+```
+
+
 
 ## Out-of-scope za v1
 

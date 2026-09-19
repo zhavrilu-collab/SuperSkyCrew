@@ -18,6 +18,7 @@ class Shift extends OrganizationModel
         'ends_at',
         'break_minutes',
         'is_night',
+        'is_shift',
     ];
 
     protected function casts(): array
@@ -25,6 +26,7 @@ class Shift extends OrganizationModel
         return [
             'break_minutes' => 'integer',
             'is_night' => 'boolean',
+            'is_shift' => 'boolean',
         ];
     }
 
@@ -47,6 +49,13 @@ class Shift extends OrganizationModel
         }
 
         return $end;
+    }
+
+    public function netMinutesOn(Carbon $day): int
+    {
+        $gross = (int) $this->startsOn($day)->diffInMinutes($this->endsOn($day));
+
+        return max(0, $gross - max(0, (int) $this->break_minutes));
     }
 
     public function label(): string

@@ -22,7 +22,7 @@ Feature flagovi paketa: `clock_mobile`, `clock_kiosk`, `clock_geofence`. Termina
 
 ## Clock API (koncept)
 
-`POST /{slug}/api/clock/punches`
+`POST /{slug}/api/clock/punches` (isti handler kao `POST /{slug}/prijava`)
 
 Tijelo: `type`, `occurred_at`, `channel`, `device_id`, `location_id`, GPS, `offline`, opcionalni foto, kiosk token/PIN.
 
@@ -56,7 +56,7 @@ Teren/gradilište: PWA sprema prijavu u IndexedDB ako nema mreže; sync kad se v
 - Geofence po lokaciji, ne globalno.
 - Opcionalni selfie: kratko čuvanje, bez face-matchinga (to bi bila biometrija).
 - Device binding za PWA; upozorenje na mock GPS ako je detektabilan.
-- Tuđa prijava zabranjena osim kioska s PIN-om.
+- Tuđa prijava zabranjena osim kioska s PIN-om ili QR-om osobe.
 - Korekcija samo kroz workflow, nikad tihi edit puncha.
 
 Ne radimo otisak prsta/lice u v1.
@@ -76,7 +76,9 @@ Ne radimo otisak prsta/lice u v1.
 
 **Kiosk**
 
-- Cijeli zaslon, veliki PIN pad / skener.
+- Cijeli zaslon, veliki PIN pad, kamera ili USB skener iskaznice.
+- QR lokacije (Postavke → Vrijeme → Lokacije → QR za tablet) otvara kiosk URL na dijeljenom tabletu.
+- QR osobe je iskaznica (`hr1:{slug}:{token}`); nije ulazni QR/NFC (to je Faza 2).
 - Odjava iste osobe na istom uređaju.
 - Auto-logout nakon puncha.
 

@@ -28,6 +28,8 @@ class TimeEntry extends OrganizationModel
         'approved_overtime_minutes',
         'sunday_minutes',
         'holiday_minutes',
+        'split_shift_minutes',
+        'shift_minutes',
         'evidential_minutes',
         'evidential_manual',
         'evidential_code',

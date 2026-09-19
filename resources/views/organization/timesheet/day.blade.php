@@ -28,6 +28,7 @@
                             {{ $punch->type->label() }} · {{ $punch->channel->label() }}
                             @if($punch->isCorrection()) <span class="badge text-bg-info">ispravak</span> @endif
                             @if($punch->corrections->isNotEmpty()) <span class="badge text-bg-secondary">zamijenjeno</span> @endif
+                            @if($punch->geofence_result === 'fail') <span class="badge text-bg-danger">izvan zone</span> @endif
                             @if($punch->deviceMismatch()) <span class="badge text-bg-warning">drugi uređaj</span> @endif
                             @if($punch->hasPhoto())
                                 <a class="small ms-1" href="{{ route('organization.timesheet.photo', [$organization->slug, $person, $punch]) }}">foto</a>
@@ -84,6 +85,11 @@
                         <dt class="col-7">Završetak</dt><dd class="col-5">{{ $entry->ended_at?->timezone(config('app.timezone'))->format('H:i') ?: '—' }}</dd>
                         <dt class="col-7">Ukupno (realizacija)</dt><dd class="col-5">{{ number_format($entry->total_minutes / 60, 2) }} h</dd>
                         <dt class="col-7">Pauza</dt><dd class="col-5">{{ $entry->break_minutes }} min</dd>
+                        <dt class="col-7">Zastoj</dt><dd class="col-5">{{ $entry->downtime_minutes }} min</dd>
+                        <dt class="col-7">Terenski</dt><dd class="col-5">{{ $entry->field_work_minutes }} min</dd>
+                        <dt class="col-7">Pripravnost</dt><dd class="col-5">{{ $entry->standby_minutes }} min</dd>
+                        <dt class="col-7">Dvokratni</dt><dd class="col-5">{{ $entry->split_shift_minutes }} min</dd>
+                        <dt class="col-7">Smjenski</dt><dd class="col-5">{{ $entry->shift_minutes }} min</dd>
                         <dt class="col-7">Noć</dt><dd class="col-5">{{ $entry->night_minutes }} min</dd>
                         <dt class="col-7">Prekovremeni</dt><dd class="col-5">{{ $entry->overtime_minutes }} min</dd>
                         <dt class="col-7">Nedjelja</dt><dd class="col-5">{{ $entry->sunday_minutes }} min</dd>
@@ -125,6 +131,33 @@
                 @endif
             </div>
         </div>
+
+        @if($canEditSlog ?? false)
+        <div class="kartica-kontejner mt-4">
+            <div class="card-header bg-white fw-semibold">Zastoj, teren, pripravnost (čl. 13.)</div>
+            <div class="card-body">
+                <p class="small text-muted">Ova polja ne proizlaze iz puncha. Ostaju nakon ponovnog izračuna dana. Dvokratni sati računaju se sami kad ima dva zatvorena intervala.</p>
+                <form method="POST" action="{{ route('organization.timesheet.slog', [$organization->slug, $person, $day->toDateString()]) }}" class="row g-3">
+                    @csrf
+                    <div class="col-md-4">
+                        <label class="form-label" for="downtime_minutes">Zastoj (min)</label>
+                        <input type="number" min="0" max="1440" class="form-control" name="downtime_minutes" id="downtime_minutes" required value="{{ old('downtime_minutes', $entry?->downtime_minutes ?? 0) }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="field_work_minutes">Terenski (min)</label>
+                        <input type="number" min="0" max="1440" class="form-control" name="field_work_minutes" id="field_work_minutes" required value="{{ old('field_work_minutes', $entry?->field_work_minutes ?? 0) }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="standby_minutes">Pripravnost (min)</label>
+                        <input type="number" min="0" max="1440" class="form-control" name="standby_minutes" id="standby_minutes" required value="{{ old('standby_minutes', $entry?->standby_minutes ?? 0) }}">
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" type="submit">Spremi slog</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @endif
 
         @if($canEditEvidential ?? false)
         <div class="kartica-kontejner mt-4">

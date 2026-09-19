@@ -133,6 +133,10 @@
                             <li><a class="dropdown-item" href="{{ route('organization.timesheet.index', $organization->slug) }}">Šihterica</a></li>
                             <li><a class="dropdown-item" href="{{ route('organization.schedule.index', $organization->slug) }}">Raspored</a></li>
                             <li><a class="dropdown-item" href="{{ route('organization.exceptions.index', $organization->slug) }}">Iznimke</a></li>
+                            <li><a class="dropdown-item" href="{{ route('organization.timesheet.fund', $organization->slug) }}">Mjesečni fond</a></li>
+                            @if($rbac->can($organization->id, $userId, 'payroll.export'))
+                                <li><a class="dropdown-item" href="{{ route('organization.timesheet.payroll-hours', $organization->slug) }}">Sati za plaće</a></li>
+                            @endif
                             @if($rbac->can($organization->id, $userId, 'inspection.export'))
                                 <li><a class="dropdown-item" href="{{ route('organization.timesheet.inspection', $organization->slug) }}">Inspekcija</a></li>
                             @endif

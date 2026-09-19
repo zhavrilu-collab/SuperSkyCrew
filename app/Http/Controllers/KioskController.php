@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ClockChannel;
 use App\Models\Person;
+use App\Services\ClockQrService;
 use App\Services\ClockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ class KioskController extends Controller
 {
     public function __construct(
         private readonly ClockService $clock,
+        private readonly ClockQrService $qr,
     ) {}
 
     public function show(Request $request): View
@@ -36,16 +38,35 @@ class KioskController extends Controller
         $organization = app('currentOrganization');
         $location = app('currentKioskLocation');
         $data = $request->validate([
-            'pin' => ['required', 'digits_between:4,6'],
+            'pin' => ['nullable', 'digits_between:4,6'],
+            'qr' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $person = Person::query()
-            ->forOrganization($organization)
-            ->where('clock_pin', $data['pin'])
-            ->first();
+        $person = null;
+        $errorKey = 'pin';
+        $errorMessage = 'PIN nije prepoznat.';
+
+        if (filled($data['pin'] ?? null)) {
+            $person = Person::query()
+                ->forOrganization($organization)
+                ->where('clock_pin', $data['pin'])
+                ->first();
+        } elseif (filled($data['qr'] ?? null)) {
+            $errorKey = 'qr';
+            $errorMessage = 'QR kod nije prepoznat.';
+            $token = $this->qr->parse((string) $data['qr'], $organization->slug);
+            if ($token !== null) {
+                $person = Person::query()
+                    ->forOrganization($organization)
+                    ->where('clock_qr', $token)
+                    ->first();
+            }
+        } else {
+            return back()->withErrors(['pin' => 'Unesite PIN ili skenirajte QR.']);
+        }
 
         if ($person === null || ! $person->isClockEligible()) {
-            return back()->withErrors(['pin' => 'PIN nije prepoznat.']);
+            return back()->withErrors([$errorKey => $errorMessage]);
         }
 
         $request->session()->put($this->sessionKey($location->kiosk_token), $person->id);
@@ -65,7 +86,7 @@ class KioskController extends Controller
         if ($person === null) {
             return redirect()
                 ->route('organization.kiosk', ['slug' => $organization->slug, 'token' => $location->kiosk_token])
-                ->withErrors(['pin' => 'Najprije unesite PIN.']);
+                ->withErrors(['pin' => 'Najprije se identificirajte PIN-om ili QR-om.']);
         }
 
         $result = $this->clock->punch($person, null, [

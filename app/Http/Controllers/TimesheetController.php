@@ -6,7 +6,9 @@ use App\Enums\ClockChannel;
 use App\Enums\PunchType;
 use App\Models\AbsenceCode;
 use App\Models\ComplianceExport;
+use App\Models\Department;
 use App\Models\DocumentHandover;
+use App\Models\Location;
 use App\Models\Person;
 use App\Models\Punch;
 use App\Models\TimeEntry;
@@ -16,6 +18,7 @@ use App\Services\OrganizationRbacService;
 use App\Services\PeriodLockService;
 use App\Services\ShiftResolver;
 use App\Services\TimeEntryRebuilder;
+use App\Services\PlanTransferService;
 use App\Services\AuditService;
 use App\Enums\AuditAction;
 use Carbon\Carbon;
@@ -23,6 +26,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -37,6 +41,7 @@ class TimesheetController extends Controller
         private readonly ShiftResolver $shifts,
         private readonly TimeEntryRebuilder $rebuilder,
         private readonly AuditService $audit,
+        private readonly PlanTransferService $planTransfer,
     ) {}
 
     public function index(Request $request): View
@@ -52,6 +57,14 @@ class TimesheetController extends Controller
             ->clockEligible()
             ->orderBy('last_name');
         $this->scope->restrictPeopleQuery($peopleQuery, $organization, $userId);
+        $departmentId = $request->integer('odjel') ?: null;
+        $locationId = $request->integer('lokacija') ?: null;
+        if ($departmentId) {
+            $peopleQuery->where('department_id', $departmentId);
+        }
+        if ($locationId) {
+            $peopleQuery->where('location_id', $locationId);
+        }
         $people = $peopleQuery->get();
 
         $entries = TimeEntry::query()
@@ -87,6 +100,10 @@ class TimesheetController extends Controller
             'from' => $from,
             'to' => $to,
             'presentIds' => $presentIds,
+            'departmentId' => $departmentId,
+            'locationId' => $locationId,
+            'departments' => Department::query()->forOrganization($organization)->orderBy('name')->get(),
+            'locations' => Location::query()->forOrganization($organization)->where('is_active', true)->orderBy('name')->get(),
             'canManual' => $this->rbac->can($organization->id, $userId, 'time.access'),
             'canLock' => $this->rbac->can($organization->id, $userId, 'time.lock'),
             'canInspect' => $this->rbac->can($organization->id, $userId, 'inspection.export'),
@@ -130,6 +147,7 @@ class TimesheetController extends Controller
         $canOpenTimesheet = $this->rbac->can($organization->id, $userId, 'time.access')
             || $this->rbac->can($organization->id, $userId, 'payroll.export');
         $canEditEvidential = $this->rbac->can($organization->id, $userId, 'time.lock') && ! $locked;
+        $canEditSlog = $this->rbac->can($organization->id, $userId, 'time.access') && ! $locked;
         $person->loadMissing('costCenter');
         $costCenters = $this->scope->costCentersOn($organization, $day);
         if ($entry?->evidentialCostCenter && ! $costCenters->contains('id', $entry->evidential_cost_center_id)) {
@@ -150,6 +168,7 @@ class TimesheetController extends Controller
             'periodLocked' => $locked,
             'canOpenTimesheet' => $canOpenTimesheet,
             'canEditEvidential' => $canEditEvidential,
+            'canEditSlog' => $canEditSlog,
             'plannedShift' => $this->shifts->forPersonOn($person, $day),
             'codes' => AbsenceCode::query()->forOrganization($organization)->orderBy('kind')->orderBy('code')->get(),
             'costCenters' => $costCenters,
@@ -201,7 +220,11 @@ class TimesheetController extends Controller
             $days[] = $d->copy();
         }
 
-        return view('organization.timesheet.mine', [
+        $view = $request->boolean('ispis')
+            ? 'organization.timesheet.mine-print'
+            : 'organization.timesheet.mine';
+
+        return view($view, [
             'organization' => $organization,
             'person' => $person,
             'days' => $days,
@@ -317,6 +340,45 @@ class TimesheetController extends Controller
         return back()->with('status', 'Evidencijski sati su spremljeni.');
     }
 
+    public function storeSlog(Request $request, string $slug, Person $person, string $date): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'time.access');
+        abort_unless($person->organization_id === $organization->id, 404);
+        abort_unless($this->scope->canManagePerson($person, (int) Auth::id()), 403, 'Nemate ovlasti za ovu radnju.');
+
+        $day = Carbon::parse($date, config('app.timezone'))->startOfDay();
+        abort_if($this->locks->isLocked($organization->id, $day), 403, 'Razdoblje je zaključano.');
+
+        $data = $request->validate([
+            'downtime_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+            'field_work_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+            'standby_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+        ]);
+
+        $entry = TimeEntry::query()
+            ->where('person_id', $person->id)
+            ->whereDate('work_date', $day->toDateString())
+            ->first() ?? $this->rebuilder->rebuild($person, $day);
+        abort_if($entry->isLocked(), 403, 'Slog je zaključan.');
+
+        $entry->fill($data)->save();
+
+        $this->audit->record(
+            $organization,
+            AuditAction::TimeSlogCorrect,
+            $request->user(),
+            'Slog čl. 13.: zastoj '.$data['downtime_minutes'].' / teren '.$data['field_work_minutes']
+                .' / pripravnost '.$data['standby_minutes'].' min · '.$person->fullName().' '.$day->format('d.m.Y.'),
+            $person,
+            TimeEntry::class,
+            $entry->id,
+            $data,
+        );
+
+        return back()->with('status', 'Dnevni slog (zastoj, teren, pripravnost) je spremljen.');
+    }
+
     public function lock(Request $request): RedirectResponse
     {
         $organization = app('currentOrganization');
@@ -332,11 +394,45 @@ class TimesheetController extends Controller
         return back()->with('status', 'Razdoblje '.$lock->label().' je zaključano.');
     }
 
+    public function transferPlan(Request $request): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'time.access');
+        [$from, $to] = $this->range($request);
+        abort_if($from->diffInDays($to) > 62, 422, 'Prijenos je ograničen na dva mjeseca.');
+
+        $userId = (int) Auth::id();
+        $peopleQuery = Person::query()
+            ->forOrganization($organization)
+            ->clockEligible()
+            ->orderBy('last_name');
+        $this->scope->restrictPeopleQuery($peopleQuery, $organization, $userId);
+        $departmentId = $request->integer('odjel') ?: null;
+        $locationId = $request->integer('lokacija') ?: null;
+        if ($departmentId) {
+            $peopleQuery->where('department_id', $departmentId);
+        }
+        if ($locationId) {
+            $peopleQuery->where('location_id', $locationId);
+        }
+
+        $count = $this->planTransfer->transfer($organization, $peopleQuery->get(), $from, $to, $request->user());
+
+        return back()->with(
+            'status',
+            $count === 0
+                ? 'Nema dana za prijenos (sve već ima prijavu, odsutnost ili je zaključano).'
+                : 'Plan je prenesen u šihtericu ('.$count.' slogova).',
+        );
+    }
+
     public function inspection(Request $request): View
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'inspection.export');
         [$from, $to] = $this->range($request);
+        $entries = $this->reportEntries($organization->id, $from, $to);
+        $showBounds = (bool) $organization->show_clock_bounds;
 
         $this->recordExport($organization->id, 'inspection', $from, $to);
 
@@ -344,7 +440,9 @@ class TimesheetController extends Controller
             'organization' => $organization,
             'from' => $from,
             'to' => $to,
-            'rows' => $this->reportRows($organization->id, $from, $to),
+            'showBounds' => $showBounds,
+            'rows' => $this->reportRows($entries, $showBounds),
+            'summaries' => $this->reportSummaries($entries),
             'codes' => AbsenceCode::query()->forOrganization($organization)->orderBy('code')->get(),
             'handovers' => DocumentHandover::query()
                 ->forOrganization($organization)
@@ -358,12 +456,71 @@ class TimesheetController extends Controller
         ]);
     }
 
+    public function exportInspection(Request $request): StreamedResponse
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'inspection.export');
+        [$from, $to] = $this->range($request);
+        $entries = $this->reportEntries($organization->id, $from, $to);
+        $showBounds = (bool) $organization->show_clock_bounds;
+        $rows = $this->reportRows($entries, $showBounds);
+        $summaries = $this->reportSummaries($entries);
+        $this->recordExport($organization->id, 'inspection', $from, $to);
+
+        $headers = ['Osoba', 'Datum'];
+        if ($showBounds) {
+            $headers = array_merge($headers, ['Početak', 'Završetak']);
+        }
+        $headers = array_merge($headers, [
+            'Ukupno min', 'Pauza', 'Zastoj', 'Teren', 'Pripravnost', 'Dvokratni', 'Smjenski',
+            'Noć', 'Prekovremeni', 'Nedjelja', 'Blagdan',
+            'Odsutnost', 'Odsutnost min', 'Šifra', 'Evidencijski min', 'Mjesto troška', 'Status', 'Iznimka',
+        ]);
+
+        $filename = 'inspekcija-'.$from->toDateString().'-'.$to->toDateString().'.csv';
+
+        return response()->streamDownload(function () use ($headers, $rows, $summaries) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, $headers, ';');
+            foreach ($rows as $row) {
+                fputcsv($handle, $row, ';');
+            }
+            fputcsv($handle, [], ';');
+            fputcsv($handle, ['Zbirno po osobi'], ';');
+            fputcsv($handle, [
+                'Osoba', 'Dani', 'Ukupno min', 'Evidencijski min', 'Zastoj', 'Teren', 'Pripravnost',
+                'Dvokratni', 'Smjenski', 'Noć', 'Prekovremeni', 'Nedjelja', 'Blagdan',
+            ], ';');
+            foreach ($summaries as $summary) {
+                fputcsv($handle, [
+                    $summary['name'],
+                    $summary['days'],
+                    $summary['total_minutes'],
+                    $summary['evidential_minutes'],
+                    $summary['downtime_minutes'],
+                    $summary['field_work_minutes'],
+                    $summary['standby_minutes'],
+                    $summary['split_shift_minutes'],
+                    $summary['shift_minutes'],
+                    $summary['night_minutes'],
+                    $summary['overtime_minutes'],
+                    $summary['sunday_minutes'],
+                    $summary['holiday_minutes'],
+                ], ';');
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
     public function export(Request $request): StreamedResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'payroll.export');
         [$from, $to] = $this->range($request);
-        $rows = $this->reportRows($organization->id, $from, $to);
+        $rows = $this->reportRows($this->reportEntries($organization->id, $from, $to), includeBounds: true);
         $this->recordExport($organization->id, 'payroll', $from, $to);
 
         $filename = 'evidencija-'.$from->toDateString().'-'.$to->toDateString().'.csv';
@@ -373,6 +530,7 @@ class TimesheetController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
             fputcsv($handle, [
                 'Osoba', 'Datum', 'Početak', 'Završetak', 'Realizirano min', 'Pauza min',
+                'Zastoj min', 'Teren min', 'Pripravnost min', 'Dvokratni min', 'Smjenski min',
                 'Noć min', 'Prekovremeni min', 'Nedjelja min', 'Blagdan min',
                 'Odsutnost', 'Odsutnost min', 'Šifra', 'Evidencijski min', 'Mjesto troška', 'Status', 'Iznimka',
             ], ';');
@@ -400,11 +558,11 @@ class TimesheetController extends Controller
     }
 
     /**
-     * @return list<list<string|int|null>>
+     * @return Collection<int, TimeEntry>
      */
-    private function reportRows(int $organizationId, Carbon $from, Carbon $to): array
+    private function reportEntries(int $organizationId, Carbon $from, Carbon $to): Collection
     {
-        $entries = TimeEntry::query()
+        return TimeEntry::query()
             ->with(['person.costCenter', 'evidentialCostCenter'])
             ->where('organization_id', $organizationId)
             ->whereDate('work_date', '>=', $from->toDateString())
@@ -412,18 +570,65 @@ class TimesheetController extends Controller
             ->orderBy('person_id')
             ->orderBy('work_date')
             ->get();
+    }
 
+    /**
+     * @param  Collection<int, TimeEntry>  $entries
+     * @return list<array<string, int|string|null>>
+     */
+    private function reportSummaries(Collection $entries): array
+    {
+        return $entries
+            ->groupBy('person_id')
+            ->map(function (Collection $group) {
+                $person = $group->first()?->person;
+
+                return [
+                    'name' => $person?->fullName() ?? '',
+                    'days' => $group->count(),
+                    'total_minutes' => (int) $group->sum('total_minutes'),
+                    'evidential_minutes' => (int) $group->sum('evidential_minutes'),
+                    'downtime_minutes' => (int) $group->sum('downtime_minutes'),
+                    'field_work_minutes' => (int) $group->sum('field_work_minutes'),
+                    'standby_minutes' => (int) $group->sum('standby_minutes'),
+                    'split_shift_minutes' => (int) $group->sum('split_shift_minutes'),
+                    'shift_minutes' => (int) $group->sum('shift_minutes'),
+                    'night_minutes' => (int) $group->sum('night_minutes'),
+                    'overtime_minutes' => (int) $group->sum('overtime_minutes'),
+                    'sunday_minutes' => (int) $group->sum('sunday_minutes'),
+                    'holiday_minutes' => (int) $group->sum('holiday_minutes'),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  Collection<int, TimeEntry>  $entries
+     * @return list<list<string|int|null>>
+     */
+    private function reportRows(Collection $entries, bool $includeBounds): array
+    {
         $tz = config('app.timezone');
         $rows = [];
         foreach ($entries as $entry) {
             $costCenter = $entry->evidentialCostCenter ?: $entry->person?->costCenter;
-            $rows[] = [
+            $row = [
                 $entry->person?->fullName() ?? '',
                 $entry->work_date->toDateString(),
-                $entry->started_at?->timezone($tz)->format('H:i') ?? '',
-                $entry->ended_at?->timezone($tz)->format('H:i') ?? '',
+            ];
+            if ($includeBounds) {
+                $row[] = $entry->started_at?->timezone($tz)->format('H:i') ?? '';
+                $row[] = $entry->ended_at?->timezone($tz)->format('H:i') ?? '';
+            }
+            $rows[] = array_merge($row, [
                 $entry->total_minutes,
                 $entry->break_minutes,
+                $entry->downtime_minutes,
+                $entry->field_work_minutes,
+                $entry->standby_minutes,
+                $entry->split_shift_minutes,
+                $entry->shift_minutes,
                 $entry->night_minutes,
                 $entry->overtime_minutes,
                 $entry->sunday_minutes,
@@ -435,7 +640,7 @@ class TimesheetController extends Controller
                 $costCenter?->summary() ?? '',
                 $entry->status->label(),
                 $entry->exception_code,
-            ];
+            ]);
         }
 
         return $rows;

@@ -17,6 +17,11 @@
             <a class="btn btn-outline-primary" href="{{ route('organization.settings.index', ['slug' => $organization->slug, 'tab' => 'vrijeme', 'section' => 'smjene']) }}">Postavke smjena</a>
         @endif
         @if($canSend)
+            <form method="POST" action="{{ route('organization.schedule.plan.transfer', $organization->slug) }}" class="d-inline">
+                @csrf
+                <input type="hidden" name="from" value="{{ $from->toDateString() }}">
+                <button class="btn btn-outline-primary" type="submit">Prenesi tjedan u šihtericu</button>
+            </form>
             <form method="POST" action="{{ route('organization.schedule.plan.send', $organization->slug) }}" class="d-inline">
                 @csrf
                 <input type="hidden" name="from" value="{{ $from->toDateString() }}">
@@ -55,6 +60,6 @@
             </tbody>
         </table>
     </div>
-    <p class="small text-muted mb-0 mt-2">Šihterica prazne ćelije prikazuje istim kodom smjene (plan → šihterica). Blagdani RH su neredovni osim ako radnik ima vlastito pravilo.</p>
+    <p class="small text-muted mb-0 mt-2">Prazne ćelije na šihterici i dalje pokazuju kod smjene. Prijenos upisuje evidencijske sate (RD) za dane bez prijave; punchovi, odsutnosti i ručne evidencije ostaju. Blagdani RH su neredovni osim ako radnik ima vlastito pravilo.</p>
 </div>
 @endsection

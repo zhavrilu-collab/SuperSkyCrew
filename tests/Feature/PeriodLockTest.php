@@ -97,7 +97,9 @@ class PeriodLockTest extends TestCase
             ->assertOk()
             ->assertSee('NN 55/2024')
             ->assertSee($person->fullName())
-            ->assertSee('čl. 18.');
+            ->assertSee('čl. 18.')
+            ->assertSee('Zbirno po osobi')
+            ->assertSee('Excel (CSV)');
 
         $this->assertDatabaseHas('compliance_exports', [
             'organization_id' => $organization->id,
@@ -223,6 +225,89 @@ class PeriodLockTest extends TestCase
 
         $this->assertDatabaseMissing('period_locks', ['organization_id' => $organization->id]);
         $this->assertSame($person->organization_id, $organization->id);
+    }
+
+    public function test_previous_month_locks_automatically_from_configured_day(): void
+    {
+        [$owner, $organization] = $this->seedOrg(OrganizationRole::Owner);
+        $organization->update(['period_lock_day' => 8]);
+        $this->travelTo('2026-09-08 09:00:00');
+
+        $lock = app(PeriodLockService::class)->lockPreviousIfDue($organization);
+
+        $this->assertNotNull($lock);
+        $this->assertSame(2026, $lock->year);
+        $this->assertSame(8, $lock->month);
+        $this->assertNull($lock->locked_by_user_id);
+        $this->assertNull(app(PeriodLockService::class)->lockPreviousIfDue($organization));
+    }
+
+    public function test_automatic_lock_waits_until_configured_day_and_can_be_disabled(): void
+    {
+        [$owner, $organization] = $this->seedOrg(OrganizationRole::Owner);
+        $organization->update(['period_lock_day' => 8]);
+        $this->travelTo('2026-09-07 09:00:00');
+        $this->assertNull(app(PeriodLockService::class)->lockPreviousIfDue($organization));
+
+        $organization->update(['period_lock_day' => 0]);
+        $this->travelTo('2026-09-19 09:00:00');
+        $this->assertNull(app(PeriodLockService::class)->lockPreviousIfDue($organization));
+    }
+
+    public function test_close_yesterday_marks_missing_out(): void
+    {
+        [$owner, $organization, $person] = $this->seedOrg(OrganizationRole::Owner);
+        $this->travelTo('2026-09-18 16:00:00');
+        app(ClockService::class)->punch($person, $owner, [
+            'type' => PunchType::In->value,
+            'occurred_at' => '2026-09-18 08:00:00',
+            'channel' => ClockChannel::Manager->value,
+            'reason' => 'Prijava',
+        ]);
+
+        $this->travelTo('2026-09-19 08:00:00');
+        $this->assertSame(1, app(\App\Services\TimeCloseService::class)->closeYesterday($organization));
+
+        $entry = TimeEntry::query()->where('person_id', $person->id)->first();
+        $this->assertSame(\App\Enums\ExceptionCode::MissingOut->value, $entry->exception_code);
+        $this->assertSame(TimeEntryStatus::Complete, $entry->status);
+    }
+
+    public function test_owner_can_save_lock_calendar_and_command_locks_previous_month(): void
+    {
+        [$owner, $organization] = $this->seedOrg(OrganizationRole::Owner);
+
+        $this->actingAs($owner)
+            ->put(route('organization.settings.period-lock', $organization->slug), [
+                'period_lock_day' => 8,
+                'show_clock_bounds' => 1,
+            ])
+            ->assertRedirect();
+        $this->assertSame(8, $organization->fresh()->period_lock_day);
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'vrijeme',
+                'section' => 'zakljucavanje',
+            ]))
+            ->assertOk()
+            ->assertSee('Zaključavanje')
+            ->assertSee('hr:close-time')
+            ->assertSee('8. u mjesecu')
+            ->assertSee('početak i završetak');
+
+        $this->travelTo('2026-09-08 09:00:00');
+        $this->artisan('hr:close-time')
+            ->expectsOutput('Zatvoreno dana: 0; zaključano razdoblja: 1')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('period_locks', [
+            'organization_id' => $organization->id,
+            'year' => 2026,
+            'month' => 8,
+            'locked_by_user_id' => null,
+        ]);
     }
 
     /**

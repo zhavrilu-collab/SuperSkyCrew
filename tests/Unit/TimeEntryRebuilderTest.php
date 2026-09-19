@@ -59,6 +59,27 @@ class TimeEntryRebuilderTest extends TestCase
         $this->assertSame(60, $result['entry']->overtime_minutes);
     }
 
+    public function test_part_time_overtime_uses_contracted_daily_fund(): void
+    {
+        [$user, $person] = $this->seedPerson();
+        \App\Models\EmploymentContract::query()->create([
+            'organization_id' => $person->organization_id,
+            'person_id' => $person->id,
+            'kind' => \App\Enums\EmploymentInstrument::EmploymentContract,
+            'signed_at' => '2026-01-01',
+            'starts_at' => '2026-01-01',
+            'weekly_hours' => 20,
+            'is_current' => true,
+        ]);
+        $clock = app(ClockService::class);
+
+        $clock->punch($person->fresh(['employmentContracts']), $user, $this->punch(PunchType::In, '2026-09-18 08:00:00'));
+        $result = $clock->punch($person->fresh(['employmentContracts']), $user, $this->punch(PunchType::Out, '2026-09-18 13:00:00'));
+
+        $this->assertSame(300, $result['entry']->total_minutes);
+        $this->assertSame(60, $result['entry']->overtime_minutes);
+    }
+
     public function test_sunday_minutes_are_recorded(): void
     {
         [$user, $person] = $this->seedPerson();
@@ -69,6 +90,7 @@ class TimeEntryRebuilderTest extends TestCase
 
         $this->assertSame(240, $result['entry']->sunday_minutes);
         $this->assertSame(240, $result['entry']->total_minutes);
+        $this->assertSame(\App\Enums\ExceptionCode::SundayWork->value, $result['entry']->exception_code);
     }
 
     public function test_holiday_minutes_are_recorded_on_first_of_may(): void
@@ -81,6 +103,92 @@ class TimeEntryRebuilderTest extends TestCase
 
         $this->assertSame(480, $result['entry']->holiday_minutes);
         $this->assertSame(480, $result['entry']->evidential_minutes);
+        $this->assertSame(\App\Enums\ExceptionCode::HolidayWork->value, $result['entry']->exception_code);
+    }
+
+    public function test_holiday_on_sunday_is_flagged_as_holiday_not_sunday(): void
+    {
+        [$user, $person] = $this->seedPerson();
+        $clock = app(ClockService::class);
+
+        $clock->punch($person, $user, $this->punch(PunchType::In, '2026-11-01 08:00:00'));
+        $result = $clock->punch($person, $user, $this->punch(PunchType::Out, '2026-11-01 12:00:00'));
+
+        $this->assertTrue(\Carbon\Carbon::parse('2026-11-01')->isSunday());
+        $this->assertSame(240, $result['entry']->holiday_minutes);
+        $this->assertSame(240, $result['entry']->sunday_minutes);
+        $this->assertSame(\App\Enums\ExceptionCode::HolidayWork->value, $result['entry']->exception_code);
+    }
+
+    public function test_two_closed_intervals_count_as_split_shift(): void
+    {
+        [$user, $person] = $this->seedPerson();
+        $clock = app(ClockService::class);
+
+        $clock->punch($person, $user, $this->punch(PunchType::In, '2026-09-18 08:00:00'));
+        $clock->punch($person, $user, $this->punch(PunchType::Out, '2026-09-18 12:00:00'));
+        $clock->punch($person, $user, $this->punch(PunchType::In, '2026-09-18 14:00:00'));
+        $result = $clock->punch($person, $user, $this->punch(PunchType::Out, '2026-09-18 18:00:00'));
+
+        $this->assertSame(480, $result['entry']->total_minutes);
+        $this->assertSame(480, $result['entry']->split_shift_minutes);
+        $this->assertSame(0, $result['entry']->overtime_minutes);
+    }
+
+    public function test_shift_minutes_follow_planned_shift_flag(): void
+    {
+        [$user, $person] = $this->seedPerson();
+        $shift = \App\Models\Shift::factory()->create([
+            'organization_id' => $person->organization_id,
+            'is_shift' => true,
+            'starts_at' => '08:00:00',
+            'ends_at' => '16:00:00',
+            'break_minutes' => 30,
+        ]);
+        \App\Models\CalendarRule::factory()->create([
+            'organization_id' => $person->organization_id,
+            'level' => \App\Enums\CalendarLevel::Organization,
+            'shift_id' => $shift->id,
+            'weekday' => 5,
+        ]);
+        $clock = app(ClockService::class);
+
+        $clock->punch($person, $user, $this->punch(PunchType::In, '2026-09-18 08:00:00'));
+        $result = $clock->punch($person, $user, $this->punch(PunchType::Out, '2026-09-18 16:00:00'));
+
+        $this->assertSame(480, $result['entry']->total_minutes);
+        $this->assertSame(480, $result['entry']->shift_minutes);
+    }
+
+    public function test_geofence_fail_is_flagged_on_complete_day(): void
+    {
+        [$user, $person] = $this->seedPerson();
+        $location = \App\Models\Location::factory()->create([
+            'organization_id' => $person->organization_id,
+            'latitude' => 45.8150,
+            'longitude' => 15.9819,
+            'radius_meters' => 100,
+            'geofence_mode' => \App\Enums\GeofenceMode::Warn,
+        ]);
+        $person->update(['location_id' => $location->id]);
+        $clock = app(ClockService::class);
+
+        $clock->punch($person->fresh(), $user, [
+            'type' => PunchType::In->value,
+            'channel' => ClockChannel::Pwa->value,
+            'occurred_at' => '2026-09-18 08:00:00',
+            'latitude' => 45.0,
+            'longitude' => 15.0,
+        ]);
+        $result = $clock->punch($person->fresh(), $user, [
+            'type' => PunchType::Out->value,
+            'channel' => ClockChannel::Pwa->value,
+            'occurred_at' => '2026-09-18 16:00:00',
+            'latitude' => 45.0,
+            'longitude' => 15.0,
+        ]);
+
+        $this->assertSame(\App\Enums\ExceptionCode::Geofence->value, $result['entry']->exception_code);
     }
 
     public function test_corrected_punch_replaces_original_in_rebuild(): void

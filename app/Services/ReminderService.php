@@ -26,6 +26,7 @@ class ReminderService
     public function __construct(
         private readonly ExpiryWarningService $expiries,
         private readonly OrganizationRbacService $rbac,
+        private readonly TimeCloseService $closer,
     ) {}
 
     public function runAll(): int
@@ -43,6 +44,8 @@ class ReminderService
 
     public function run(Organization $organization): int
     {
+        $this->closer->closeYesterday($organization);
+
         return $this->sendExpiries($organization)
             + $this->sendMissingOuts($organization)
             + $this->sendIncomplete($organization);

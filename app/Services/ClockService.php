@@ -8,12 +8,14 @@ use App\Enums\DeviceBindMode;
 use App\Enums\GeofenceMode;
 use App\Enums\PunchType;
 use App\Models\Location;
+use App\Models\Organization;
 use App\Models\Person;
 use App\Models\Punch;
 use App\Models\TimeEntry;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -290,6 +292,38 @@ class ClockService
             PunchType::BreakStart,
             PunchType::BreakEnd,
         ], true);
+    }
+
+    /**
+     * @param  iterable<int>  $personIds
+     * @return Collection<int, array{person: Person, punch: Punch}>
+     */
+    public function presentPeople(Organization $organization, iterable $personIds): Collection
+    {
+        $ids = collect($personIds)->filter()->map(fn ($id) => (int) $id)->unique()->values();
+        if ($ids->isEmpty()) {
+            return collect();
+        }
+
+        $latest = Punch::query()
+            ->forOrganization($organization)
+            ->with('person')
+            ->whereDoesntHave('corrections')
+            ->whereIn('person_id', $ids)
+            ->orderByDesc('occurred_at_device')
+            ->orderByDesc('id')
+            ->get()
+            ->unique('person_id')
+            ->filter(fn (Punch $punch) => in_array($punch->type, [
+                PunchType::In,
+                PunchType::BreakStart,
+                PunchType::BreakEnd,
+            ], true) && $punch->person !== null);
+
+        return $latest->values()->map(fn (Punch $punch) => [
+            'person' => $punch->person,
+            'punch' => $punch,
+        ]);
     }
 
     private function resolveType(Person $person, ?string $requested): PunchType

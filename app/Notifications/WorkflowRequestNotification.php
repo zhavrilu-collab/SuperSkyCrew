@@ -48,8 +48,8 @@ class WorkflowRequestNotification extends Notification
         };
 
         $url = $this->event === 'waiting'
-            ? url('/'.$request->organization->slug.'/odobrenja/'.$request->id)
-            : url('/'.$request->organization->slug.'/zahtjevi/'.$request->id);
+            ? route('organization.approvals.index', $request->organization->slug)
+            : route('organization.requests.show', [$request->organization->slug, $request]);
 
         return (new MailMessage)
             ->subject($subject)

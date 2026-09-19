@@ -10,6 +10,7 @@ use App\Enums\PunchType;
 use App\Models\Organization;
 use App\Models\OrganizationUser;
 use App\Models\Person;
+use App\Models\TimeEntry;
 use App\Models\User;
 use App\Services\ClockService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -237,6 +238,177 @@ class TimesheetTest extends TestCase
             ->assertSee('1')
             ->assertSee('Kadrovi')
             ->assertSee('Šihterica');
+    }
+
+    public function test_timesheet_filters_people_by_department(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+        $prodaja = \App\Models\Department::factory()->create([
+            'organization_id' => $organization->id,
+            'name' => 'Prodaja',
+            'code' => 'PRD',
+        ]);
+        $skladiste = \App\Models\Department::factory()->create([
+            'organization_id' => $organization->id,
+            'name' => 'Skladište',
+            'code' => 'SKL',
+        ]);
+        Person::factory()->create([
+            'organization_id' => $organization->id,
+            'first_name' => 'Ana',
+            'last_name' => 'Prodaja',
+            'status' => PersonStatus::Employee,
+            'department_id' => $prodaja->id,
+        ]);
+        Person::factory()->create([
+            'organization_id' => $organization->id,
+            'first_name' => 'Boris',
+            'last_name' => 'Skladistar',
+            'status' => PersonStatus::Employee,
+            'department_id' => $skladiste->id,
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('organization.timesheet.index', [$organization->slug, 'odjel' => $prodaja->id]))
+            ->assertOk()
+            ->assertSee('Svi odjeli')
+            ->assertSee('Ana Prodaja')
+            ->assertDontSee('Boris Skladistar');
+    }
+
+    public function test_owner_can_store_downtime_and_it_survives_rebuild(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+        $person = Person::factory()->create([
+            'organization_id' => $organization->id,
+            'status' => PersonStatus::Employee,
+        ]);
+        $day = now()->toDateString();
+
+        $this->actingAs($owner)
+            ->post(route('organization.timesheet.slog', [$organization->slug, $person, $day]), [
+                'downtime_minutes' => 45,
+                'field_work_minutes' => 120,
+                'standby_minutes' => 30,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('time_entries', [
+            'person_id' => $person->id,
+            'downtime_minutes' => 45,
+            'field_work_minutes' => 120,
+            'standby_minutes' => 30,
+        ]);
+
+        app(ClockService::class)->punch($person, $owner, [
+            'type' => PunchType::In->value,
+            'occurred_at' => now()->startOfDay()->addHours(8)->toDateTimeString(),
+            'channel' => ClockChannel::Manager->value,
+            'reason' => 'Prijava',
+        ]);
+
+        $this->assertDatabaseHas('time_entries', [
+            'person_id' => $person->id,
+            'downtime_minutes' => 45,
+            'field_work_minutes' => 120,
+            'standby_minutes' => 30,
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('organization.timesheet.day', [$organization->slug, $person, $day]))
+            ->assertOk()
+            ->assertSee('Zastoj, teren, pripravnost')
+            ->assertSee('45');
+    }
+
+    public function test_slog_does_not_wipe_existing_evidential_hours(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+        $person = Person::factory()->create([
+            'organization_id' => $organization->id,
+            'status' => PersonStatus::Employee,
+        ]);
+        $day = now()->toDateString();
+
+        TimeEntry::query()->create([
+            'organization_id' => $organization->id,
+            'person_id' => $person->id,
+            'work_date' => $day,
+            'evidential_minutes' => 90,
+            'evidential_code' => 'RD',
+            'evidential_manual' => true,
+            'status' => 'complete',
+        ]);
+
+        $this->actingAs($owner)
+            ->post(route('organization.timesheet.slog', [$organization->slug, $person, $day]), [
+                'downtime_minutes' => 20,
+                'field_work_minutes' => 0,
+                'standby_minutes' => 0,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('time_entries', [
+            'person_id' => $person->id,
+            'evidential_minutes' => 90,
+            'downtime_minutes' => 20,
+        ]);
+    }
+
+    public function test_inspection_csv_has_person_totals_and_can_hide_clock_bounds(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+        $person = Person::factory()->create([
+            'organization_id' => $organization->id,
+            'first_name' => 'Iva',
+            'last_name' => 'Babić',
+            'status' => PersonStatus::Employee,
+        ]);
+        app(ClockService::class)->punch($person, $owner, [
+            'type' => PunchType::In->value,
+            'occurred_at' => now()->startOfDay()->addHours(8)->toDateTimeString(),
+            'channel' => ClockChannel::Manager->value,
+            'reason' => 'Prijava',
+        ]);
+        app(ClockService::class)->punch($person, $owner, [
+            'type' => PunchType::Out->value,
+            'occurred_at' => now()->startOfDay()->addHours(16)->toDateTimeString(),
+            'channel' => ClockChannel::Manager->value,
+            'reason' => 'Odjava',
+        ]);
+
+        $csv = $this->actingAs($owner)
+            ->get(route('organization.timesheet.inspection-export', [
+                $organization->slug,
+                'from' => now()->toDateString(),
+                'to' => now()->toDateString(),
+            ]));
+        $csv->assertOk();
+        $body = $csv->streamedContent();
+        $this->assertStringContainsString('Zbirno po osobi', $body);
+        $this->assertStringContainsString('Iva Babić', $body);
+        $this->assertStringContainsString('Početak', $body);
+        $this->assertStringContainsString('Smjenski', $body);
+
+        $organization->update(['show_clock_bounds' => false]);
+
+        $this->actingAs($owner)
+            ->get(route('organization.timesheet.inspection', [
+                $organization->slug,
+                'from' => now()->toDateString(),
+                'to' => now()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertSee('Zbirno po osobi')
+            ->assertDontSee('>Početak</th>', false);
+
+        $hidden = $this->actingAs($owner)
+            ->get(route('organization.timesheet.inspection-export', [
+                $organization->slug,
+                'from' => now()->toDateString(),
+                'to' => now()->toDateString(),
+            ]));
+        $this->assertStringNotContainsString('Početak', $hidden->streamedContent());
     }
 
     /**

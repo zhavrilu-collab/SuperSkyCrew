@@ -228,6 +228,7 @@ class ReminderMailTest extends TestCase
             ->assertOk()
             ->assertSee('Obavijesti')
             ->assertSee('hr:reminders')
+            ->assertSee('hr:close-time')
             ->assertSee('Zaboravljena odjava')
             ->assertSee('Nekompletan slog')
             ->assertSee('Broj poslanih poruka danas: 0')

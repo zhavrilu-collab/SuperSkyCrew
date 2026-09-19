@@ -95,6 +95,27 @@ class ClockPunchTest extends TestCase
         ]);
     }
 
+    public function test_clock_api_route_accepts_json_punch(): void
+    {
+        [$user, $organization, $person] = $this->seedClockableEmployee();
+
+        $this->actingAs($user)
+            ->postJson(route('organization.clock.api', $organization->slug), [
+                'type' => PunchType::In->value,
+                'client_event_id' => '55555555-5555-4555-8555-555555555555',
+            ])
+            ->assertOk()
+            ->assertJsonPath('clocked_in', true)
+            ->assertJsonPath('next_type', PunchType::Out->value)
+            ->assertJsonPath('state', PunchType::In->value)
+            ->assertJsonPath('entry_status', 'draft');
+
+        $this->assertDatabaseHas('punches', [
+            'person_id' => $person->id,
+            'type' => PunchType::In->value,
+        ]);
+    }
+
     public function test_duplicate_client_event_id_does_not_create_second_punch(): void
     {
         [$user, $organization, $person] = $this->seedClockableEmployee();

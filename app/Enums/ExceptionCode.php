@@ -10,6 +10,9 @@ enum ExceptionCode: string
     case DailyRest = 'daily_rest';
     case MonthlyFund = 'monthly_fund';
     case Late = 'late';
+    case Geofence = 'geofence';
+    case HolidayWork = 'holiday_work';
+    case SundayWork = 'sunday_work';
 
     public function label(): string
     {
@@ -20,14 +23,17 @@ enum ExceptionCode: string
             self::DailyRest => 'Narušen dnevni odmor (12 h)',
             self::MonthlyFund => 'Odstupanje od mjesečnog fonda',
             self::Late => 'Kašnjenje vs plan',
+            self::Geofence => 'Prijava izvan zone',
+            self::HolidayWork => 'Rad na blagdan',
+            self::SundayWork => 'Rad u nedjelju',
         };
     }
 
     public function badgeClass(): string
     {
         return match ($this) {
-            self::MissingOut, self::Overlapping, self::OutWithoutIn => 'text-bg-danger',
-            self::DailyRest, self::Late => 'text-bg-warning',
+            self::MissingOut, self::Overlapping, self::OutWithoutIn, self::Geofence => 'text-bg-danger',
+            self::DailyRest, self::Late, self::HolidayWork, self::SundayWork => 'text-bg-warning',
             self::MonthlyFund => 'text-bg-info',
         };
     }

@@ -135,7 +135,10 @@ class ClockController extends Controller
                 ],
                 'clocked_in' => $this->clock->isClockedIn($person),
                 'next_type' => $this->clock->nextSuggestedType($person)->value,
+                'state' => $this->clock->currentState($person)?->value,
                 'geofence' => $result['geofence'],
+                'exception' => $result['entry']->exception_code,
+                'entry_status' => $result['entry']->status->value,
                 'total_minutes' => $result['entry']->total_minutes,
             ]);
         }

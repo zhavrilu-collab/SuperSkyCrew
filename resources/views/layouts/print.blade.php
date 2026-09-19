@@ -26,6 +26,8 @@
         .ispis-dokument h1 { color: var(--primarna-zelena); }
         .ispis-dokument .list-group-item { border-color: var(--tema-rub-tablica); }
         .sign { min-height: 80px; }
+        [data-qr] svg { width: 100%; height: auto; display: block; background: #fff; }
+        .qr-iskaznica, .qr-poster { width: 240px; padding: 12px; background: #fff; border: 1px solid var(--zlatna-tradicija); border-radius: 12px; }
         @media print {
             .no-print { display: none !important; }
             body { background: #fff !important; }
@@ -60,5 +62,6 @@
         @yield('content')
     </article>
 </main>
+@stack('scripts')
 </body>
 </html>

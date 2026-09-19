@@ -208,6 +208,9 @@
         <div class="col-md-3">
             <label class="form-label" for="clock_pin">PIN za kiosk</label>
             <input class="form-control" name="clock_pin" id="clock_pin" value="{{ old('clock_pin', $person->clock_pin) }}" maxlength="6" inputmode="numeric">
+            @if($person->exists && $person->isClockEligible())
+                <p class="form-text mb-0">QR iskaznica za kiosk: <a href="{{ route('organization.people.badge', [$organization->slug, $person]) }}">ispiši</a></p>
+            @endif
             @if($person->clock_device_id)
                 <div class="form-check mt-1">
                     <input class="form-check-input" type="checkbox" name="clock_device_reset" id="clock_device_reset" value="1">

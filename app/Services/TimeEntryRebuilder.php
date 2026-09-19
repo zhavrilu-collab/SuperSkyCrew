@@ -17,6 +17,7 @@ class TimeEntryRebuilder
 {
     public function __construct(
         private readonly ShiftResolver $shifts,
+        private readonly WorkFundService $fund,
     ) {}
 
     public function rebuild(Person $person, CarbonInterface $date): TimeEntry
@@ -46,6 +47,7 @@ class TimeEntryRebuilder
         $workSeconds = 0;
         $breakSeconds = 0;
         $nightSeconds = 0;
+        $closedIntervals = 0;
         $firstIn = null;
         $lastOut = null;
         $exception = null;
@@ -55,7 +57,7 @@ class TimeEntryRebuilder
 
             match ($punch->type) {
                 PunchType::In => $this->handleIn($at, $openIn, $firstIn, $exception),
-                PunchType::Out => $this->handleOut($at, $openIn, $workSeconds, $nightSeconds, $lastOut, $exception),
+                PunchType::Out => $this->handleOut($at, $openIn, $workSeconds, $nightSeconds, $lastOut, $closedIntervals, $exception),
                 PunchType::BreakStart => $openBreak = $at,
                 PunchType::BreakEnd => $this->handleBreakEnd($at, $openBreak, $breakSeconds),
             };
@@ -77,16 +79,23 @@ class TimeEntryRebuilder
         $totalMinutes = (int) round($netSeconds / 60);
         $nightMinutes = (int) round($nightSeconds / 60);
         $breakMinutes = (int) round($breakSeconds / 60);
-        $overtime = max(0, $totalMinutes - 480);
+        $dailyFund = $this->fund->dailyMinutes($person);
+        $overtime = max(0, $totalMinutes - $dailyFund);
         $approvedOvertime = (int) ($existing?->approved_overtime_minutes ?? 0);
         $overtime = max($overtime, $approvedOvertime);
         $sunday = $day->isSunday() ? $totalMinutes : 0;
         $holiday = CroatianHolidays::isHoliday($day) ? $totalMinutes : 0;
+        $splitMinutes = $closedIntervals >= 2 ? $totalMinutes : 0;
         $manual = (bool) ($existing?->evidential_manual);
         $defaultEvidential = (int) ($existing?->absence_minutes ?: $totalMinutes);
         $defaultCode = $existing?->absence_code ?: ($totalMinutes > 0 ? 'RD' : null);
 
+        if ($punches->contains(fn (Punch $punch) => $punch->geofence_result === 'fail')) {
+            $exception ??= ExceptionCode::Geofence->value;
+        }
+
         $exception ??= $this->dailyRestException($person, $firstIn);
+        $exception ??= $this->specialDayException($day, $totalMinutes);
         $exception ??= $this->monthlyFundException($person, $day, $totalMinutes, $existing?->id);
         $exception ??= $late;
 
@@ -118,15 +127,17 @@ class TimeEntryRebuilder
             'started_at' => $firstIn,
             'ended_at' => $lastOut,
             'break_minutes' => $breakMinutes,
-            'downtime_minutes' => 0,
+            'downtime_minutes' => (int) ($existing?->downtime_minutes ?? 0),
             'total_minutes' => $totalMinutes,
-            'field_work_minutes' => 0,
-            'standby_minutes' => 0,
+            'field_work_minutes' => (int) ($existing?->field_work_minutes ?? 0),
+            'standby_minutes' => (int) ($existing?->standby_minutes ?? 0),
             'night_minutes' => $nightMinutes,
             'overtime_minutes' => $overtime,
             'approved_overtime_minutes' => $approvedOvertime,
             'sunday_minutes' => $sunday,
             'holiday_minutes' => $holiday,
+            'split_shift_minutes' => $splitMinutes,
+            'shift_minutes' => ($shift?->is_shift && $totalMinutes > 0) ? $totalMinutes : 0,
             'evidential_minutes' => $manual ? (int) $existing->evidential_minutes : $defaultEvidential,
             'evidential_manual' => $manual,
             'evidential_code' => $manual ? $existing->evidential_code : $defaultCode,
@@ -171,6 +182,7 @@ class TimeEntryRebuilder
         int &$workSeconds,
         int &$nightSeconds,
         ?Carbon &$lastOut,
+        int &$closedIntervals,
         ?string &$exception,
     ): void {
         if ($openIn === null) {
@@ -183,6 +195,7 @@ class TimeEntryRebuilder
         $nightSeconds += $this->nightSeconds($openIn, $at);
         $lastOut = $at;
         $openIn = null;
+        $closedIntervals++;
     }
 
     private function handleBreakEnd(Carbon $at, ?Carbon &$openBreak, int &$breakSeconds): void
@@ -260,7 +273,7 @@ class TimeEntryRebuilder
             ->when($existingId, fn ($query) => $query->where('id', '!=', $existingId))
             ->sum('total_minutes');
 
-        $expected = $expectedDays * 480;
+        $expected = $expectedDays * $this->fund->dailyMinutes($person);
 
         return ($prior + $todayMinutes) > $expected ? ExceptionCode::MonthlyFund->value : null;
     }
@@ -274,5 +287,18 @@ class TimeEntryRebuilder
         $limit = $plannedStart->copy()->addMinutes(ShiftResolver::LATE_GRACE_MINUTES);
 
         return $firstIn->gt($limit) ? ExceptionCode::Late->value : null;
+    }
+
+    private function specialDayException(Carbon $day, int $totalMinutes): ?string
+    {
+        if ($totalMinutes <= 0) {
+            return null;
+        }
+
+        if (CroatianHolidays::isHoliday($day)) {
+            return ExceptionCode::HolidayWork->value;
+        }
+
+        return $day->isSunday() ? ExceptionCode::SundayWork->value : null;
     }
 }

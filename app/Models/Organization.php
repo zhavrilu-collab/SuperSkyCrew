@@ -33,6 +33,8 @@ class Organization extends Model
         'expiry_warning_days',
         'annual_leave_base_days',
         'annual_leave_days_per_child',
+        'period_lock_day',
+        'show_clock_bounds',
     ];
 
     protected function casts(): array
@@ -45,6 +47,8 @@ class Organization extends Model
             'expiry_warning_days' => 'integer',
             'annual_leave_base_days' => 'integer',
             'annual_leave_days_per_child' => 'integer',
+            'period_lock_day' => 'integer',
+            'show_clock_bounds' => 'boolean',
         ];
     }
 

@@ -7,6 +7,7 @@
     <a href="{{ route('organization.timesheet.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}" class="small">← Šihterica</a>
     <div class="d-flex gap-2">
         <a class="btn btn-outline-primary" href="{{ route('organization.handovers.index', $organization->slug) }}">Predaja (čl. 5.)</a>
+        <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.inspection-export', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}">Excel (CSV)</a>
         <button class="btn btn-primary" type="button" onclick="window.print()">Ispiši</button>
     </div>
 @endsection
@@ -26,23 +27,79 @@
         <dd class="col-sm-9">{{ $exporter->name }} · {{ $exportedAt->timezone(config('app.timezone'))->format('d.m.Y. H:i') }}</dd>
     </dl>
 
+    <h2 class="h6">Zbirno po osobi</h2>
+    <div class="table-responsive table-responsive-no-sticky mb-4">
+        <table class="table table-sm table-bordered mb-0">
+            <thead>
+                <tr>
+                    <th>Osoba</th>
+                    <th>Dani</th>
+                    <th>Ukupno h</th>
+                    <th>Evid. h</th>
+                    <th>Zastoj</th>
+                    <th>Teren</th>
+                    <th>Pripr.</th>
+                    <th>Dvokr.</th>
+                    <th>Smjen.</th>
+                    <th>Noć</th>
+                    <th>Prekovr.</th>
+                    <th>Nedj.</th>
+                    <th>Blagdan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($summaries as $summary)
+                    <tr>
+                        <td>{{ $summary['name'] }}</td>
+                        <td>{{ $summary['days'] }}</td>
+                        <td>{{ number_format($summary['total_minutes'] / 60, 1) }}</td>
+                        <td>{{ number_format($summary['evidential_minutes'] / 60, 1) }}</td>
+                        <td>{{ $summary['downtime_minutes'] }}</td>
+                        <td>{{ $summary['field_work_minutes'] }}</td>
+                        <td>{{ $summary['standby_minutes'] }}</td>
+                        <td>{{ $summary['split_shift_minutes'] }}</td>
+                        <td>{{ $summary['shift_minutes'] }}</td>
+                        <td>{{ $summary['night_minutes'] }}</td>
+                        <td>{{ $summary['overtime_minutes'] }}</td>
+                        <td>{{ $summary['sunday_minutes'] }}</td>
+                        <td>{{ $summary['holiday_minutes'] }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="13" class="text-muted">Nema slogova u odabranom razdoblju.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="h6">Dnevni slog</h2>
     <div class="table-responsive table-responsive-no-sticky mb-4">
         <table class="table table-sm table-bordered mb-0">
             <thead>
                 <tr>
                     <th>Osoba</th>
                     <th>Datum</th>
-                    <th>Početak</th>
-                    <th>Završetak</th>
+                    @if($showBounds)
+                        <th>Početak</th>
+                        <th>Završetak</th>
+                    @endif
                     <th>Ukupno min</th>
                     <th>Pauza</th>
+                    <th>Zastoj</th>
+                    <th>Teren</th>
+                    <th>Pripr.</th>
+                    <th>Dvokr.</th>
+                    <th>Smjen.</th>
                     <th>Noć</th>
                     <th>Prekovr.</th>
                     <th>Nedj.</th>
                     <th>Blagdan</th>
                     <th>Odsutnost</th>
                     <th>Ods. min</th>
+                    <th>Šifra</th>
                     <th>Evid. min</th>
+                    <th>MT</th>
                     <th>Status</th>
                     <th>Iznimka</th>
                 </tr>
@@ -56,7 +113,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="15" class="text-muted">Nema slogova u odabranom razdoblju.</td>
+                        <td colspan="{{ $showBounds ? 22 : 20 }}" class="text-muted">Nema slogova u odabranom razdoblju.</td>
                     </tr>
                 @endforelse
             </tbody>

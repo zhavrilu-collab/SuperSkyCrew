@@ -48,6 +48,7 @@ class PeopleDirectoryTest extends TestCase
             'status' => PersonStatus::Employee->value,
             'job_title' => 'Knjigovođa',
         ]);
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{16}$/', (string) $person->clock_qr);
 
         $this->actingAs($owner)
             ->get(route('organization.people.index', $organization->slug))

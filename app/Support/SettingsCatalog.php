@@ -65,7 +65,7 @@ class SettingsCatalog
     {
         return match ($tab) {
             self::TAB_KADAR => 'Vrste dokumenata, predlošci akata, pragovi isteka, zadržavanje dosjea i volonteri.',
-            self::TAB_VRIJEME => 'Šifrarnik sati, smjene, kalendari, lokacije/kanali, politika GO i e-mail podsjetnici.',
+            self::TAB_VRIJEME => 'Šifrarnik sati, smjene, kalendari, lokacije/kanali, politika GO, zaključavanje i e-mail podsjetnici.',
             self::TAB_ODOBRENJA => 'Definicije radnih slijedova i tablica koraka odobrenja.',
             self::TAB_PRISTUP => 'Korisnici aplikacije, pozivnice i prava po ulogama.',
             self::TAB_PODACI => 'Izvoz i uvoz kadra, šihterica, inspekcijski paket i revizijski trag.',
@@ -98,6 +98,7 @@ class SettingsCatalog
                 'kalendari' => 'Kalendari',
                 'lokacije' => 'Lokacije i kanali',
                 'go-politika' => 'GO politika',
+                'zakljucavanje' => 'Zaključavanje',
                 'obavijesti' => 'Obavijesti',
             ],
             self::TAB_ODOBRENJA => [

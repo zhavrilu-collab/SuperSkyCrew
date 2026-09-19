@@ -12,6 +12,7 @@
     <div class="d-flex gap-2">
         <a class="btn btn-outline-secondary" href="{{ route('organization.timesheet.mine', [$organization->slug, 'from' => $prev->toDateString()]) }}">← Prethodni</a>
         <a class="btn btn-outline-secondary" href="{{ route('organization.timesheet.mine', [$organization->slug, 'from' => $next->toDateString()]) }}">Sljedeći →</a>
+        <a class="btn btn-outline-primary" href="{{ route('organization.timesheet.mine', [$organization->slug, 'from' => $from->toDateString(), 'ispis' => 1]) }}">Ispiši</a>
     </div>
 </div>
 
