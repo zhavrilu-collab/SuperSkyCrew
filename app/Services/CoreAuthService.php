@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Exceptions\PlatformTwoFactorRequiredException;
 use App\Models\User;
+use App\Support\AdminConsoleHttp;
 use App\Support\CoreApiUrl;
 use App\Support\CoreAuthSession;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 
 class CoreAuthService
@@ -21,7 +21,7 @@ class CoreAuthService
      */
     public function registerWithCredentials(string $name, string $email, string $password, ?string $passwordConfirmation = null): array
     {
-        $response = Http::acceptJson()
+        $response = AdminConsoleHttp::client()
             ->timeout(8)
             ->post(CoreApiUrl::endpoint('/auth/register'), [
                 'name' => $name,
@@ -68,7 +68,7 @@ class CoreAuthService
      */
     public function loginWithCredentials(string $email, string $password): array
     {
-        $response = Http::acceptJson()
+        $response = AdminConsoleHttp::client()
             ->timeout(8)
             ->post(CoreApiUrl::endpoint('/auth/login'), [
                 'email' => $email,
@@ -158,8 +158,7 @@ class CoreAuthService
             return;
         }
 
-        Http::withToken($token)
-            ->acceptJson()
+        AdminConsoleHttp::client($token)
             ->timeout(5)
             ->post(CoreApiUrl::endpoint('/auth/logout'));
     }

@@ -18,6 +18,19 @@ return Application::configure(basePath: dirname(__DIR__))
             'clock.actor' => \App\Http\Middleware\EnsureClockActor::class,
             'terminal' => \App\Http\Middleware\EnsureTerminalLocation::class,
         ]);
+
+        $middleware->append([
+            \App\Http\Middleware\ForceHttps::class,
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
+
+        $trustedProxies = env('TRUSTED_PROXIES');
+
+        if (is_string($trustedProxies) && $trustedProxies !== '') {
+            $middleware->trustProxies(
+                at: $trustedProxies === '*' ? '*' : array_map('trim', explode(',', $trustedProxies)),
+            );
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

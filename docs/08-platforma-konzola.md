@@ -56,7 +56,7 @@ Identity: Core platform login, kao udruga/SMB. Clock PWA koristi isti identitet 
 3. Uloge zamijeniti HR ulogama (vlasnik, HR, računovodstvo, voditelj, radnik).
 4. Zatim domena: people, punch, time entries, leave, workflow.
 
-Lokalno SQLite kao ostali moduli; produkcija Postgres.
+Lokalno SQLite kao ostali moduli; produkcija MySQL na istom VPS-u kao udruga-saas.
 
 Back-office: Blade + Bootstrap 5 + Alpine.
 

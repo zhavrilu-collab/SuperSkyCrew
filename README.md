@@ -24,3 +24,13 @@ C:\xampp\php\php.exe artisan serve --host=127.0.0.1 --port=8004
 - Lozinka: `password`
 
 U `.env` za lokalni login bez redirecta na konzolu: `IDENTITY_CORE_AUTH_ENABLED=false` i `IDENTITY_UNIFIED_LOGIN_ENABLED=false`.
+
+## Produkcija
+
+Isti VPS kao Udruga SaaS i konzola. Checklist: [`DEPLOY.md`](DEPLOY.md).
+
+| | |
+|---|---|
+| URL | https://hr.superskytech.com |
+| Put | `/var/www/hr-saas` |
+| Deploy | `bash /home/ubuntu/bin/deploy-hr-from-git.sh` |
