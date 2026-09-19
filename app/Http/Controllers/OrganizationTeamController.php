@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OrganizationRole;
-use App\Models\Organization;
 use App\Models\OrganizationUser;
 use App\Models\StaffInvite;
 use App\Services\OrganizationRbacService;
@@ -11,7 +10,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 class OrganizationTeamController extends Controller
 {
@@ -19,29 +17,15 @@ class OrganizationTeamController extends Controller
         private readonly OrganizationRbacService $rbac,
     ) {}
 
-    public function index(string $slug): View
+    public function index(string $slug): RedirectResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'team.manage');
 
-        $members = OrganizationUser::query()
-            ->with('user')
-            ->where('organization_id', $organization->id)
-            ->orderBy('role')
-            ->get();
-
-        $pendingInvites = StaffInvite::query()
-            ->where('organization_id', $organization->id)
-            ->whereNull('accepted_at')
-            ->where('expires_at', '>', now())
-            ->orderByDesc('created_at')
-            ->get();
-
-        return view('organization.team', [
-            'organization' => $organization,
-            'members' => $members,
-            'pendingInvites' => $pendingInvites,
-            'roles' => OrganizationRole::cases(),
+        return redirect()->route('organization.settings.index', [
+            'slug' => $organization->slug,
+            'tab' => 'pristup',
+            'section' => 'korisnici',
         ]);
     }
 

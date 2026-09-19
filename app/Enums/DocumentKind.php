@@ -10,6 +10,7 @@ enum DocumentKind: string
     case EmploymentContract = 'uor';
     case ContractAnnex = 'aneks';
     case MedicalReferral = 'uputnica';
+    case OtherFoRecord = 'evidencija_fo';
     case Other = 'ostalo';
 
     public function label(): string
@@ -21,6 +22,7 @@ enum DocumentKind: string
             self::EmploymentContract => 'Ugovor o radu',
             self::ContractAnnex => 'Aneks ugovora',
             self::MedicalReferral => 'Uputnica za liječnički',
+            self::OtherFoRecord => 'Evidencija drugih FO (čl. 10.)',
             self::Other => 'Ostalo',
         };
     }

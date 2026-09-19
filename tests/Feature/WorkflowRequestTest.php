@@ -64,6 +64,10 @@ class WorkflowRequestTest extends TestCase
         ]);
         $this->assertSame(2, TimeEntry::query()->where('person_id', $person->id)->where('absence_code', 'GO')->count());
         $this->assertSame(18, app(LeaveService::class)->snapshot($person->fresh(), 2026)['remaining']);
+        $this->assertDatabaseHas('person_documents', [
+            'person_id' => $person->id,
+            'title' => 'GO-'.$zahtjev->id.'/2026',
+        ]);
 
         $this->actingAs($owner)
             ->get(route('organization.timesheet.index', [

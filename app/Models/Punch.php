@@ -6,6 +6,7 @@ use App\Enums\ClockChannel;
 use App\Enums\PunchType;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Punch extends OrganizationModel
 {
@@ -20,10 +21,14 @@ class Punch extends OrganizationModel
         'occurred_at_device',
         'occurred_at_server',
         'device_id',
+        'client_ip',
+        'photo_path',
+        'photo_taken_at',
         'latitude',
         'longitude',
         'gps_accuracy',
         'geofence_result',
+        'device_result',
         'offline',
         'client_event_id',
         'reason',
@@ -41,6 +46,7 @@ class Punch extends OrganizationModel
             'latitude' => 'float',
             'longitude' => 'float',
             'offline' => 'boolean',
+            'photo_taken_at' => 'datetime',
             'raw_payload' => 'array',
         ];
     }
@@ -73,5 +79,26 @@ class Punch extends OrganizationModel
     public function isCorrection(): bool
     {
         return $this->correction_of_id !== null;
+    }
+
+    public function hasPhoto(): bool
+    {
+        return filled($this->photo_path);
+    }
+
+    public function deletePhoto(): void
+    {
+        if ($this->photo_path) {
+            Storage::disk('local')->delete($this->photo_path);
+        }
+        $this->forceFill([
+            'photo_path' => null,
+            'photo_taken_at' => null,
+        ])->save();
+    }
+
+    public function deviceMismatch(): bool
+    {
+        return $this->device_result === 'mismatch';
     }
 }

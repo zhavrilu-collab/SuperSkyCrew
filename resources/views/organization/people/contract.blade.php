@@ -1,36 +1,21 @@
-<!DOCTYPE html>
-<html lang="hr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ugovor o radu {{ $number }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background: #fff; }
-            a { text-decoration: none; color: inherit; }
-        }
-        .doc { max-width: 720px; }
-        .sign { min-height: 80px; }
-    </style>
-</head>
-<body class="bg-light">
-<div class="container py-4 doc">
-    <div class="d-flex justify-content-between mb-4 no-print">
-        @if(app(\App\Services\OrganizationRbacService::class)->can($organization->id, auth()->id(), 'people.access'))
-            <a href="{{ route('organization.people.edit', [$organization->slug, $person]) }}" class="small">← Kartica</a>
-        @else
-            <a href="{{ route('organization.people.review', [$organization->slug, $person]) }}" class="small">← Pisani pregled</a>
-        @endif
-        <button class="btn btn-primary" type="button" onclick="window.print()">Ispiši</button>
-    </div>
+@extends('layouts.print')
 
-    <p class="text-muted mb-1">{{ $organization->name }}@if($organization->oib) · OIB {{ $organization->oib }}@endif</p>
-    <p class="text-end">Klasa: {{ $number }}<br>
+@section('title', 'Ugovor o radu '.$number)
+
+@section('toolbar')
+    @if(app(\App\Services\OrganizationRbacService::class)->can($organization->id, auth()->id(), 'people.access'))
+        <a href="{{ route('organization.people.edit', [$organization->slug, $person]) }}" class="small">← Kartica</a>
+    @else
+        <a href="{{ route('organization.people.review', [$organization->slug, $person]) }}" class="small">← Pisani pregled</a>
+    @endif
+    <button class="btn btn-primary" type="button" onclick="window.print()">Ispiši</button>
+@endsection
+
+@section('content')
+    <p class="text-end mb-1">Klasa: {{ $number }}<br>
         {{ $issuedAt->timezone(config('app.timezone'))->format('d.m.Y.') }}@if($organization->city) · {{ $organization->city }}@endif</p>
 
-    <h1 class="h4 text-center mt-4 mb-4">{{ $printTitle }}</h1>
+    <h1 class="h4 text-center mt-3 mb-4">{{ $printTitle }}</h1>
 
     <p>sklopljen između:</p>
     <p><strong>Poslodavac:</strong> {{ $organization->name }}@if($organization->oib), OIB {{ $organization->oib }}@endif
@@ -48,15 +33,10 @@
         Odjel: <strong>{{ $person->department?->name ?: 'nije dodijeljen' }}</strong>.</p>
 
     <h2 class="h6">Članak 2. Trajanje i početak rada</h2>
-    <p>{{ $durationText }}
-        {{ $trialText }}
-    </p>
+    <p>{{ $durationText }} {{ $trialText }}</p>
 
     <h2 class="h6">Članak 3. Radno vrijeme</h2>
-    <p>
-        {{ $hoursText }}
-        Evidencija radnog vremena vodi se prema Pravilniku NN 55/2024.
-    </p>
+    <p>{{ $hoursText }} Evidencija radnog vremena vodi se prema Pravilniku NN 55/2024.</p>
 
     <h2 class="h6">Članak 4. Godišnji odmor</h2>
     <p>Fond godišnjeg odmora iznosi <strong>{{ $person->annual_leave_days ?? 20 }}</strong> radnih dana u kalendarskoj godini, ako posebni uvjeti ili kolektivni ugovor ne određuju više.</p>
@@ -81,6 +61,4 @@
             <div class="small">{{ $issuer->name }}</div>
         </div>
     </div>
-</div>
-</body>
-</html>
+@endsection

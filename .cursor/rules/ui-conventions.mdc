@@ -1,0 +1,36 @@
+---
+description: HR chrome i IA — landing, navbar, hamburger, Postavke, Blade komponente
+globs: resources/views/**/*.blade.php,public/js/**/*.js,app/Support/{SettingsCatalog,OrganizationThemes}.php
+alwaysApply: false
+---
+
+# HR chrome i informacijska arhitektura
+
+Stack: **Blade + Bootstrap 5.3 CDN**. Bez Alpine/Tailwind za UI.
+
+## Landing (`organization/landing`) — SAMOSTALNA stranica
+
+Kao udruga-saas: **nema** org navbara / hamburgera. Struktura:
+
+1. Bijeli `.top-bar` (~52px): avatar, e-mail · uloga, Odjava
+2. Zeleni `.hero` (gradient 135deg, **3px zlatni** donji rub): naziv org + „odaberite modul”
+3. Kartice **2 reda × 3** (`.col-md-4`), max-width ~960px
+4. Footer
+
+Ikone (isti ritam kao udruga, emoji): Pregled 📊, **Kadrovi** 👥, Vrijeme ⏱, Moje 🙋, Odobrenja ✅, Postavke ⚙. Badge **Aktivno**. Radnik: Pregled, Moje, Moj tjedan, Zahtjevi — bez Kadra/šihterice/Postavki.
+
+## Org navbar (`layouts/organization`) — ostale stranice
+
+Jedini stalni elementi: brand `NAZIV ORG - Modul` (uppercase prefix), user chip, Odjava, hamburger. **Nema** trake od 12 linkova. Clock je u **Moje**, ne kao gumb u headeru.
+
+Hamburger: Pregled · Kadrovi (evidencija, isteci, predaje, Struktura→Postavke ustroj, Postavke) · Vrijeme (šihterica, plan tjedna, iznimke, inspekcija, Postavke) · Moje · Odobrenja+Postavke · Postavke tabovi. Modulska stavka **Postavke** uvijek otvara isti tab kataloga.
+
+`@section('nav-suffix')` = putanja (npr. `Kadrovi`, `Postavke - Organizacija`). Naziv modula kadra: **Kadrovi**, ne Kadar.
+
+## Postavke `/{slug}/postavke?tab=&section=`
+
+Jedna `.kartica-kontejner`: gornji tabovi + pill sekcije. Katalog: `SettingsCatalog`. Tim i Ustroj žive ovdje (GET `/tim` i `/struktura` redirectaju). Plan tjedna ostaje u Vrijeme; CRUD smjena/kalendara u Postavkama.
+
+## Operativni ekrani
+
+Page heading (`h1` + muted opis + toolbar desno) + `.kartica-kontejner` + sticky tablica. Clock/kiosk ostaju tamni touch; `theme-color` i punch gumb na `--primarna-zelena`.

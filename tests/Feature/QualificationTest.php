@@ -29,7 +29,7 @@ class QualificationTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->get(route('organization.people.edit', [$organization->slug, $person]))
+            ->get(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'kvalifikacije']))
             ->assertOk()
             ->assertSee('Obrazovanje i certifikati');
 
@@ -42,7 +42,7 @@ class QualificationTest extends TestCase
                 'expires_at' => now()->addDays(8)->toDateString(),
                 'required_for_job' => '1',
             ])
-            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person]));
+            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'kvalifikacije']));
 
         $this->assertDatabaseHas('person_qualifications', [
             'person_id' => $person->id,
@@ -103,7 +103,7 @@ class QualificationTest extends TestCase
 
         $this->actingAs($owner)
             ->delete(route('organization.qualifications.destroy', [$organization->slug, $person, $item]))
-            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person]));
+            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'kvalifikacije']));
 
         $this->assertDatabaseMissing('person_qualifications', ['id' => $item->id]);
     }

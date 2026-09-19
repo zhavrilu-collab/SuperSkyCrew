@@ -26,4 +26,9 @@ class Workflow extends OrganizationModel
     {
         return $this->hasMany(WorkflowRequest::class);
     }
+
+    public function steps(): HasMany
+    {
+        return $this->hasMany(WorkflowStep::class)->orderBy('position');
+    }
 }

@@ -1,12 +1,15 @@
 @extends('layouts.organization')
 
 @section('title', 'Novi zahtjev')
+@section('nav-suffix', 'Moje')
 
 @section('content')
-<h1 class="h4 mb-1">Novi zahtjev</h1>
-<p class="text-muted mb-4">{{ $person->fullName() }} · GO preostalo {{ $leave['remaining'] }} dana (staro {{ $leave['remaining_old'] }} / novo {{ $leave['remaining_new'] }})</p>
+<div class="page-heading">
+    <h1>Novi zahtjev</h1>
+    <p class="text-muted mb-0">{{ $person->fullName() }} · GO preostalo {{ $leave['remaining'] }} dana (staro {{ $leave['remaining_old'] }} / novo {{ $leave['remaining_new'] }})</p>
+</div>
 
-<form method="POST" action="{{ route('organization.requests.store', $organization->slug) }}" class="card border-0 shadow-sm" id="request-form">
+<form method="POST" action="{{ route('organization.requests.store', $organization->slug) }}" class="kartica-kontejner" id="request-form">
     @csrf
     <div class="card-body">
         @if($errors->any())
@@ -106,9 +109,9 @@
             </div>
         </div>
     </div>
-    <div class="card-footer bg-white d-flex gap-2">
-        <button class="btn btn-primary" type="submit">Pošalji na odobrenje</button>
+    <div class="forma-podnozje">
         <a class="btn btn-outline-secondary" href="{{ route('organization.requests.index', $organization->slug) }}">Odustani</a>
+        <button class="btn btn-primary" type="submit">Pošalji na odobrenje</button>
     </div>
 </form>
 <script>

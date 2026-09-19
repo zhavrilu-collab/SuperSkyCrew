@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AuditAction;
 use App\Enums\TimeEntryStatus;
 use App\Models\Organization;
 use App\Models\PeriodLock;
@@ -14,6 +15,9 @@ use Illuminate\Validation\ValidationException;
 
 class PeriodLockService
 {
+    public function __construct(
+        private readonly AuditService $audit,
+    ) {}
     public function isLocked(int $organizationId, CarbonInterface|string $date): bool
     {
         $day = Carbon::parse($date);
@@ -74,13 +78,26 @@ class PeriodLockService
             ->whereDate('work_date', '<=', $to->toDateString())
             ->update(['status' => TimeEntryStatus::Locked->value]);
 
-        return PeriodLock::query()->create([
+        $lock = PeriodLock::query()->create([
             'organization_id' => $organization->id,
             'year' => $year,
             'month' => $month,
             'locked_by_user_id' => $actor->id,
             'locked_at' => now(),
         ]);
+
+        $this->audit->record(
+            $organization,
+            AuditAction::PeriodLock,
+            $actor,
+            'Zaključano razdoblje '.$lock->label(),
+            null,
+            PeriodLock::class,
+            $lock->id,
+            ['year' => $year, 'month' => $month],
+        );
+
+        return $lock;
     }
 
     public function forMonth(Organization $organization, int $year, int $month): ?PeriodLock

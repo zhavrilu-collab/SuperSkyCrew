@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditAction;
 use App\Enums\DocumentKind;
 use App\Models\DocumentHandover;
 use App\Models\Person;
+use App\Services\AuditService;
 use App\Services\OrganizationRbacService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +18,7 @@ class DocumentHandoverController extends Controller
 {
     public function __construct(
         private readonly OrganizationRbacService $rbac,
+        private readonly AuditService $audit,
     ) {}
 
     public function index(): View
@@ -61,7 +64,7 @@ class DocumentHandoverController extends Controller
             $data['person_id'] = null;
         }
 
-        DocumentHandover::query()->create([
+        $handover = DocumentHandover::query()->create([
             'organization_id' => $organization->id,
             'person_id' => $data['person_id'] ?? null,
             'recorded_by_user_id' => Auth::id(),
@@ -71,6 +74,21 @@ class DocumentHandoverController extends Controller
             'document_kind' => $data['document_kind'],
             'notes' => $data['notes'] ?? null,
         ]);
+
+        $person = $handover->person_id
+            ? Person::query()->find($handover->person_id)
+            : null;
+        $kind = \App\Enums\DocumentKind::tryFrom((string) $data['document_kind']);
+        $this->audit->record(
+            $organization,
+            AuditAction::Handover,
+            $request->user(),
+            'Predaja: '.($kind?->label() ?? $data['document_kind']).' → '.$data['recipient'].' ('.$data['purpose'].')',
+            $person,
+            DocumentHandover::class,
+            $handover->id,
+            ['recipient' => $data['recipient'], 'purpose' => $data['purpose']],
+        );
 
         return back()->with('status', 'Predaja je zabilježena.');
     }

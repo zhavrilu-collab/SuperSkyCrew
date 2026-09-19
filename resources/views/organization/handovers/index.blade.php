@@ -1,16 +1,17 @@
 @extends('layouts.organization')
 
 @section('title', 'Predaje dokumenata')
+@section('nav-suffix', 'Kadrovi')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-        <h1 class="h4 mb-1">Predaja ovlaštenoj osobi</h1>
+    <div class="page-heading mb-0">
+        <h1>Predaja ovlaštenoj osobi</h1>
         <p class="text-muted mb-0">Evidencija preuzimanja pisanog dokumenta (čl. 5. st. 5.–6.).</p>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm mb-4">
+<div class="kartica-kontejner mb-4">
     <div class="card-header bg-white fw-semibold">Nova predaja</div>
     <div class="card-body">
         <form method="POST" action="{{ route('organization.handovers.store', $organization->slug) }}" class="row g-3">
@@ -55,7 +56,7 @@
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="kartica-kontejner">
     <div class="table-responsive">
         <table class="table mb-0 align-middle">
             <thead>

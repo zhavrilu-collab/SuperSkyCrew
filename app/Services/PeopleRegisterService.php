@@ -80,7 +80,7 @@ class PeopleRegisterService
     {
         return [
             'Rbr', 'Prezime', 'Ime', 'OIB', 'Spol', 'Datum rođenja', 'Državljanstvo',
-            'Prebivalište', 'Status', 'Radno mjesto', 'Odjel', 'Mjesto troška', 'Lokacija',
+            'Prebivalište', 'Status', 'Vrsta FO', 'Naziv akta', 'Ustupitelj', 'Radno mjesto', 'Odjel', 'Mjesto troška', 'Lokacija',
             'Vrsta ugovora', 'Početak', 'Prestanak', 'Prijava na osiguranja',
         ];
     }
@@ -100,10 +100,11 @@ class PeopleRegisterService
     /**
      * @return list<list<string>>
      */
-    public function payrollRows(Collection $people): array
+    public function payrollRows(Collection $people, Carbon $on): array
     {
         $rows = [];
         foreach ($people as $person) {
+            $assignment = $person->assignmentOn($on);
             $rows[] = [
                 $person->last_name,
                 $person->first_name,
@@ -117,8 +118,8 @@ class PeopleRegisterService
                 $person->tax_relief_note ?: '',
                 $person->family_right?->label() ?: '',
                 $person->znr_exam_required ? 'da' : 'ne',
-                $person->jobLabel(),
-                $person->costCenter?->summary() ?: '',
+                $assignment?->jobLabel() ?: $person->jobLabel(),
+                $assignment?->costCenter?->summary() ?: ($person->costCenter?->summary() ?: ''),
             ];
         }
 
@@ -128,11 +129,12 @@ class PeopleRegisterService
     /**
      * @return list<list<string>>
      */
-    public function csvRows(Collection $people): array
+    public function csvRows(Collection $people, Carbon $on): array
     {
         $rows = [];
         $i = 1;
         foreach ($people as $person) {
+            $assignment = $person->assignmentOn($on);
             $rows[] = [
                 (string) $i++,
                 $person->last_name,
@@ -142,11 +144,14 @@ class PeopleRegisterService
                 $person->date_of_birth?->format('d.m.Y.') ?: '',
                 $person->citizenship ?: '',
                 $person->residence ?: '',
-                $person->status->label(),
-                $person->jobLabel(),
-                $person->department?->name ?: '',
-                $person->costCenter?->summary() ?: '',
-                $person->location?->name ?: '',
+                $assignment?->status->label() ?: $person->status->label(),
+                $person->fo_kind?->label() ?: '',
+                $person->instrument_title ?: '',
+                $person->host_employer ?: '',
+                $assignment?->jobLabel() ?: $person->jobLabel(),
+                $assignment?->department?->name ?: ($person->department?->name ?: ''),
+                $assignment?->costCenter?->summary() ?: ($person->costCenter?->summary() ?: ''),
+                $assignment?->location?->name ?: ($person->location?->name ?: ''),
                 $person->contract_type?->label() ?: '',
                 $person->started_at?->format('d.m.Y.') ?: '',
                 $person->ended_at?->format('d.m.Y.') ?: '',
@@ -164,7 +169,7 @@ class PeopleRegisterService
     {
         return Person::query()
             ->forOrganization($organization)
-            ->with(['department', 'jobPosition', 'location', 'costCenter'])
+            ->with(['department', 'jobPosition', 'location', 'costCenter', 'engagements.department', 'engagements.jobPosition', 'engagements.location', 'engagements.costCenter'])
             ->whereIn('status', $this->registerStatuses());
     }
 }

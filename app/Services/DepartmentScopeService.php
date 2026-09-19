@@ -55,12 +55,28 @@ class DepartmentScopeService
      */
     public function managedDepartmentIds(Organization $organization, int $userId): array
     {
-        return Department::query()
+        $direct = Department::query()
             ->forOrganization($organization)
             ->where('manager_user_id', $userId)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->all();
+        $all = Department::query()->forOrganization($organization)->get(['id', 'parent_id']);
+        $ids = $direct;
+        $changed = true;
+        while ($changed) {
+            $changed = false;
+            foreach ($all as $department) {
+                $id = (int) $department->id;
+                $parentId = $department->parent_id ? (int) $department->parent_id : null;
+                if ($parentId !== null && in_array($parentId, $ids, true) && ! in_array($id, $ids, true)) {
+                    $ids[] = $id;
+                    $changed = true;
+                }
+            }
+        }
+
+        return $ids;
     }
 
     public function canManagePerson(Person $person, int $userId): bool
@@ -123,6 +139,7 @@ class DepartmentScopeService
 
         return JobPosition::query()
             ->forOrganization($organization)
+            ->with('department')
             ->where(function (Builder $query) use ($day) {
                 $query->whereNull('valid_from')->orWhereDate('valid_from', '<=', $day);
             })

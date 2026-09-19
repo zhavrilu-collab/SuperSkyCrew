@@ -1,29 +1,17 @@
-<!DOCTYPE html>
-<html lang="hr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Evidencija radnog vremena — {{ $organization->name }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background: #fff; }
-            a { text-decoration: none; color: inherit; }
-        }
-        .legend dt { font-family: monospace; }
-    </style>
-</head>
-<body class="bg-light">
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2 no-print">
-        <a href="{{ route('organization.timesheet.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}" class="small">← Šihterica</a>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-primary" href="{{ route('organization.handovers.index', $organization->slug) }}">Predaja (čl. 5.)</a>
-            <button class="btn btn-primary" type="button" onclick="window.print()">Ispiši</button>
-        </div>
-    </div>
+@extends('layouts.print')
 
+@section('title', 'Evidencija radnog vremena — '.$organization->name)
+@section('document-class', 'ispis-dokument--wide')
+
+@section('toolbar')
+    <a href="{{ route('organization.timesheet.index', [$organization->slug, 'from' => $from->toDateString(), 'to' => $to->toDateString()]) }}" class="small">← Šihterica</a>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{{ route('organization.handovers.index', $organization->slug) }}">Predaja (čl. 5.)</a>
+        <button class="btn btn-primary" type="button" onclick="window.print()">Ispiši</button>
+    </div>
+@endsection
+
+@section('content')
     <h1 class="h4 mb-1">Evidencija o radnom vremenu</h1>
     <p class="text-muted">Pravilnik NN 55/2024, čl. 13.</p>
 
@@ -38,8 +26,8 @@
         <dd class="col-sm-9">{{ $exporter->name }} · {{ $exportedAt->timezone(config('app.timezone'))->format('d.m.Y. H:i') }}</dd>
     </dl>
 
-    <div class="table-responsive mb-4">
-        <table class="table table-sm table-bordered bg-white">
+    <div class="table-responsive table-responsive-no-sticky mb-4">
+        <table class="table table-sm table-bordered mb-0">
             <thead>
                 <tr>
                     <th>Osoba</th>
@@ -76,10 +64,10 @@
     </div>
 
     <h2 class="h6">Značenje kratica (čl. 18. st. 2.)</h2>
-    <dl class="row legend">
+    <dl class="row">
         @forelse($codes as $code)
             <dt class="col-sm-2">{{ $code->code }}</dt>
-            <dd class="col-sm-10">{{ $code->name }}{{ $code->paid ? '' : ' · neplaćeno' }}</dd>
+            <dd class="col-sm-10">{{ $code->legendLine() }}</dd>
         @empty
             <dd class="col-12 text-muted mb-0">Šifrarnik odsutnosti nije popunjen.</dd>
         @endforelse
@@ -91,8 +79,6 @@
             · {{ $handover->person?->fullName() ?: 'organizacija' }}
             → {{ $handover->recipient }} ({{ $handover->purpose }})</p>
     @empty
-        <p class="text-muted">U odabranom razdoblju nema zabilježenih predaja.</p>
+        <p class="text-muted mb-0">U odabranom razdoblju nema zabilježenih predaja.</p>
     @endforelse
-</div>
-</body>
-</html>
+@endsection

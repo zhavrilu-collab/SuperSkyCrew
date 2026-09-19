@@ -84,6 +84,9 @@ class EmploymentContractService
 
     public function seedIfMissing(Person $person, ?User $actor = null): ?EmploymentContract
     {
+        if (! $person->status->usesEmploymentContract()) {
+            return null;
+        }
         if ($person->employmentContracts()->exists()) {
             return null;
         }

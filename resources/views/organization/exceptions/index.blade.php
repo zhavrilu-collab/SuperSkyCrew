@@ -1,11 +1,12 @@
 @extends('layouts.organization')
 
 @section('title', 'Iznimke')
+@section('nav-suffix', 'Vrijeme')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-        <h1 class="h4 mb-1">Queue iznimki</h1>
+    <div class="page-heading mb-0">
+        <h1>Queue iznimki</h1>
         <p class="text-muted mb-0">Nekompletni slogovi, kašnjenje vs plan, dnevni odmor (12 h) i odstupanje od mjesečnog fonda. Današnje otvorene prijave nisu u redu.</p>
     </div>
     <form class="d-flex gap-2 flex-wrap" method="GET">
@@ -21,7 +22,7 @@
     </form>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="kartica-kontejner">
     <div class="table-responsive">
         <table class="table mb-0 align-middle">
             <thead>

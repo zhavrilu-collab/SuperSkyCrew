@@ -13,6 +13,7 @@ class Department extends OrganizationModel
 
     protected $fillable = [
         'organization_id',
+        'parent_id',
         'manager_user_id',
         'name',
         'code',
@@ -28,6 +29,16 @@ class Department extends OrganizationModel
         ];
     }
 
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id');
+    }
+
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_user_id');
@@ -36,6 +47,11 @@ class Department extends OrganizationModel
     public function people(): HasMany
     {
         return $this->hasMany(Person::class);
+    }
+
+    public function jobPositions(): HasMany
+    {
+        return $this->hasMany(JobPosition::class);
     }
 
     public function isValidOn(Carbon $date): bool

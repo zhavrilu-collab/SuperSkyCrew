@@ -37,7 +37,7 @@ class AbsenceCalendarController extends Controller
         $peopleQuery = Person::query()
             ->forOrganization($organization)
             ->with('department')
-            ->whereIn('status', ['employee', 'assigned', 'other_fo', 'contractor', 'executive'])
+            ->clockEligible()
             ->orderBy('last_name')
             ->orderBy('first_name');
 

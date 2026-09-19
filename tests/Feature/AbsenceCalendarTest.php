@@ -56,8 +56,7 @@ class AbsenceCalendarTest extends TestCase
         $this->actingAs($owner)
             ->get(route('organization.dashboard', $organization->slug))
             ->assertOk()
-            ->assertSee('Odsutni danas')
-            ->assertSee('Otvori kalendar');
+            ->assertSee('Odsutni danas');
     }
 
     public function test_employee_sees_only_own_row(): void

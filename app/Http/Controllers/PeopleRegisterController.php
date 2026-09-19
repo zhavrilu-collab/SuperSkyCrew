@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditAction;
+use App\Services\AuditService;
 use App\Services\OrganizationRbacService;
 use App\Services\PeopleRegisterService;
 use Carbon\Carbon;
@@ -15,6 +17,7 @@ class PeopleRegisterController extends Controller
     public function __construct(
         private readonly OrganizationRbacService $rbac,
         private readonly PeopleRegisterService $register,
+        private readonly AuditService $audit,
     ) {}
 
     public function book(Request $request): View
@@ -39,8 +42,18 @@ class PeopleRegisterController extends Controller
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
         $on = Carbon::parse($request->input('na', now()->toDateString()), config('app.timezone'))->startOfDay();
         $people = $this->register->activeOn($organization, $on);
-        $rows = $this->register->csvRows($people);
+        $rows = $this->register->csvRows($people, $on);
         $filename = 'maticna-knjiga-'.$on->toDateString().'.csv';
+        $this->audit->record(
+            $organization,
+            AuditAction::PeopleExport,
+            $request->user(),
+            'Izvoz matične knjige na dan '.$on->format('d.m.Y.'),
+            null,
+            null,
+            null,
+            ['on' => $on->toDateString(), 'rows' => count($rows)],
+        );
 
         return response()->streamDownload(function () use ($rows) {
             $handle = fopen('php://output', 'w');
@@ -105,8 +118,18 @@ class PeopleRegisterController extends Controller
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'payroll.export');
         $on = Carbon::parse($request->input('na', now()->toDateString()), config('app.timezone'))->startOfDay();
         $people = $this->register->activeOn($organization, $on);
-        $rows = $this->register->payrollRows($people);
+        $rows = $this->register->payrollRows($people, $on);
         $filename = 'podaci-za-place-'.$on->toDateString().'.csv';
+        $this->audit->record(
+            $organization,
+            AuditAction::PayrollExport,
+            $request->user(),
+            'Izvoz podataka za plaće na dan '.$on->format('d.m.Y.'),
+            null,
+            null,
+            null,
+            ['on' => $on->toDateString(), 'rows' => count($rows)],
+        );
 
         return response()->streamDownload(function () use ($rows) {
             $handle = fopen('php://output', 'w');

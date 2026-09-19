@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AuditAction;
 use App\Enums\OrganizationRole;
 use App\Enums\RequestActionType;
 use App\Enums\RequestStatus;
@@ -35,6 +36,8 @@ class WorkflowEngine
         private readonly HrSetupService $setup,
         private readonly PeriodLockService $locks,
         private readonly ClockService $clock,
+        private readonly AuditService $audit,
+        private readonly DocumentFillService $documents,
     ) {}
 
     /**
@@ -326,7 +329,7 @@ class WorkflowEngine
         $path = $request->approval_path ?? [];
         $nextIndex = $request->step_index + 1;
 
-        return DB::transaction(function () use ($request, $actor, $comment, $path, $nextIndex) {
+        $result = DB::transaction(function () use ($request, $actor, $comment, $path, $nextIndex) {
             $this->record($request, $actor, RequestActionType::Approve, $comment);
 
             if ($nextIndex >= count($path)) {
@@ -344,6 +347,19 @@ class WorkflowEngine
 
             return $request->fresh();
         });
+
+        $this->audit->record(
+            $result->organization ?? $request->organization,
+            AuditAction::RequestApprove,
+            $actor,
+            'Odobreno: '.$result->type->label().($comment ? ' · '.$comment : ''),
+            $result->person,
+            WorkflowRequest::class,
+            $result->id,
+            ['status' => $result->status->value],
+        );
+
+        return $result;
     }
 
     public function reject(WorkflowRequest $request, User $actor, string $reason): WorkflowRequest
@@ -357,7 +373,7 @@ class WorkflowEngine
             ]);
         }
 
-        return DB::transaction(function () use ($request, $actor, $reason) {
+        $result = DB::transaction(function () use ($request, $actor, $reason) {
             $this->record($request, $actor, RequestActionType::Reject, $reason);
             $request->update([
                 'status' => RequestStatus::Rejected,
@@ -369,6 +385,18 @@ class WorkflowEngine
 
             return $request->fresh();
         });
+
+        $this->audit->record(
+            $result->organization ?? $request->organization,
+            AuditAction::RequestReject,
+            $actor,
+            'Odbijeno: '.$result->type->label().' · '.$reason,
+            $result->person,
+            WorkflowRequest::class,
+            $result->id,
+        );
+
+        return $result;
     }
 
     public function cancel(WorkflowRequest $request, User $actor): WorkflowRequest
@@ -423,6 +451,26 @@ class WorkflowEngine
      */
     public function approvalPath(Person $person, RequestType $type, int $days): array
     {
+        $workflow = Workflow::query()
+            ->where('organization_id', $person->organization_id)
+            ->where('type', $type->value)
+            ->with('steps')
+            ->first();
+
+        if ($workflow && $workflow->steps->isNotEmpty()) {
+            $path = [];
+            foreach ($workflow->steps as $step) {
+                if ($step->matches($days, (bool) $person->manager_user_id)) {
+                    $path[] = $step->role;
+                }
+            }
+            if ($path !== []) {
+                return $path;
+            }
+
+            return [OrganizationRole::Hr->value];
+        }
+
         $managerFirst = $person->manager_user_id && (
             ($type === RequestType::LeaveAnnual && $days <= 3)
             || $type === RequestType::Overtime
@@ -470,6 +518,10 @@ class WorkflowEngine
             'decided_at' => now(),
             'payload' => $payload,
         ]);
+
+        if ($request->type === RequestType::LeaveAnnual) {
+            $this->documents->storeLeaveDecision($request->fresh(['person', 'organization']), $person);
+        }
 
         $request->submittedBy?->notify(new WorkflowRequestNotification($request->fresh(['person', 'organization']), 'approved'));
     }

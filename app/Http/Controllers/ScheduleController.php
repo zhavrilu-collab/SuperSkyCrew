@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WeeklyPlanMail;
 use App\Enums\CalendarLevel;
 use App\Models\CalendarRule;
 use App\Models\Department;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -40,7 +42,7 @@ class ScheduleController extends Controller
         $peopleQuery = Person::query()
             ->forOrganization($organization)
             ->with(['department', 'jobPosition'])
-            ->whereIn('status', ['employee', 'assigned', 'other_fo', 'contractor', 'executive'])
+            ->clockEligible()
             ->orderBy('last_name')
             ->orderBy('first_name');
         $this->scope->restrictPeopleQuery($peopleQuery, $organization, $userId);
@@ -73,7 +75,71 @@ class ScheduleController extends Controller
             'next' => $from->copy()->addWeek(),
             'days' => $days,
             'plan' => $this->resolver->mapForPeople($people, $from, $to),
+            'canSend' => $this->canSend($organization->id),
         ]);
+    }
+
+    public function sendPlan(Request $request): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->authorizeSend($organization->id);
+        $userId = (int) Auth::id();
+
+        $from = Carbon::parse($request->input('from', now()->startOfWeek(Carbon::MONDAY)->toDateString()), config('app.timezone'))
+            ->startOfWeek(Carbon::MONDAY);
+        $to = $from->copy()->endOfWeek(Carbon::SUNDAY);
+
+        $peopleQuery = Person::query()
+            ->forOrganization($organization)
+            ->with('user')
+            ->clockEligible()
+            ->orderBy('last_name')
+            ->orderBy('first_name');
+        $this->scope->restrictPeopleQuery($peopleQuery, $organization, $userId);
+        $people = $peopleQuery->get();
+
+        $days = [];
+        for ($day = $from->copy(); $day->lte($to); $day->addDay()) {
+            $days[] = $day->copy();
+        }
+        $plan = $this->resolver->mapForPeople($people, $from, $to);
+        $weekdayNames = [1 => 'Ponedjeljak', 2 => 'Utorak', 3 => 'Srijeda', 4 => 'Četvrtak', 5 => 'Petak', 6 => 'Subota', 7 => 'Nedjelja'];
+        $rangeLabel = $from->format('d.m.').' – '.$to->format('d.m.Y.');
+        $sender = $request->user();
+
+        $sent = 0;
+        foreach ($people as $person) {
+            $email = $person->user?->email;
+            if ($email === null || $email === '') {
+                continue;
+            }
+
+            $rows = [];
+            foreach ($days as $day) {
+                $shift = $plan[$person->id][$day->toDateString()] ?? null;
+                $rows[] = [
+                    'day' => $weekdayNames[$day->isoWeekday()].' '.$day->format('d.m.Y.'),
+                    'shift' => $shift ? $shift->label() : 'slobodan dan',
+                ];
+            }
+
+            Mail::to($email)->send(new WeeklyPlanMail(
+                $organization,
+                $person,
+                $rangeLabel,
+                $rows,
+                $sender->name,
+            ));
+            $sent++;
+        }
+
+        if ($sent === 0) {
+            return back()->withErrors(['plan' => 'Nema povezanih e-mail adresa u ovom tjednu. Povežite kartice s korisnicima.']);
+        }
+
+        $word = $sent === 1 ? 'adresu' : (($sent >= 2 && $sent <= 4) ? 'adrese' : 'adresa');
+
+        return back()->with('status', 'Plan tjedna poslan je na '.$sent.' '.$word.'.');
     }
 
     public function storeShift(Request $request): RedirectResponse
@@ -215,6 +281,23 @@ class ScheduleController extends Controller
             || $this->rbac->can($organizationId, $userId, 'people.access')
             || $this->rbac->can($organizationId, $userId, 'payroll.export')
         ) {
+            return;
+        }
+
+        abort(403, 'Nemate ovlasti za ovu radnju.');
+    }
+
+    private function canSend(int $organizationId): bool
+    {
+        $userId = (int) Auth::id();
+
+        return $this->rbac->can($organizationId, $userId, 'time.access')
+            || $this->rbac->can($organizationId, $userId, 'people.access');
+    }
+
+    private function authorizeSend(int $organizationId): void
+    {
+        if ($this->canSend($organizationId)) {
             return;
         }
 

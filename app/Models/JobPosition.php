@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobPosition extends OrganizationModel
@@ -12,9 +13,11 @@ class JobPosition extends OrganizationModel
 
     protected $fillable = [
         'organization_id',
+        'department_id',
         'name',
         'rad1g',
         'annual_leave_days',
+        'description',
         'valid_from',
         'valid_to',
     ];
@@ -26,6 +29,11 @@ class JobPosition extends OrganizationModel
             'valid_from' => 'date',
             'valid_to' => 'date',
         ];
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 
     public function people(): HasMany

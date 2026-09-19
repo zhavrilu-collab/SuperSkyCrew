@@ -19,6 +19,7 @@ class PersonPrintController extends Controller
     {
         $this->assertPerson($person);
         $this->authorizeSelfOrPeople($person);
+        abort_unless($person->status->usesEmploymentContract(), 404);
         $person->load(['location', 'department', 'jobPosition', 'employmentContracts']);
         $contract = $person->currentContract();
         $kind = $contract?->kind ?? EmploymentInstrument::EmploymentContract;
@@ -61,6 +62,21 @@ class PersonPrintController extends Controller
             'issuer' => Auth::user(),
             'issuedAt' => now(),
             'number' => sprintf('UPUT-%d/%s', $person->id, now()->format('Ymd')),
+        ]);
+    }
+
+    public function articleTen(string $slug, Person $person): View
+    {
+        $this->assertPerson($person);
+        $this->authorizeSelfOrPeople($person);
+        abort_unless($person->status->usesArticleTen(), 404);
+        $person->load(['location', 'department', 'jobPosition']);
+
+        return view('organization.people.article-ten', [
+            'organization' => app('currentOrganization'),
+            'person' => $person,
+            'exporter' => Auth::user(),
+            'exportedAt' => now(),
         ]);
     }
 

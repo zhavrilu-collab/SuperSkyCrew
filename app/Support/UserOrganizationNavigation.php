@@ -43,7 +43,7 @@ class UserOrganizationNavigation
         }
 
         if ($active->count() === 1 && $orgUsers->count() === 1) {
-            return route('organization.dashboard', [
+            return route('organization.landing', [
                 'slug' => $active->first()->organization->slug,
             ], false);
         }

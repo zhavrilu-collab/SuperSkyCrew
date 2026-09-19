@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\WeeklyPlanMail;
 use App\Enums\CalendarLevel;
 use App\Enums\ClockChannel;
 use App\Enums\ExceptionCode;
@@ -19,6 +20,7 @@ use App\Models\User;
 use App\Services\ClockService;
 use App\Services\ShiftResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ScheduleTest extends TestCase
@@ -60,8 +62,26 @@ class ScheduleTest extends TestCase
         $this->actingAs($owner)
             ->get(route('organization.schedule.index', [$organization->slug, 'from' => '2026-09-14']))
             ->assertOk()
-            ->assertSee('P1')
-            ->assertSee('Organizacija');
+            ->assertSee('Plan tjedna');
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'vrijeme',
+                'section' => 'smjene',
+            ]))
+            ->assertOk()
+            ->assertSee('P1');
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'vrijeme',
+                'section' => 'kalendari',
+            ]))
+            ->assertOk()
+            ->assertSee('Organizacija')
+            ->assertSee('P1');
     }
 
     public function test_person_rule_wins_over_organization_and_holiday_clears_default(): void
@@ -217,6 +237,76 @@ class ScheduleTest extends TestCase
                 'ends_at' => '16:00',
             ])
             ->assertForbidden();
+    }
+
+    public function test_owner_sends_weekly_plan_mail(): void
+    {
+        Mail::fake();
+        [$owner, $organization, $person] = $this->seedPerson();
+        $worker = User::factory()->create([
+            'name' => 'Iva Smjena',
+            'email' => 'iva.plan@hr.test',
+        ]);
+        $person->update(['user_id' => $worker->id]);
+        $shift = Shift::factory()->create([
+            'organization_id' => $organization->id,
+            'code' => 'P1',
+            'name' => 'Prva',
+            'starts_at' => '08:00:00',
+            'ends_at' => '16:00:00',
+        ]);
+        CalendarRule::factory()->create([
+            'organization_id' => $organization->id,
+            'level' => CalendarLevel::Organization,
+            'shift_id' => $shift->id,
+            'weekday' => 5,
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('organization.schedule.index', [$organization->slug, 'from' => '2026-09-14']))
+            ->assertOk()
+            ->assertSee('Pošalji plan e-mailom');
+
+        $this->actingAs($owner)
+            ->post(route('organization.schedule.plan.send', $organization->slug), [
+                'from' => '2026-09-14',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('status');
+
+        Mail::assertSent(WeeklyPlanMail::class, function (WeeklyPlanMail $mail) use ($person) {
+            return $mail->hasTo('iva.plan@hr.test')
+                && $mail->person->is($person)
+                && collect($mail->rows)->contains(fn (array $row) => str_contains($row['shift'], 'P1'));
+        });
+    }
+
+    public function test_plan_mail_requires_linked_user_and_employee_cannot_send(): void
+    {
+        Mail::fake();
+        [$owner, $organization, $person] = $this->seedPerson();
+        $employee = User::factory()->create();
+        OrganizationUser::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $employee->id,
+            'role' => OrganizationRole::Employee,
+        ]);
+
+        $this->actingAs($owner)
+            ->from(route('organization.schedule.index', $organization->slug))
+            ->post(route('organization.schedule.plan.send', $organization->slug), [
+                'from' => '2026-09-14',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasErrors('plan');
+        Mail::assertNothingSent();
+
+        $this->actingAs($employee)
+            ->post(route('organization.schedule.plan.send', $organization->slug), [
+                'from' => '2026-09-14',
+            ])
+            ->assertForbidden();
+        $this->assertNotNull($person->id);
     }
 
     public function test_department_rule_applies_before_organization(): void

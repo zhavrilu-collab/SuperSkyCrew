@@ -78,6 +78,7 @@ class OrganizationRegistrationController extends Controller
             'organization_email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'city' => ['nullable', 'string', 'max:100'],
+            'organization_type' => ['nullable', Rule::enum(\App\Enums\OrganizationType::class)],
         ];
 
         if (! Auth::check()) {
@@ -129,6 +130,8 @@ class OrganizationRegistrationController extends Controller
                 'oib' => preg_replace('/\s+/', '', $data['oib']),
                 'phone' => $data['phone'] ?? null,
                 'city' => $data['city'] ?? null,
+                'organization_type' => $data['organization_type'] ?? \App\Enums\OrganizationType::Company,
+                'volunteer_module' => ($data['organization_type'] ?? 'company') === \App\Enums\OrganizationType::Nonprofit->value,
             ]);
 
             OrganizationUser::query()->create([
@@ -153,6 +156,6 @@ class OrganizationRegistrationController extends Controller
 
         return redirect()
             ->route('registration.pending')
-            ->with('status', 'Tvrtka je registrirana i čeka odobrenje administratora.');
+            ->with('status', 'Organizacija je registrirana i čeka odobrenje administratora.');
     }
 }

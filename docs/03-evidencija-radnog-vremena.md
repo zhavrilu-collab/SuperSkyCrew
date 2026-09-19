@@ -39,7 +39,7 @@ Obvezna polja:
 Pravila:
 
 - Jedna aktivna prijava po osobi (nema overlapping in bez out, osim iznimke u queueu).
-- Ručni unos voditelja uvijek ima razlog i audit.
+- Ručni unos voditelja uvijek ima razlog i audit (`audit_events`).
 - Naknadni unos s terena (gradilište bez mreže) ide kao offline queue ili delayed submit; `occurred_at_device` ostaje trenutak događaja.
 
 ## TimeEntry (dnevni slog čl. 13.)
@@ -128,8 +128,8 @@ Svaki kalendar ima smjene (početak, kraj, pauza, noćna oznaka). Plan rada po r
 
 ## Godišnji odmor i odsutnosti
 
-- Kriteriji fonda: staž, posebni uvjeti rada, politika organizacije; automatsko povećanje dana.
-- Stari GO prije novog.
+- Kriteriji fonda: Postavke → Vrijeme → **GO politika**. Fond = max(osnova organizacije, fond radnog mjesta) + dodatak za najviši dosegnuti prag staža + dani × broj djece. Staž = mjeseci kod poslodavca + staž prije s kartice. Kartica može ostati ručna.
+- Stari GO prije novog (preneseni dani iz prethodne godine).
 - Zahtjev ide u radni slijed; nakon odobrenja generira se rješenje (predložak) i upis u šihtericu.
 - Kalendar odsutnosti: prava uvida, vrste, statusi.
 - Bolovanje: teret poslodavca vs HZZO kao šifre; ne radimo medicinski modul.
@@ -147,7 +147,7 @@ Svaki kalendar ima smjene (početak, kraj, pauza, noćna oznaka). Plan rada po r
 
 ## Jobovi
 
-- Zatvaranje jučerašnjeg dana, oznaka missing out
-- Podsjetnik 5. i 7. dana za nekompletne slogove
-- Upozorenje dnevnog odmora
+- Zatvaranje jučerašnjeg dana, oznaka missing out (pri rebuildu sloga)
+- `hr:reminders` (dnevno): istek dokumenata, zaboravljena odjava, nekompletan slog 5. i 7. dana
+- Upozorenje dnevnog odmora (iznimka na slogu)
 - Zaključavanje razdoblja po kalendaru plaće organizacije

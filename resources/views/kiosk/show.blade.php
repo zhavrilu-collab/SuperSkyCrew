@@ -3,17 +3,19 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#111111">
+    <meta name="theme-color" content="{{ $organization->themePalette()['primary'] }}">
     <title>Kiosk — {{ $organization->name }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    @include('partials.platform-styles')
+    @include('partials.organization-theme', ['organization' => $organization])
     <style>
-        body { min-height: 100vh; }
+        body { min-height: 100vh; background: var(--primarna-tamna) !important; color: #fff; }
         .pin-btn { min-height: 72px; font-size: 1.75rem; }
         .clock-btn { min-height: 96px; font-size: 1.6rem; }
         .pin-dots { letter-spacing: 0.4rem; font-size: 2rem; }
     </style>
 </head>
-<body class="bg-dark text-white">
+<body>
 <div class="container py-4" style="max-width: 420px;">
     <p class="text-white-50 mb-1">{{ $organization->name }}</p>
     <p class="small text-white-50 mb-4">{{ $location->name }}</p>
@@ -40,7 +42,7 @@
             @csrf
             <input type="hidden" name="type" id="punch-type" value="{{ $nextType->value }}">
             <input type="hidden" name="client_event_id" id="client-event-id">
-            <button class="btn {{ $clockedIn ? 'btn-light' : 'btn-success' }} clock-btn" type="submit">{{ $nextType->label() }}</button>
+            <button class="btn {{ $clockedIn ? 'btn-light' : 'btn-primary' }} clock-btn" type="submit">{{ $nextType->label() }}</button>
             @if($clockedIn && $currentState !== \App\Enums\PunchType::BreakStart)
                 <button class="btn btn-outline-warning" type="submit" onclick="document.getElementById('punch-type').value='break_start'">Početak pauze</button>
             @elseif($currentState === \App\Enums\PunchType::BreakStart)
@@ -66,7 +68,7 @@
                 @endforeach
                 <div class="col-4"><button class="btn btn-outline-secondary w-100 pin-btn" type="button" id="pin-del">⌫</button></div>
                 <div class="col-4"><button class="btn btn-outline-light w-100 pin-btn" type="button" data-digit="0">0</button></div>
-                <div class="col-4"><button class="btn btn-success w-100 pin-btn" type="submit">OK</button></div>
+                <div class="col-4"><button class="btn btn-primary w-100 pin-btn" type="submit">OK</button></div>
             </div>
         </form>
         <script>

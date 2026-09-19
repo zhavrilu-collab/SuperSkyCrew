@@ -1,11 +1,12 @@
 @extends('layouts.organization')
 
 @section('title', 'Moj tjedan')
+@section('nav-suffix', 'Moje')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-        <h1 class="h4 mb-1">Moj tjedan</h1>
+    <div class="page-heading mb-0">
+        <h1>Moj tjedan</h1>
         <p class="text-muted mb-0">{{ $person->fullName() }} · {{ $from->format('d.m.') }} – {{ $to->format('d.m.Y.') }} · uvid u evidenciju RV (čl. 20.)</p>
     </div>
     <div class="d-flex gap-2">
@@ -14,7 +15,7 @@
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="kartica-kontejner">
     <div class="table-responsive">
         <table class="table mb-0 align-middle">
             <thead>

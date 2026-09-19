@@ -1,11 +1,12 @@
 @extends('layouts.organization')
 
 @section('title', 'Fluktuacija')
+@section('nav-suffix', 'Kadrovi')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-        <h1 class="h4 mb-1">Fluktuacija</h1>
+    <div class="page-heading mb-0">
+        <h1>Fluktuacija</h1>
         <p class="text-muted mb-0">Ulazci i izlasci u razdoblju. Stopa = izlasci / broj aktivnih na početku razdoblja.</p>
     </div>
     <form method="GET" class="d-flex gap-2 flex-wrap">
@@ -18,7 +19,7 @@
 
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <div class="text-muted small">Aktivni na početku</div>
                 <div class="h3 mb-0">{{ $startCount }}</div>
@@ -27,7 +28,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <div class="text-muted small">Ulazci</div>
                 <div class="h3 mb-0">{{ $hires->count() }}</div>
@@ -35,7 +36,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <div class="text-muted small">Izlazci</div>
                 <div class="h3 mb-0">{{ $exits->count() }}</div>
@@ -43,7 +44,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <div class="text-muted small">Aktivni na kraju · stopa</div>
                 <div class="h3 mb-0">{{ $endCount }}{{ $rate === null ? '' : ' · '.$rate.' %' }}</div>
@@ -55,7 +56,7 @@
 
 <div class="row g-3">
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <h2 class="h6">Ulazci</h2>
                 <div class="table-responsive">
@@ -86,7 +87,7 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <h2 class="h6">Izlazci</h2>
                 <div class="table-responsive">

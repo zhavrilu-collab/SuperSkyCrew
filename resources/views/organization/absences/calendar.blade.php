@@ -1,6 +1,7 @@
 @extends('layouts.organization')
 
 @section('title', 'Kalendar odsutnosti')
+@section('nav-suffix', 'Moje')
 
 @section('content')
 <style>
@@ -9,11 +10,11 @@
     .absence-cal th.person, .absence-cal td.person { min-width: 9rem; text-align: left; position: sticky; left: 0; background: #fff; z-index: 1; }
     .absence-cal .weekend { background: #f8f9fa; }
     .absence-cal .holiday { background: #eee; }
-    .absence-cal .today { box-shadow: inset 0 0 0 2px #0d6efd; }
+    .absence-cal .today { box-shadow: inset 0 0 0 2px var(--primarna-zelena); }
 </style>
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-        <h1 class="h4 mb-1">Kalendar odsutnosti</h1>
+    <div class="page-heading mb-0">
+        <h1>Kalendar odsutnosti</h1>
         <p class="text-muted mb-0">
             {{ $monthLabel }}
             · odobreno u šihterici, na odobrenju obrubljeno.
@@ -46,7 +47,7 @@
     </div>
 </div>
 
-<div class="card border-0 shadow-sm mb-3">
+<div class="kartica-kontejner mb-3">
     <div class="table-responsive">
         <table class="table table-bordered mb-0 absence-cal">
             <thead>

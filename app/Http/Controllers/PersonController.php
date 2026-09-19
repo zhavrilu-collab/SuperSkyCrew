@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\Enums\ContractType;
 use App\Enums\EmploymentInstrument;
 use App\Enums\FamilyRight;
+use App\Enums\OtherFoKind;
 use App\Enums\PersonStatus;
+use App\Enums\AuditAction;
 use App\Models\Department;
+use App\Models\DocumentTemplate;
+use App\Models\DocumentType;
 use App\Models\JobPosition;
 use App\Models\Location;
 use App\Models\OrganizationUser;
@@ -15,7 +19,9 @@ use App\Rules\ValidOib;
 use App\Services\DepartmentScopeService;
 use App\Services\EmploymentContractService;
 use App\Services\ExpiryWarningService;
+use App\Services\LeaveService;
 use App\Services\OrganizationRbacService;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +35,8 @@ class PersonController extends Controller
         private readonly ExpiryWarningService $expiries,
         private readonly DepartmentScopeService $scope,
         private readonly EmploymentContractService $contracts,
+        private readonly AuditService $audit,
+        private readonly LeaveService $leave,
     ) {}
 
     public function index(Request $request): View
@@ -40,6 +48,7 @@ class PersonController extends Controller
         $people = Person::query()
             ->forOrganization($organization)
             ->with(['user', 'location', 'department', 'jobPosition', 'costCenter'])
+            ->withCount('interviewNotes')
             ->when(
                 is_string($statusFilter) && $statusFilter !== '',
                 fn ($query) => $query->where('status', $statusFilter),
@@ -70,10 +79,12 @@ class PersonController extends Controller
         $data = $this->validated($request);
         $data['organization_id'] = $organization->id;
 
-        Person::query()->create($data);
+        $person = Person::query()->create($data);
+        $this->leave->applyToPerson($person);
+        $tab = $person->status === PersonStatus::Candidate ? 'odabir' : 'pregled';
 
         return redirect()
-            ->route('organization.people.index', $organization->slug)
+            ->route('organization.people.edit', [$organization->slug, $person, 'tab' => $tab])
             ->with('status', 'Osoba je spremljena.');
     }
 
@@ -90,10 +101,19 @@ class PersonController extends Controller
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
-        $person->update($this->validated($request, $person));
+        $data = $this->validated($request, $person);
+        if ($request->boolean('clock_device_reset')) {
+            $data['clock_device_id'] = null;
+        }
+        $person->update($data);
+        $this->leave->applyToPerson($person->fresh(['organization', 'jobPosition']));
 
         return redirect()
-            ->route('organization.people.index', $organization->slug)
+            ->route('organization.people.edit', [
+                $organization->slug,
+                $person,
+                'tab' => $this->profileTab($request->input('return_tab')),
+            ])
             ->with('status', 'Kartica je ažurirana.');
     }
 
@@ -114,6 +134,16 @@ class PersonController extends Controller
             'started_at' => $person->started_at?->toDateString() ?? now()->toDateString(),
         ]);
         $this->contracts->seedIfMissing($person->fresh(), $request->user());
+        $this->leave->applyToPerson($person->fresh(['organization', 'jobPosition']));
+        $this->audit->record(
+            $organization,
+            AuditAction::PersonHire,
+            $request->user(),
+            'Kandidat prenesen u kadar: '.$person->fullName(),
+            $person->fresh(),
+            Person::class,
+            $person->id,
+        );
 
         return redirect()
             ->route('organization.people.edit', [$organization->slug, $person])
@@ -127,7 +157,14 @@ class PersonController extends Controller
 
         $person->load(['location', 'department', 'jobPosition', 'costCenter', 'qualifications', 'employmentContracts']);
 
-        return view('organization.people.review', [
+        $view = match (true) {
+            $person->status->usesArticleTen() => 'organization.people.article-ten',
+            $person->status === PersonStatus::Contractor => 'organization.people.contractor',
+            $person->status === PersonStatus::Volunteer => 'organization.people.volunteer',
+            default => 'organization.people.review',
+        };
+
+        return view($view, [
             'organization' => app('currentOrganization'),
             'person' => $person,
             'exporter' => Auth::user(),
@@ -183,23 +220,33 @@ class PersonController extends Controller
         }
 
         if ($person) {
-            $person->load(['qualifications', 'employmentContracts']);
+            $person->load(['qualifications', 'employmentContracts', 'documents.documentType', 'user', 'manager', 'department', 'jobPosition', 'location', 'costCenter', 'engagements.department', 'engagements.jobPosition', 'engagements.location', 'engagements.costCenter', 'engagements.changedByUser', 'interviewNotes.interviewer', 'interviewNotes.author']);
+            app(\App\Services\HrSetupService::class)->provision($organization);
         }
 
         return view('organization.people.form', [
             'organization' => $organization,
             'person' => $person,
+            'profileTab' => $this->profileTab(request()->query('tab')),
+            'expiryCount' => $person ? (int) ($this->expiries->countsByPerson($this->expiries->due($organization))[$person->id] ?? 0) : 0,
             'locations' => Location::query()->forOrganization($organization)->where('is_active', true)->orderBy('name')->get(),
             'departments' => $departments,
             'positions' => $positions,
             'costCenters' => $costCenters,
             'users' => $users->unique('id')->values(),
             'managers' => $managers,
-            'statuses' => PersonStatus::cases(),
+            'statuses' => $this->selectableStatuses($organization, $person),
             'contracts' => ContractType::cases(),
             'qualificationKinds' => \App\Enums\QualificationKind::cases(),
             'instrumentKinds' => EmploymentInstrument::cases(),
             'familyRights' => FamilyRight::cases(),
+            'otherFoKinds' => OtherFoKind::cases(),
+            'documentTypes' => DocumentType::query()->forOrganization($organization)->orderBy('sort_order')->orderBy('name')->get(),
+            'documentTemplates' => DocumentTemplate::query()->forOrganization($organization)->orderBy('name')->get(),
+            'interviewOutcomes' => \App\Enums\InterviewOutcome::cases(),
+            'leaveSnapshot' => $person && $person->status->usesArticleThree()
+                ? $this->leave->snapshot($person)
+                : null,
         ]);
     }
 
@@ -223,7 +270,37 @@ class PersonController extends Controller
             'residence' => ['nullable', 'string', 'max:255'],
             'job_title' => ['nullable', 'string', 'max:120'],
             'contract_type' => ['nullable', Rule::enum(ContractType::class)],
-            'status' => ['required', Rule::enum(PersonStatus::class)],
+            'status' => [
+                'required',
+                Rule::enum(PersonStatus::class),
+                function (string $attribute, mixed $value, \Closure $fail) use ($organization, $person): void {
+                    if ($value === PersonStatus::Volunteer->value
+                        && ! $organization->volunteer_module
+                        && $person?->status !== PersonStatus::Volunteer) {
+                        $fail('Status volontera nije uključen (Postavke → Kadrovi → Volonteri).');
+                    }
+                },
+            ],
+            'fo_kind' => [
+                'nullable',
+                Rule::enum(OtherFoKind::class),
+                Rule::requiredIf(fn () => $request->input('status') === PersonStatus::OtherFo->value),
+            ],
+            'instrument_title' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::requiredIf(fn () => in_array($request->input('status'), [
+                    PersonStatus::OtherFo->value,
+                    PersonStatus::Contractor->value,
+                ], true)),
+            ],
+            'host_employer' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::requiredIf(fn () => $request->input('status') === PersonStatus::Assigned->value),
+            ],
             'started_at' => ['nullable', 'date'],
             'ended_at' => ['nullable', 'date'],
             'ended_reason' => ['nullable', 'string', 'max:255'],
@@ -259,6 +336,7 @@ class PersonController extends Controller
                 Rule::exists('organization_users', 'user_id')->where('organization_id', $organization->id),
             ],
             'annual_leave_days' => ['nullable', 'integer', 'min:0', 'max:50'],
+            'annual_leave_manual' => ['nullable', 'boolean'],
             'iban' => ['nullable', 'string', 'max:34', 'regex:/^[A-Za-z]{2}[0-9]{2}[A-Za-z0-9]{11,30}$/'],
             'pay_coefficient' => ['nullable', 'numeric', 'min:0', 'max:99.9999'],
             'allowance_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
@@ -277,7 +355,7 @@ class PersonController extends Controller
             ],
         ]);
 
-        foreach (['location_id', 'department_id', 'job_position_id', 'cost_center_id', 'user_id', 'manager_user_id', 'oib', 'contract_type', 'clock_pin', 'iban', 'family_right', 'tax_relief_note', 'pay_coefficient', 'allowance_percent', 'prior_service_months'] as $empty) {
+        foreach (['location_id', 'department_id', 'job_position_id', 'cost_center_id', 'user_id', 'manager_user_id', 'oib', 'contract_type', 'clock_pin', 'iban', 'family_right', 'tax_relief_note', 'pay_coefficient', 'allowance_percent', 'prior_service_months', 'fo_kind', 'instrument_title', 'host_employer'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }
@@ -288,6 +366,9 @@ class PersonController extends Controller
         }
 
         $data['znr_exam_required'] = $request->boolean('znr_exam_required');
+        $data['annual_leave_manual'] = $request->boolean('annual_leave_manual');
+        $data['assignment_clocks'] = $request->boolean('assignment_clocks');
+        $data['executive_autonomy'] = $request->boolean('executive_autonomy');
         $data['children_count'] = (int) ($data['children_count'] ?? 0);
         $data['dependents_count'] = (int) ($data['dependents_count'] ?? 0);
 
@@ -297,7 +378,7 @@ class PersonController extends Controller
                 ->find($data['job_position_id']);
             if ($position) {
                 $data['job_title'] = $position->name;
-                if (! isset($data['annual_leave_days']) || $data['annual_leave_days'] === null) {
+                if ($data['annual_leave_manual'] && (! isset($data['annual_leave_days']) || $data['annual_leave_days'] === null)) {
                     $data['annual_leave_days'] = $position->annual_leave_days;
                 }
             }
@@ -313,6 +394,19 @@ class PersonController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * @return list<PersonStatus>
+     */
+    private function selectableStatuses(\App\Models\Organization $organization, ?Person $person): array
+    {
+        $statuses = PersonStatus::selectable((bool) $organization->volunteer_module);
+        if ($person?->status === PersonStatus::Volunteer && ! in_array(PersonStatus::Volunteer, $statuses, true)) {
+            $statuses[] = PersonStatus::Volunteer;
+        }
+
+        return $statuses;
     }
 
     private function assertPerson(Person $person): void
@@ -331,5 +425,12 @@ class PersonController extends Controller
         }
 
         abort_unless((int) $person->user_id === $userId, 403, 'Nemate ovlasti za ovu radnju.');
+    }
+
+    private function profileTab(mixed $tab): string
+    {
+        $allowed = ['pregled', 'odabir', 'osobno', 'zaposlenje', 'angazman', 'ugovori', 'dokumenti', 'kvalifikacije', 'place'];
+
+        return is_string($tab) && in_array($tab, $allowed, true) ? $tab : 'pregled';
     }
 }

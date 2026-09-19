@@ -41,14 +41,15 @@ Auth:
 Svaka lokacija ima:
 
 - `geofence`: isključeno / upozorenje / strogo (radius u metrima)
-- `require_photo`: da/ne
+- `require_photo`: da/ne (selfie, 30 dana, bez face-matchinga)
 - `allow_offline`: da/ne
+- `device_bind_mode`: isključeno / upozorenje / strogo (PWA/web, ne kiosk)
 - `kiosk_enabled`
 - `allowed_channels`
 
-Rad na daljinu: geofence isključen; bilježi se IP i uređaj; samopotvrda. Poslodavac i dalje nadzire ažurnost (čl. 17.).
+Rad na daljinu: geofence isključen; bilježi se IP (`client_ip`) i uređaj; samopotvrda. Poslodavac i dalje nadzire ažurnost (čl. 17.).
 
-Teren/gradilište: offline queue na PWA; sync kad se vrati mreža; `occurred_at_device` ostaje original.
+Teren/gradilište: PWA sprema prijavu u IndexedDB ako nema mreže; sync kad se vrati veza. `occurred_at_device` ostaje trenutak događaja, `occurred_at_server` je trenutak primitka. Naknadni unos stariji od 7 dana se odbija. Lokacija može isključiti offline. Service worker drži zadnji ekran prijave.
 
 ## Antiprevara (proporcionalno, GDPR)
 

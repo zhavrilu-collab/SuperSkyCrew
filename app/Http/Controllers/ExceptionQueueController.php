@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditAction;
 use App\Models\Person;
 use App\Models\TimeEntry;
+use App\Services\AuditService;
 use App\Services\DepartmentScopeService;
 use App\Services\OrganizationRbacService;
 use Carbon\Carbon;
@@ -17,6 +19,7 @@ class ExceptionQueueController extends Controller
     public function __construct(
         private readonly OrganizationRbacService $rbac,
         private readonly DepartmentScopeService $scope,
+        private readonly AuditService $audit,
     ) {}
 
     public function index(Request $request): View
@@ -87,6 +90,18 @@ class ExceptionQueueController extends Controller
             'exception_resolved_by' => Auth::id(),
             'exception_note' => $data['comment'],
         ]);
+
+        $this->audit->record(
+            $organization,
+            AuditAction::ExceptionResolve,
+            $request->user(),
+            'Iznimka riješena: '.$entry->exceptionLabel().' · '.$entry->person?->fullName()
+                .' '.$entry->work_date?->format('d.m.Y.').' · '.$data['comment'],
+            $entry->person,
+            TimeEntry::class,
+            $entry->id,
+            ['comment' => $data['comment']],
+        );
 
         return back()->with('status', 'Iznimka je označena kao riješena.');
     }

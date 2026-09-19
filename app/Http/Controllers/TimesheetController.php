@@ -16,10 +16,13 @@ use App\Services\OrganizationRbacService;
 use App\Services\PeriodLockService;
 use App\Services\ShiftResolver;
 use App\Services\TimeEntryRebuilder;
+use App\Services\AuditService;
+use App\Enums\AuditAction;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -33,6 +36,7 @@ class TimesheetController extends Controller
         private readonly DepartmentScopeService $scope,
         private readonly ShiftResolver $shifts,
         private readonly TimeEntryRebuilder $rebuilder,
+        private readonly AuditService $audit,
     ) {}
 
     public function index(Request $request): View
@@ -45,7 +49,7 @@ class TimesheetController extends Controller
 
         $peopleQuery = Person::query()
             ->forOrganization($organization)
-            ->whereIn('status', ['employee', 'assigned', 'other_fo', 'contractor', 'executive'])
+            ->clockEligible()
             ->orderBy('last_name');
         $this->scope->restrictPeopleQuery($peopleQuery, $organization, $userId);
         $people = $peopleQuery->get();
@@ -96,6 +100,7 @@ class TimesheetController extends Controller
                 ->whereDate('work_date', '>=', $from->toDateString())
                 ->whereDate('work_date', '<=', $to->toDateString())
                 ->count(),
+            'absenceCodes' => AbsenceCode::query()->forOrganization($organization)->orderBy('kind')->orderBy('code')->get(),
         ]);
     }
 
@@ -148,6 +153,21 @@ class TimesheetController extends Controller
             'plannedShift' => $this->shifts->forPersonOn($person, $day),
             'codes' => AbsenceCode::query()->forOrganization($organization)->orderBy('kind')->orderBy('code')->get(),
             'costCenters' => $costCenters,
+        ]);
+    }
+
+    public function punchPhoto(string $slug, Person $person, Punch $punch): StreamedResponse
+    {
+        $organization = app('currentOrganization');
+        abort_unless($person->organization_id === $organization->id, 404);
+        abort_unless($punch->person_id === $person->id, 404);
+        abort_unless($punch->organization_id === $organization->id, 404);
+        $this->authorizeTimeOrSelf($organization->id, $person);
+        abort_unless($this->scope->canManagePerson($person, (int) Auth::id()), 403, 'Nemate ovlasti za ovu radnju.');
+        abort_unless($punch->hasPhoto() && Storage::disk('local')->exists($punch->photo_path), 404);
+
+        return Storage::disk('local')->response($punch->photo_path, 'prijava.jpg', [
+            'Content-Type' => 'image/jpeg',
         ]);
     }
 
@@ -235,6 +255,17 @@ class TimesheetController extends Controller
             $entry->save();
             $this->rebuilder->rebuild($person, $day);
 
+            $this->audit->record(
+                $organization,
+                AuditAction::EvidentialCorrect,
+                $request->user(),
+                'Evidencijski sati vraćeni na realizaciju · '.$person->fullName().' '.$day->format('d.m.Y.'),
+                $person,
+                TimeEntry::class,
+                $entry->id,
+                ['revert' => true, 'date' => $day->toDateString()],
+            );
+
             return back()->with('status', 'Evidencijski sati vraćeni na realizaciju.');
         }
 
@@ -266,6 +297,22 @@ class TimesheetController extends Controller
             'evidential_note' => $data['evidential_note'],
             'evidential_manual' => true,
         ])->save();
+
+        $this->audit->record(
+            $organization,
+            AuditAction::EvidentialCorrect,
+            $request->user(),
+            'Evidencijski sati: '.$data['evidential_code'].' '
+                .round(((int) $data['evidential_minutes']) / 60, 2).' h · '.$person->fullName().' '.$day->format('d.m.Y.'),
+            $person,
+            TimeEntry::class,
+            $entry->id,
+            [
+                'code' => $data['evidential_code'],
+                'minutes' => (int) $data['evidential_minutes'],
+                'note' => $data['evidential_note'],
+            ],
+        );
 
         return back()->with('status', 'Evidencijski sati su spremljeni.');
     }
@@ -403,6 +450,20 @@ class TimesheetController extends Controller
             'from_date' => $from->toDateString(),
             'to_date' => $to->toDateString(),
         ]);
+
+        $organization = app('currentOrganization');
+        $action = $kind === 'inspection' ? AuditAction::InspectionExport : AuditAction::TimesheetExport;
+        $this->audit->record(
+            $organization,
+            $action,
+            Auth::user(),
+            ($action === AuditAction::InspectionExport ? 'Inspekcijski paket' : 'Izvoz šihterice')
+                .' '.$from->format('d.m.Y.').' – '.$to->format('d.m.Y.'),
+            null,
+            ComplianceExport::class,
+            null,
+            ['kind' => $kind, 'from' => $from->toDateString(), 'to' => $to->toDateString()],
+        );
     }
 
     private function authorizeTime(int $organizationId): void

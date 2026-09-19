@@ -1,6 +1,7 @@
 @extends('layouts.organization')
 
 @section('title', 'Dan u šihterici')
+@section('nav-suffix', 'Vrijeme')
 
 @section('content')
 <div class="mb-4">
@@ -9,7 +10,7 @@
     @else
         <a href="{{ route('organization.timesheet.mine', $organization->slug) }}" class="small">← Moj tjedan</a>
     @endif
-    <h1 class="h4 mt-2">{{ $person->fullName() }} · {{ $day->format('d.m.Y.') }}</h1>
+    <h1 class="mt-2 mb-1">{{ $person->fullName() }} · {{ $day->format('d.m.Y.') }}</h1>
     <p class="text-muted">Plan: {{ $plannedShift?->label() ?: 'nema smjene' }}</p>
     @if($periodLocked)
         <p class="text-warning mb-0">Ovaj dan je zaključan. Ručni unos nije dopušten.</p>
@@ -18,7 +19,7 @@
 
 <div class="row g-4">
     <div class="col-lg-7">
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="kartica-kontejner mb-4">
             <div class="card-header bg-white fw-semibold">Punchovi</div>
             <ul class="list-group list-group-flush">
                 @forelse($punches as $punch)
@@ -27,6 +28,10 @@
                             {{ $punch->type->label() }} · {{ $punch->channel->label() }}
                             @if($punch->isCorrection()) <span class="badge text-bg-info">ispravak</span> @endif
                             @if($punch->corrections->isNotEmpty()) <span class="badge text-bg-secondary">zamijenjeno</span> @endif
+                            @if($punch->deviceMismatch()) <span class="badge text-bg-warning">drugi uređaj</span> @endif
+                            @if($punch->hasPhoto())
+                                <a class="small ms-1" href="{{ route('organization.timesheet.photo', [$organization->slug, $person, $punch]) }}">foto</a>
+                            @endif
                         </span>
                         <span>{{ $punch->occurred_at_device->timezone(config('app.timezone'))->format('H:i:s') }}</span>
                     </li>
@@ -37,7 +42,7 @@
         </div>
 
         @if($canManual)
-        <div class="card border-0 shadow-sm">
+        <div class="kartica-kontejner">
             <div class="card-header bg-white fw-semibold">Ručni unos</div>
             <div class="card-body">
                 <form method="POST" action="{{ route('organization.timesheet.manual', [$organization->slug, $person]) }}" class="row g-3">
@@ -68,7 +73,7 @@
         @endif
     </div>
     <div class="col-lg-5">
-        <div class="card border-0 shadow-sm">
+        <div class="kartica-kontejner">
             <div class="card-header bg-white fw-semibold">Dnevni slog (čl. 13.)</div>
             <div class="card-body">
                 @if($entry)
@@ -122,7 +127,7 @@
         </div>
 
         @if($canEditEvidential ?? false)
-        <div class="card border-0 shadow-sm mt-4">
+        <div class="kartica-kontejner mt-4">
             <div class="card-header bg-white fw-semibold">Evidencijski sati (plaća)</div>
             <div class="card-body">
                 <p class="small text-muted">Realizacija ostaje iz puncha. HR korekcija ide u izvoz za plaće (šifra × sati × MT) i ostaje nakon ponovnog izračuna.</p>

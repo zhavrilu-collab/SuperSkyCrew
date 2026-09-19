@@ -90,6 +90,17 @@ class TimeEntryRebuilder
         $exception ??= $this->monthlyFundException($person, $day, $totalMinutes, $existing?->id);
         $exception ??= $late;
 
+        if ($person->hasRelaxedTimeRecord()) {
+            $relaxed = [
+                ExceptionCode::DailyRest->value,
+                ExceptionCode::MonthlyFund->value,
+                ExceptionCode::Late->value,
+            ];
+            if (in_array($exception, $relaxed, true)) {
+                $exception = null;
+            }
+        }
+
         $status = TimeEntryStatus::Draft;
         if ($firstIn && $lastOut && $openIn === null) {
             $status = TimeEntryStatus::Complete;

@@ -24,10 +24,10 @@ class PeopleDirectoryTest extends TestCase
         $this->actingAs($owner)
             ->get(route('organization.people.index', $organization->slug))
             ->assertOk()
-            ->assertSee('Kadar')
+            ->assertSee('Kadrovi')
             ->assertSee('Nema unesenih osoba.');
 
-        $this->actingAs($owner)
+        $response = $this->actingAs($owner)
             ->post(route('organization.people.store', $organization->slug), [
                 'first_name' => 'Ana',
                 'last_name' => 'Kovač',
@@ -36,8 +36,10 @@ class PeopleDirectoryTest extends TestCase
                 'job_title' => 'Knjigovođa',
                 'started_at' => '2026-01-15',
                 'citizenship' => 'HR',
-            ])
-            ->assertRedirect(route('organization.people.index', $organization->slug));
+            ]);
+        $person = Person::query()->where('last_name', 'Kovač')->first();
+        $this->assertNotNull($person);
+        $response->assertRedirect(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'pregled']));
 
         $this->assertDatabaseHas('people', [
             'organization_id' => $organization->id,
@@ -73,16 +75,16 @@ class PeopleDirectoryTest extends TestCase
             'role' => OrganizationRole::Employee,
         ]);
 
-        $this->actingAs($owner)
+        $response = $this->actingAs($owner)
             ->post(route('organization.people.store', $organization->slug), [
                 'first_name' => 'Ivan',
                 'last_name' => 'Horvat',
                 'status' => PersonStatus::Employee->value,
                 'user_id' => $worker->id,
-            ])
-            ->assertRedirect(route('organization.people.index', $organization->slug));
-
+            ]);
         $person = Person::query()->where('user_id', $worker->id)->first();
+        $this->assertNotNull($person);
+        $response->assertRedirect(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'pregled']));
         $this->assertNotNull($person);
         $this->assertSame($organization->id, $person->organization_id);
     }

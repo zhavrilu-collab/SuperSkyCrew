@@ -8,6 +8,7 @@ class AbsenceCode extends OrganizationModel
         'organization_id',
         'code',
         'name',
+        'meaning',
         'category',
         'kind',
         'paid',
@@ -22,6 +23,30 @@ class AbsenceCode extends OrganizationModel
             'consumes_annual_leave' => 'boolean',
             'is_system' => 'boolean',
         ];
+    }
+
+    public function categoryLabel(): string
+    {
+        return match ($this->category) {
+            'presence' => 'Prisutnost',
+            'leave' => 'Odsutnost',
+            'sick' => 'Bolovanje',
+            'holiday' => 'Blagdan',
+            default => 'Ostalo',
+        };
+    }
+
+    public function legendLine(): string
+    {
+        $line = $this->name;
+        if ($this->meaning) {
+            $line .= ' — '.$this->meaning;
+        }
+        if (! $this->paid) {
+            $line .= ' · neplaćeno';
+        }
+
+        return $line;
     }
 
     public function badgeClass(): string

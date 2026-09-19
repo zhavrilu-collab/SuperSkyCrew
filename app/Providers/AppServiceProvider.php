@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Person;
+use App\Observers\PersonEngagementObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -16,6 +18,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Person::observe(PersonEngagementObserver::class);
+
         RateLimiter::for('admin-sync', function (Request $request) {
             return Limit::perMinute(30)->by($request->ip());
         });

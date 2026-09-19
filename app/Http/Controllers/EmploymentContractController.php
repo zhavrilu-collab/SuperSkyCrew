@@ -58,7 +58,7 @@ class EmploymentContractController extends Controller
         $this->contracts->store($organization, $person, $data, $request->user());
 
         return redirect()
-            ->route('organization.people.edit', [$organization->slug, $person])
+            ->route('organization.people.edit', [$organization->slug, $person, 'tab' => 'ugovori'])
             ->with('status', 'Ugovor je spremljen.');
     }
 
@@ -73,7 +73,7 @@ class EmploymentContractController extends Controller
         $this->contracts->destroy($employmentContract);
 
         return redirect()
-            ->route('organization.people.edit', [$organization->slug, $person])
+            ->route('organization.people.edit', [$organization->slug, $person, 'tab' => 'ugovori'])
             ->with('status', 'Ugovor je uklonjen.');
     }
 

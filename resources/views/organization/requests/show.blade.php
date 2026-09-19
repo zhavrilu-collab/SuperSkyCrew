@@ -1,17 +1,18 @@
 @extends('layouts.organization')
 
 @section('title', 'Zahtjev')
+@section('nav-suffix', 'Moje')
 
 @section('content')
 <div class="mb-4">
     <a href="{{ route('organization.requests.index', $organization->slug) }}" class="small">← Zahtjevi</a>
-    <h1 class="h4 mt-2">{{ $requestItem->type->label() }} · {{ $requestItem->person->fullName() }}</h1>
+    <h1 class="mt-2 mb-1">{{ $requestItem->type->label() }} · {{ $requestItem->person->fullName() }}</h1>
     <span class="badge {{ $requestItem->status->badgeClass() }}">{{ $requestItem->status->label() }}</span>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-7">
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="kartica-kontejner mb-4">
             <div class="card-body">
                 <dl class="row mb-0">
                     @if($requestItem->type === \App\Enums\RequestType::PunchCorrection)
@@ -57,6 +58,7 @@
                 </dl>
                 @if($requestItem->hasLeaveDecision())
                     <a class="btn btn-outline-primary mt-3" href="{{ route('organization.requests.decision', [$organization->slug, $requestItem]) }}">Rješenje o GO</a>
+                    <p class="small text-muted mt-2 mb-0">Word rješenje upisano je u dosje osobe.</p>
                 @endif
             </div>
         </div>
@@ -69,7 +71,7 @@
         @endif
 
         @if($canAct)
-            <div class="card border-0 shadow-sm mt-4">
+            <div class="kartica-kontejner mt-4">
                 <div class="card-header bg-white fw-semibold">Odluka</div>
                 <div class="card-body">
                     @if($errors->any())
@@ -93,7 +95,7 @@
         @endif
     </div>
     <div class="col-lg-5">
-        <div class="card border-0 shadow-sm">
+        <div class="kartica-kontejner">
             <div class="card-header bg-white fw-semibold">Povijest</div>
             <ul class="list-group list-group-flush">
                 @forelse($requestItem->actions as $action)

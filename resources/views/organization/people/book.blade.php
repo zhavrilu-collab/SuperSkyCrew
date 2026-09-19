@@ -1,40 +1,27 @@
-<!DOCTYPE html>
-<html lang="hr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Matična knjiga — {{ $organization->name }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background: #fff; }
-            a { text-decoration: none; color: inherit; }
-            table { font-size: .8rem; }
-        }
-    </style>
-</head>
-<body class="bg-light">
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2 no-print">
-        <a href="{{ route('organization.people.index', $organization->slug) }}" class="small">← Kadar</a>
-        <form method="GET" class="d-flex gap-2">
-            <label class="form-label mb-0 align-self-center" for="na">Stanje na dan</label>
-            <input type="date" class="form-control" name="na" id="na" value="{{ $on->toDateString() }}">
-            <button class="btn btn-outline-secondary" type="submit">Prikaži</button>
-        </form>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-primary" href="{{ route('organization.people.export', [$organization->slug, 'na' => $on->toDateString()]) }}">Izvoz CSV</a>
-            <button class="btn btn-primary" type="button" onclick="window.print()">Ispiši</button>
-        </div>
+@extends('layouts.print')
+
+@section('title', 'Matična knjiga — '.$organization->name)
+@section('document-class', 'ispis-dokument--wide')
+
+@section('toolbar')
+    <a href="{{ route('organization.people.index', $organization->slug) }}" class="small">← Kadrovi</a>
+    <form method="GET" class="d-flex gap-2">
+        <label class="form-label mb-0 align-self-center" for="na">Stanje na dan</label>
+        <input type="date" class="form-control" name="na" id="na" value="{{ $on->toDateString() }}">
+        <button class="btn btn-outline-secondary" type="submit">Prikaži</button>
+    </form>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{{ route('organization.people.export', [$organization->slug, 'na' => $on->toDateString()]) }}">Izvoz CSV</a>
+        <button class="btn btn-primary" type="button" onclick="window.print()">Ispiši</button>
     </div>
+@endsection
 
+@section('content')
     <h1 class="h4 mb-1">Matična knjiga radnika</h1>
-    <p class="text-muted">{{ $organization->name }}{{ $organization->oib ? ' · OIB '.$organization->oib : '' }} · stanje na {{ $on->format('d.m.Y.') }} · {{ $people->count() }} aktivnih</p>
-    <p class="small text-muted">Registar aktivnih osoba (čl. 3. / čl. 10.) na odabrani dan. Kandidati i volonteri nisu u knjizi.</p>
+    <p class="text-muted">Stanje na {{ $on->format('d.m.Y.') }} · {{ $people->count() }} aktivnih. Odjel i radno mjesto čitaju se iz povijesti angažmana.</p>
 
-    <div class="table-responsive">
-        <table class="table table-sm table-bordered bg-white">
+    <div class="table-responsive table-responsive-no-sticky">
+        <table class="table table-sm table-bordered mb-0">
             <thead>
                 <tr>
                     <th>Rbr</th>
@@ -52,6 +39,7 @@
             </thead>
             <tbody>
                 @forelse($people as $index => $person)
+                    @php($assignment = $person->assignmentOn($on))
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $person->last_name }} {{ $person->first_name }}</td>
@@ -59,10 +47,10 @@
                         <td>{{ $person->genderLabel() }}</td>
                         <td>{{ $person->date_of_birth?->format('d.m.Y.') ?: '—' }}</td>
                         <td>{{ $person->citizenship ?: '—' }}</td>
-                        <td>{{ $person->status->label() }}</td>
-                        <td>{{ $person->jobLabel() }}</td>
-                        <td>{{ $person->department?->name ?: '—' }}</td>
-                        <td>{{ $person->contract_type?->label() ?: '—' }}</td>
+                        <td>{{ $assignment?->status->label() ?: $person->engagementLabel() }}</td>
+                        <td>{{ $assignment?->jobLabel() ?: $person->jobLabel() }}</td>
+                        <td>{{ $assignment?->department?->name ?: ($person->department?->name ?: '—') }}</td>
+                        <td>{{ $person->instrument_title ?: ($person->contract_type?->label() ?: '—') }}</td>
                         <td>{{ $person->started_at?->format('d.m.Y.') ?: '—' }}</td>
                     </tr>
                 @empty
@@ -74,7 +62,5 @@
         </table>
     </div>
 
-    <p class="small text-muted mt-3">Ispisao {{ $exporter->name }} · {{ $exportedAt->timezone(config('app.timezone'))->format('d.m.Y. H:i') }}. Nije preslika osobne iskaznice.</p>
-</div>
-</body>
-</html>
+    <p class="small text-muted mt-3 mb-0">Ispisao {{ $exporter->name }} · {{ $exportedAt->timezone(config('app.timezone'))->format('d.m.Y. H:i') }}. Nije preslika osobne iskaznice.</p>
+@endsection

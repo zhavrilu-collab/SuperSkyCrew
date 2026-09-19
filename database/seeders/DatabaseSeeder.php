@@ -19,6 +19,7 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Services\EmploymentContractService;
 use App\Services\HrSetupService;
+use App\Services\PersonEngagementService;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -78,6 +79,7 @@ class DatabaseSeeder extends Seeder
                 'plan' => 'standard',
                 'email' => 'info@demo-tvrtka.hr',
                 'oib' => '12345678903',
+                'annual_leave_days_per_child' => 2,
             ],
             [
                 'name' => 'Demo udruga Split',
@@ -149,6 +151,7 @@ class DatabaseSeeder extends Seeder
             ['organization_id' => $activeOrg->id, 'code' => 'OPS'],
             [
                 'name' => 'Operativa',
+                'parent_id' => $uprava->id,
                 'manager_user_id' => $manager->id,
                 'valid_from' => now()->subYears(3)->toDateString(),
                 'valid_to' => null,
@@ -158,6 +161,7 @@ class DatabaseSeeder extends Seeder
         $direktorica = JobPosition::query()->updateOrCreate(
             ['organization_id' => $activeOrg->id, 'name' => 'Direktorica'],
             [
+                'department_id' => $uprava->id,
                 'rad1g' => '1210',
                 'annual_leave_days' => 25,
                 'valid_from' => now()->subYears(3)->toDateString(),
@@ -167,6 +171,7 @@ class DatabaseSeeder extends Seeder
         $referent = JobPosition::query()->updateOrCreate(
             ['organization_id' => $activeOrg->id, 'name' => 'Referent'],
             [
+                'department_id' => $operativa->id,
                 'rad1g' => '4110',
                 'annual_leave_days' => 20,
                 'valid_from' => now()->subYears(3)->toDateString(),
@@ -206,6 +211,7 @@ class DatabaseSeeder extends Seeder
                 'cost_center_id' => $mtUprava->id,
                 'citizenship' => 'HR',
                 'annual_leave_days' => 25,
+                'annual_leave_manual' => false,
                 'clock_pin' => '1111',
             ],
         );
@@ -226,6 +232,7 @@ class DatabaseSeeder extends Seeder
                 'citizenship' => 'HR',
                 'manager_user_id' => $manager->id,
                 'annual_leave_days' => 20,
+                'annual_leave_manual' => false,
                 'clock_pin' => '2222',
                 'medical_expires_at' => now()->addDays(10)->toDateString(),
                 'iban' => 'HR1210010051863000160',
@@ -244,7 +251,68 @@ class DatabaseSeeder extends Seeder
             $contracts->seedIfMissing($person);
         }
 
+        Person::query()->updateOrCreate(
+            ['organization_id' => $activeOrg->id, 'last_name' => 'Student', 'first_name' => 'Luka'],
+            [
+                'job_title' => 'Pomoćni referent',
+                'status' => PersonStatus::OtherFo,
+                'fo_kind' => \App\Enums\OtherFoKind::Student,
+                'instrument_title' => 'Ugovor o obavljanju studentskih poslova',
+                'started_at' => now()->subMonths(2)->toDateString(),
+                'location_id' => $location->id,
+                'department_id' => $operativa->id,
+                'citizenship' => 'HR',
+                'clock_pin' => '4444',
+            ],
+        );
+        Person::query()->updateOrCreate(
+            ['organization_id' => $activeOrg->id, 'last_name' => 'Honor', 'first_name' => 'Iva'],
+            [
+                'job_title' => 'Prevodioc',
+                'status' => PersonStatus::Contractor,
+                'instrument_title' => 'Ugovor o djelu — prijevod',
+                'started_at' => now()->subMonths(1)->toDateString(),
+                'location_id' => $location->id,
+                'citizenship' => 'HR',
+            ],
+        );
+        Person::query()->updateOrCreate(
+            ['organization_id' => $activeOrg->id, 'last_name' => 'Ustup', 'first_name' => 'Ante'],
+            [
+                'job_title' => 'Referent',
+                'status' => PersonStatus::Assigned,
+                'host_employer' => 'Agencija Plus d.o.o.',
+                'assignment_clocks' => true,
+                'started_at' => now()->subMonths(4)->toDateString(),
+                'location_id' => $location->id,
+                'department_id' => $operativa->id,
+                'job_position_id' => $referent->id,
+                'citizenship' => 'HR',
+                'clock_pin' => '5555',
+            ],
+        );
+        Person::query()->updateOrCreate(
+            ['organization_id' => $activeOrg->id, 'last_name' => 'Ruk', 'first_name' => 'Roko'],
+            [
+                'job_title' => 'Direktorica',
+                'status' => PersonStatus::Executive,
+                'executive_autonomy' => true,
+                'started_at' => now()->subYears(5)->toDateString(),
+                'location_id' => $location->id,
+                'department_id' => $uprava->id,
+                'job_position_id' => $direktorica->id,
+                'citizenship' => 'HR',
+                'clock_pin' => '6666',
+                'annual_leave_manual' => false,
+            ],
+        );
+
+        $engagements = app(PersonEngagementService::class);
+        Person::query()->where('organization_id', $activeOrg->id)->orderBy('id')->get()
+            ->each(fn (Person $person) => $engagements->sync($person));
+
         app(HrSetupService::class)->provision($activeOrg);
+        app(\App\Services\LeaveService::class)->recalculateOrganization($activeOrg);
 
         $prva = Shift::query()->updateOrCreate(
             ['organization_id' => $activeOrg->id, 'code' => 'P1'],

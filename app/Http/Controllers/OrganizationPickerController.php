@@ -38,9 +38,9 @@ class OrganizationPickerController extends Controller
             ->first();
 
         if ($entry === null) {
-            return back()->withErrors(['slug' => 'Odabrana tvrtka nije dostupna.']);
+            return back()->withErrors(['slug' => 'Odabrana organizacija nije dostupna.']);
         }
 
-        return redirect()->route('organization.dashboard', ['slug' => $entry->organization->slug]);
+        return redirect()->route('organization.landing', ['slug' => $entry->organization->slug]);
     }
 }

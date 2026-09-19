@@ -36,7 +36,9 @@ class DocumentComplianceTest extends TestCase
             ->assertSee('Pisani pregled')
             ->assertSee('čl. 4.')
             ->assertSee('Lana Matić')
-            ->assertSee('Referentica');
+            ->assertSee('Referentica')
+            ->assertSee('kartica-kontejner', false)
+            ->assertSee('ispis-zaglavlje', false);
     }
 
     public function test_employee_can_open_own_review_but_not_another(): void

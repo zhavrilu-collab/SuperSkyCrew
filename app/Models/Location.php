@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DeviceBindMode;
 use App\Enums\GeofenceMode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,6 +21,9 @@ class Location extends OrganizationModel
         'is_active',
         'kiosk_enabled',
         'kiosk_token',
+        'require_photo',
+        'allow_offline',
+        'device_bind_mode',
     ];
 
     protected function casts(): array
@@ -30,6 +34,9 @@ class Location extends OrganizationModel
             'radius_meters' => 'integer',
             'geofence_mode' => GeofenceMode::class,
             'kiosk_enabled' => 'boolean',
+            'require_photo' => 'boolean',
+            'allow_offline' => 'boolean',
+            'device_bind_mode' => DeviceBindMode::class,
             'is_active' => 'boolean',
         ];
     }

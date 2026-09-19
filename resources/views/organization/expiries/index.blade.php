@@ -1,14 +1,15 @@
 @extends('layouts.organization')
 
 @section('title', 'Isteci dokumenata')
+@section('nav-suffix', 'Kadrovi')
 
 @section('content')
-<div class="mb-4">
-    <h1 class="h4 mb-1">Upozorenja isteka</h1>
-    <p class="text-muted mb-1">UOR na određeno, probni rad, dozvola, liječnički, certifikat i kvalifikacije u sljedećih 30 dana (pragovi 5 / 10 / 20 / 30).</p>
+<div class="page-heading">
+    <h1>Upozorenja isteka</h1>
+    <p class="text-muted mb-0">UOR na određeno, probni rad, dozvola, liječnički, certifikat, kvalifikacije i dokumenti dosjea u sljedećih {{ $horizon }} dana (pragovi 5 / 10 / 20 / 30).</p>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="kartica-kontejner">
     <div class="table-responsive">
         <table class="table mb-0 align-middle">
             <thead>
@@ -49,7 +50,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-muted">Nema isteka u sljedećih 30 dana.</td>
+                        <td colspan="5" class="text-muted">Nema isteka u sljedećih {{ $horizon }} dana.</td>
                     </tr>
                 @endforelse
             </tbody>

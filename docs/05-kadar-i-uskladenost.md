@@ -59,13 +59,13 @@ Fluktuacija: izvještaj ulazaka/izlazaka po razdoblju. Matična knjiga: ispis re
 
 Tipovi dokumenata korisnik definira (UOR, aneks, UOD, viza, porezna kartica, certifikat, uputnica…). Više datoteka po osobi.
 
-Predlošci v1 (Word/PDF merge):
+Predlošci v1 (Word merge u `.docx`, HTML ispis ostaje na kartici):
 
-- Ugovor o radu
-- Rješenje o GO
-- Uputnica za liječnički pregled
+- **Ugovor o radu** — ugrađeni predložak; Preuzmi ili Spremi u dosje
+- **Rješenje o GO** — HTML na odobrenom zahtjevu; Word se upisuje u dosje pri odobrenju
+- **Uputnica za liječnički pregled** — ugrađeni predložak
 
-Korisnik dodaje vlastite predloške.
+Polja su `{{ime}}`, `{{go_broj}}` i ostali tokeni u Postavke → Kadrovi → Predlošci. Word često reže token u više runova — merge ih spaja. Korisnik dodaje vlastite predloške. Ugrađeni se ne brišu.
 
 Upozorenja isteka: UOR na određeno, boravište/dozvola, certifikat, liječnički, atest. Signal na dashboardu HR-a (npr. 5/10/20/30 dana).
 
@@ -101,10 +101,15 @@ Radnik ima pravo uvida u vlastite podatke (čl. 5. st. 1.). Promjenu prijavljuje
 
 ## Kandidati (ATS-lite, v1)
 
-- Osobni podaci, škole, kompetencije, CV
-- Bilješke razgovora
-- Stranci: ima/nema radnu i boravišnu, rok
+- Osobni podaci, škole, kompetencije, CV i bilješke razgovora (kartica **Odabir**; ostaje i nakon prijenosa u kadar)
+- Stranci: ima/nema radnu i boravišnu, rok (Osobno)
 - Nije puni ATS (natječaji, scoring) — to je Faza 4
+
+## Ustupljeni, rukovodeće i volonteri
+
+- **Ustupljeni radnik** — kartica čl. 3./4. s nazivom ustupitelja (agencija / povezano društvo). Evidencija RV samo ako je ugovorena.
+- **Rukovodeća osoba** — kartica čl. 3. Ako je ugovorena samostalnost (čl. 21.), šihterica ne diže iznimke dnevnog odmora, kašnjenja ni mjesečnog fonda.
+- **Volonter** — Postavke → Kadrovi → Volonteri. Nije u matičnoj knjizi ni na šihterici. Grant sati Faza 2.
 
 ## Druge FO (čl. 10.)
 

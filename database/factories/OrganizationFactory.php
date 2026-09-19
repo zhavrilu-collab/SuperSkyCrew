@@ -23,6 +23,8 @@ class OrganizationFactory extends Factory
             'slug' => Str::slug($name).'-'.fake()->unique()->numerify('###'),
             'status' => OrganizationStatus::Active,
             'plan' => 'standard',
+            'organization_type' => \App\Enums\OrganizationType::Company,
+            'theme_key' => 'zelena',
             'email' => fake()->unique()->companyEmail(),
             'oib' => '12345678903',
             'city' => 'Zagreb',

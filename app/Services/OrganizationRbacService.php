@@ -67,4 +67,27 @@ class OrganizationRbacService
     {
         return $this->roleForUser($organizationId, $userId) === OrganizationRole::Owner;
     }
+
+    public function canOpenSettings(int $organizationId, int $userId): bool
+    {
+        return $this->can($organizationId, $userId, 'settings.manage')
+            || $this->can($organizationId, $userId, 'people.access')
+            || $this->can($organizationId, $userId, 'team.manage');
+    }
+
+    public function canAccessSettingsTab(int $organizationId, int $userId, string $tab): bool
+    {
+        return match ($tab) {
+            'organizacija' => $this->can($organizationId, $userId, 'settings.manage')
+                || $this->can($organizationId, $userId, 'people.access'),
+            'kadar', 'podaci' => $this->can($organizationId, $userId, 'people.access')
+                || $this->can($organizationId, $userId, 'settings.manage'),
+            'vrijeme', 'odobrenja' => $this->can($organizationId, $userId, 'time.access')
+                || $this->can($organizationId, $userId, 'people.access')
+                || $this->can($organizationId, $userId, 'payroll.export'),
+            'pristup' => $this->can($organizationId, $userId, 'team.manage'),
+            'pretplata' => $this->can($organizationId, $userId, 'settings.manage'),
+            default => false,
+        };
+    }
 }

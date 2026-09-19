@@ -27,6 +27,21 @@ enum PersonStatus: string
         };
     }
 
+    public function usesArticleThree(): bool
+    {
+        return in_array($this, [self::Employee, self::Assigned, self::Executive], true);
+    }
+
+    public function usesArticleTen(): bool
+    {
+        return $this === self::OtherFo;
+    }
+
+    public function usesEmploymentContract(): bool
+    {
+        return $this->usesArticleThree();
+    }
+
     public function clocksIn(): bool
     {
         return in_array($this, [
@@ -36,5 +51,20 @@ enum PersonStatus: string
             self::Contractor,
             self::Executive,
         ], true);
+    }
+
+    /**
+     * @return list<self>
+     */
+    public static function selectable(bool $includeVolunteer): array
+    {
+        if ($includeVolunteer) {
+            return self::cases();
+        }
+
+        return array_values(array_filter(
+            self::cases(),
+            fn (self $status) => $status !== self::Volunteer,
+        ));
     }
 }

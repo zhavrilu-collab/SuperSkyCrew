@@ -24,6 +24,7 @@ class ExpiryController extends Controller
         return view('organization.expiries.index', [
             'organization' => $organization,
             'items' => $items,
+            'horizon' => $this->expiries->horizon($organization),
         ]);
     }
 }

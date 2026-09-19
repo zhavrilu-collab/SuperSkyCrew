@@ -131,6 +131,23 @@ class TimeEntryRebuilderTest extends TestCase
         $this->assertNull($result['entry']->exception_code);
     }
 
+    public function test_executive_autonomy_skips_daily_rest_flag(): void
+    {
+        [$user, $person] = $this->seedPerson();
+        $person->update([
+            'status' => PersonStatus::Executive,
+            'executive_autonomy' => true,
+        ]);
+        $clock = app(ClockService::class);
+
+        $clock->punch($person->fresh(), $user, $this->punch(PunchType::In, '2026-09-17 08:00:00'));
+        $clock->punch($person->fresh(), $user, $this->punch(PunchType::Out, '2026-09-17 22:00:00'));
+        $clock->punch($person->fresh(), $user, $this->punch(PunchType::In, '2026-09-18 07:00:00'));
+        $result = $clock->punch($person->fresh(), $user, $this->punch(PunchType::Out, '2026-09-18 15:00:00'));
+
+        $this->assertNull($result['entry']->exception_code);
+    }
+
     public function test_monthly_fund_excess_is_flagged(): void
     {
         [$user, $person] = $this->seedPerson();

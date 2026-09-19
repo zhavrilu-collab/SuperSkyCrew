@@ -13,18 +13,24 @@ class ExpiryWarningService
 {
     public const WITHIN_DAYS = 30;
 
+    public function horizon(Organization $organization): int
+    {
+        return max(1, (int) ($organization->expiry_warning_days ?: self::WITHIN_DAYS));
+    }
+
     /**
      * @return list<array{person: Person, kind: ExpiryKind, detail: string|null, date: Carbon, days: int, overdue: bool, window: int}>
      */
-    public function due(Organization $organization, int $withinDays = self::WITHIN_DAYS): array
+    public function due(Organization $organization, ?int $withinDays = null): array
     {
         $today = now()->timezone(config('app.timezone'))->startOfDay();
-        $horizon = $today->copy()->addDays($withinDays);
+        $horizonDays = $withinDays ?? $this->horizon($organization);
+        $horizon = $today->copy()->addDays($horizonDays);
         $items = [];
 
         $people = Person::query()
             ->forOrganization($organization)
-            ->with(['qualifications', 'employmentContracts'])
+            ->with(['qualifications', 'employmentContracts', 'documents.documentType'])
             ->whereNotIn('status', [PersonStatus::Former->value, PersonStatus::Candidate->value])
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -46,6 +52,23 @@ class ExpiryWarningService
                     $today,
                     $horizon,
                     $qualification->title,
+                );
+                if ($item !== null) {
+                    $items[] = $item;
+                }
+            }
+
+            foreach ($person->documents as $document) {
+                if ($document->isDisposed()) {
+                    continue;
+                }
+                $item = $this->item(
+                    $person,
+                    ExpiryKind::Dossier,
+                    $document->expires_on?->copy()->startOfDay(),
+                    $today,
+                    $horizon,
+                    $document->label(),
                 );
                 if ($item !== null) {
                     $items[] = $item;

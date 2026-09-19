@@ -1,26 +1,14 @@
-<!DOCTYPE html>
-<html lang="hr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pisani pregled — {{ $person->fullName() }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background: #fff; }
-            a { text-decoration: none; color: inherit; }
-        }
-    </style>
-</head>
-<body class="bg-light">
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2 no-print">
-        @if(app(\App\Services\OrganizationRbacService::class)->can($organization->id, auth()->id(), 'people.access'))
-            <a href="{{ route('organization.people.edit', [$organization->slug, $person]) }}" class="small">← Kartica</a>
-        @else
-            <a href="{{ route('organization.dashboard', $organization->slug) }}" class="small">← Ploča</a>
-        @endif
+@extends('layouts.print')
+
+@section('title', 'Pisani pregled — '.$person->fullName())
+
+@section('toolbar')
+    @if(app(\App\Services\OrganizationRbacService::class)->can($organization->id, auth()->id(), 'people.access'))
+        <a href="{{ route('organization.people.edit', [$organization->slug, $person]) }}" class="small">← Kartica</a>
+    @else
+        <a href="{{ route('organization.dashboard', $organization->slug) }}" class="small">← Ploča</a>
+    @endif
+    <div class="d-flex gap-2 flex-wrap">
         <button class="btn btn-primary" type="button" onclick="window.print()">Ispiši</button>
         @if(app(\App\Services\OrganizationRbacService::class)->can($organization->id, auth()->id(), 'people.access'))
             <a class="btn btn-outline-primary" href="{{ route('organization.people.contract', [$organization->slug, $person]) }}">UOR</a>
@@ -32,7 +20,9 @@
             <a class="btn btn-outline-primary" href="{{ route('organization.requests.create', [$organization->slug, 'type' => 'personal_data']) }}">Prijavi promjenu</a>
         @endif
     </div>
+@endsection
 
+@section('content')
     <h1 class="h4 mb-1">Pisani pregled evidencije o radniku</h1>
     <p class="text-muted">Pravilnik NN 55/2024, čl. 4. u vezi s čl. 3. st. 1.</p>
 
@@ -42,7 +32,15 @@
         <dt class="col-sm-3">Izradio</dt>
         <dd class="col-sm-9">{{ $exporter->name }} · {{ $exportedAt->timezone(config('app.timezone'))->format('d.m.Y. H:i') }}</dd>
         <dt class="col-sm-3">Status u evidenciji</dt>
-        <dd class="col-sm-9">{{ $person->status->label() }}</dd>
+        <dd class="col-sm-9">{{ $person->engagementLabel() }}</dd>
+        @if($person->status === \App\Enums\PersonStatus::Assigned)
+            <dt class="col-sm-3">Ustupitelj / agencija</dt>
+            <dd class="col-sm-9">{{ $person->host_employer ?: '—' }}{{ $person->assignment_clocks ? ' · evidencija RV ugovorena' : ' · evidencija RV nije ugovorena' }}</dd>
+        @endif
+        @if($person->status === \App\Enums\PersonStatus::Executive && $person->executive_autonomy)
+            <dt class="col-sm-3">Čl. 21.</dt>
+            <dd class="col-sm-9">Ugovorena samostalnost — smanjeni slog (bez upozorenja dnevnog odmora, kašnjenja i mjesečnog fonda).</dd>
+        @endif
     </dl>
 
     <ol class="list-group list-group-numbered mb-4">
@@ -56,19 +54,12 @@
         <li class="list-group-item">
             <div class="d-flex justify-content-between">
                 <span>Stručno obrazovanje / certifikati</span>
-                @if($person->qualifications->isEmpty())
-                    <strong>nije uneseno u karticu</strong>
-                @endif
+                <strong>{{ $person->qualifications->isEmpty() ? 'nije uneseno u karticu' : '' }}</strong>
             </div>
             @if($person->qualifications->isNotEmpty())
                 <ul class="mb-0 mt-2 ps-3">
                     @foreach($person->qualifications as $item)
-                        <li>
-                            {{ $item->summary() }}
-                            @if($item->required_for_job)
-                                · uvjet za posao
-                            @endif
-                        </li>
+                        <li>{{ $item->summary() }}{{ $item->required_for_job ? ' · uvjet za posao' : '' }}</li>
                     @endforeach
                 </ul>
             @endif
@@ -81,9 +72,7 @@
         <li class="list-group-item">
             <div class="d-flex justify-content-between">
                 <span>Ugovori i aneksi</span>
-                @if($person->employmentContracts->isEmpty())
-                    <strong>nema ugovora u dosjeu</strong>
-                @endif
+                <strong>{{ $person->employmentContracts->isEmpty() ? 'nema ugovora u dosjeu' : '' }}</strong>
             </div>
             @if($person->employmentContracts->isNotEmpty())
                 <ul class="mb-0 mt-2 ps-3">
@@ -118,6 +107,4 @@
     </dl>
 
     <p class="small text-muted mb-0">Radnik ima pravo uvida u vlastite podatke (čl. 5. st. 1.). Ovaj ispis nije preslika osobne iskaznice.</p>
-</div>
-</body>
-</html>
+@endsection

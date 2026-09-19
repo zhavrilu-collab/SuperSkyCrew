@@ -32,7 +32,7 @@ class EmploymentContractTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->get(route('organization.people.edit', [$organization->slug, $person]))
+            ->get(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'ugovori']))
             ->assertOk()
             ->assertSee('Ugovori i aneksi');
 
@@ -45,7 +45,7 @@ class EmploymentContractTest extends TestCase
                 'weekly_hours' => 40,
                 'is_current' => '1',
             ])
-            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person]));
+            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'ugovori']));
 
         $person->refresh();
         $this->assertSame(ContractType::Indefinite, $person->contract_type);
@@ -196,7 +196,7 @@ class EmploymentContractTest extends TestCase
 
         $this->actingAs($owner)
             ->delete(route('organization.contracts.destroy', [$organization->slug, $person, $item]))
-            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person]));
+            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'ugovori']));
 
         $this->assertDatabaseMissing('employment_contracts', ['id' => $item->id]);
     }

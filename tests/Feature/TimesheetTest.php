@@ -235,7 +235,7 @@ class TimesheetTest extends TestCase
             ->assertOk()
             ->assertSee('Na poslu')
             ->assertSee('1')
-            ->assertSee('Kadar')
+            ->assertSee('Kadrovi')
             ->assertSee('Šihterica');
     }
 

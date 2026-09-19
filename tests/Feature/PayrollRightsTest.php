@@ -28,7 +28,7 @@ class PayrollRightsTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->get(route('organization.people.edit', [$organization->slug, $person]))
+            ->get(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'place']))
             ->assertOk()
             ->assertSee('Podaci za plaće i prava');
 
@@ -47,7 +47,7 @@ class PayrollRightsTest extends TestCase
                 'family_right' => FamilyRight::Parental->value,
                 'znr_exam_required' => '1',
             ])
-            ->assertRedirect(route('organization.people.index', $organization->slug));
+            ->assertRedirect(route('organization.people.edit', [$organization->slug, $person, 'tab' => 'pregled']));
 
         $this->assertDatabaseHas('people', [
             'id' => $person->id,

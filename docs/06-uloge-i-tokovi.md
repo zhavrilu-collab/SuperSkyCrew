@@ -75,11 +75,11 @@ Korisnik (HR/vlasnik) vidi popis slijedova i može mijenjati korake. Grafički d
 
 ### Notifikacije v1
 
-- E-mail: zahtjev čeka, odobreno, odbijeno, istek dokumenta, zaboravljena odjava, nekompletan slog pred 7. dan
+- E-mail: zahtjev čeka, odobreno, odbijeno (radni slijed odmah); istek dokumenta, zaboravljena odjava, nekompletan slog 5. i 7. dana (`hr:reminders`, jednom po događaju)
 - Push: Faza 2
 
 ## Autorizacija podataka
 
 - Voditelj ne vidi plaće ni OIB cijelog poduzeća — samo svoj odjel, i to operativna polja.
 - Računovodstvo vidi evidencijske sate i MT, ne CV niti zdravstvene nalaze.
-- Izvoz inspekciji je privilegirana akcija s auditom (čl. 5. st. 6.).
+- Izvoz inspekciji je privilegirana akcija s auditom (čl. 5. st. 6.). Revizijski trag: Postavke → Podaci → Revizijski trag.

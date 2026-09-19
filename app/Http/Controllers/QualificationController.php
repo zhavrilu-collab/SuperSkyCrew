@@ -46,7 +46,7 @@ class QualificationController extends Controller
         ]);
 
         return redirect()
-            ->route('organization.people.edit', [$organization->slug, $person])
+            ->route('organization.people.edit', [$organization->slug, $person, 'tab' => 'kvalifikacije'])
             ->with('status', 'Kvalifikacija je spremljena.');
     }
 
@@ -61,7 +61,7 @@ class QualificationController extends Controller
         $qualification->delete();
 
         return redirect()
-            ->route('organization.people.edit', [$organization->slug, $person])
+            ->route('organization.people.edit', [$organization->slug, $person, 'tab' => 'kvalifikacije'])
             ->with('status', 'Kvalifikacija je uklonjena.');
     }
 

@@ -78,7 +78,7 @@ class StaffInviteAcceptController extends Controller
         $request->session()->regenerate();
 
         return redirect()
-            ->route('organization.dashboard', ['slug' => $invite->organization->slug])
+            ->route('organization.landing', ['slug' => $invite->organization->slug])
             ->with('status', 'Pozivnica je prihvaćena.');
     }
 }

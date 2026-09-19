@@ -95,8 +95,7 @@ class ExceptionQueueTest extends TestCase
         $this->actingAs($owner)
             ->get(route('organization.dashboard', $organization->slug))
             ->assertOk()
-            ->assertSee('Iznimke')
-            ->assertSee('Nema otvorenih');
+            ->assertSee('Iznimke (7 d.)');
     }
 
     public function test_employee_cannot_open_queue_and_accountant_cannot_resolve(): void

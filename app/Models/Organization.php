@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Enums\OrganizationStatus;
+use App\Enums\OrganizationType;
+use App\Support\OrganizationThemes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Organization extends Model
 {
@@ -23,6 +26,13 @@ class Organization extends Model
         'city',
         'stripe_customer_id',
         'stripe_subscription_id',
+        'organization_type',
+        'theme_key',
+        'logo_path',
+        'volunteer_module',
+        'expiry_warning_days',
+        'annual_leave_base_days',
+        'annual_leave_days_per_child',
     ];
 
     protected function casts(): array
@@ -30,7 +40,36 @@ class Organization extends Model
         return [
             'status' => OrganizationStatus::class,
             'status_changed_at' => 'datetime',
+            'organization_type' => OrganizationType::class,
+            'volunteer_module' => 'boolean',
+            'expiry_warning_days' => 'integer',
+            'annual_leave_base_days' => 'integer',
+            'annual_leave_days_per_child' => 'integer',
         ];
+    }
+
+    public function navbarBrandPrefix(): string
+    {
+        return mb_strtoupper($this->name);
+    }
+
+    public function logoUrl(): ?string
+    {
+        if (blank($this->logo_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->logo_path);
+    }
+
+    public function isNonprofit(): bool
+    {
+        return $this->organization_type === OrganizationType::Nonprofit;
+    }
+
+    public function themePalette(): array
+    {
+        return OrganizationThemes::paletteFor($this);
     }
 
     /**
@@ -74,5 +113,10 @@ class Organization extends Model
     public function calendarRules(): HasMany
     {
         return $this->hasMany(CalendarRule::class);
+    }
+
+    public function leaveTenureRules(): HasMany
+    {
+        return $this->hasMany(LeaveTenureRule::class)->orderBy('min_years');
     }
 }

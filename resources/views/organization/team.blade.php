@@ -16,7 +16,7 @@
 
 <div class="row g-4">
     <div class="col-lg-7">
-        <div class="card border-0 shadow-sm">
+        <div class="kartica-kontejner">
             <div class="card-header bg-white fw-semibold">Članovi</div>
             <div class="table-responsive">
                 <table class="table mb-0 align-middle">
@@ -67,7 +67,7 @@
     </div>
 
     <div class="col-lg-5">
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="kartica-kontejner mb-4">
             <div class="card-header bg-white fw-semibold">Nova pozivnica</div>
             <div class="card-body">
                 <form method="POST" action="{{ route('organization.team.invite', $organization->slug) }}">
@@ -91,7 +91,7 @@
         </div>
 
         @if($pendingInvites->isNotEmpty())
-            <div class="card border-0 shadow-sm">
+            <div class="kartica-kontejner">
                 <div class="card-header bg-white fw-semibold">Aktivne pozivnice</div>
                 <ul class="list-group list-group-flush">
                     @foreach($pendingInvites as $invite)

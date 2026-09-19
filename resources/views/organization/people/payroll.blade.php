@@ -1,11 +1,12 @@
 @extends('layouts.organization')
 
 @section('title', 'Podaci za plaće')
+@section('nav-suffix', 'Kadrovi')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
-    <div>
-        <h1 class="h4 mb-1">Podaci za plaće</h1>
+    <div class="page-heading mb-0">
+        <h1>Podaci za plaće</h1>
         <p class="text-muted mb-0">Čl. 3. st. 2. — unos, ne obračun. Stanje na {{ $on->format('d.m.Y.') }}.</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
@@ -17,7 +18,7 @@
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="kartica-kontejner">
     <div class="table-responsive">
         <table class="table table-sm mb-0 align-middle">
             <thead>

@@ -1,11 +1,12 @@
 @extends('layouts.organization')
 
 @section('title', 'Zahtjevi')
+@section('nav-suffix', 'Moje')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h4 mb-1">Zahtjevi</h1>
+    <div class="page-heading mb-0">
+        <h1>Zahtjevi</h1>
         @if($leave)
             <p class="text-muted mb-0">GO {{ $leave['year'] }}.: preostalo <strong>{{ $leave['remaining'] }}</strong> (staro {{ $leave['remaining_old'] }}, novo {{ $leave['remaining_new'] }})</p>
         @endif
@@ -16,7 +17,7 @@
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="kartica-kontejner">
     <div class="table-responsive">
         <table class="table mb-0 align-middle">
             <thead>

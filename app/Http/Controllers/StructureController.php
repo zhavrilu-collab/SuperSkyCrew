@@ -5,16 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\CostCenter;
 use App\Models\Department;
 use App\Models\JobPosition;
-use App\Models\OrganizationUser;
-use App\Models\Person;
 use App\Services\DepartmentScopeService;
 use App\Services\OrganizationRbacService;
-use Carbon\Carbon;
+use App\Support\DepartmentTree;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 class StructureController extends Controller
 {
@@ -23,41 +20,16 @@ class StructureController extends Controller
         private readonly DepartmentScopeService $scope,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): RedirectResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
-        $on = Carbon::parse($request->input('na', now()->toDateString()), config('app.timezone'))->startOfDay();
-        $departments = $this->scope->departmentsOn($organization, $on);
-        $positions = $this->scope->positionsOn($organization, $on);
-        $costCenters = $this->scope->costCentersOn($organization, $on);
-
-        $people = Person::query()
-            ->forOrganization($organization)
-            ->whereIn('status', ['employee', 'assigned', 'other_fo', 'contractor', 'executive'])
-            ->with(['department', 'jobPosition', 'costCenter'])
-            ->orderBy('last_name')
-            ->get();
-
-        $managers = OrganizationUser::query()
-            ->with('user')
-            ->where('organization_id', $organization->id)
-            ->whereIn('role', ['owner', 'hr', 'manager'])
-            ->get()
-            ->map(fn (OrganizationUser $membership) => $membership->user)
-            ->filter()
-            ->unique('id')
-            ->values();
-
-        return view('organization.structure.index', [
-            'organization' => $organization,
-            'on' => $on,
-            'departments' => $departments,
-            'positions' => $positions,
-            'costCenters' => $costCenters,
-            'people' => $people,
-            'managers' => $managers,
+        return redirect()->route('organization.settings.index', [
+            'slug' => $organization->slug,
+            'tab' => 'organizacija',
+            'section' => 'ustroj',
+            'na' => $request->input('na'),
         ]);
     }
 
@@ -93,6 +65,9 @@ class StructureController extends Controller
         if ($department->people()->exists()) {
             return back()->withErrors(['department' => 'Odjel ima dodijeljene osobe. Premjestite ih prije brisanja.']);
         }
+        if ($department->children()->exists()) {
+            return back()->withErrors(['department' => 'Odjel ima pododjele. Premjestite ih prije brisanja.']);
+        }
 
         $department->delete();
 
@@ -117,7 +92,7 @@ class StructureController extends Controller
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
         abort_unless($position->organization_id === $organization->id, 404);
 
-        $position->update($this->validatedPosition($request));
+        $position->update($this->validatedPosition($request, $position));
 
         return back()->with('status', 'Radno mjesto je ažurirano.');
     }
@@ -191,6 +166,10 @@ class StructureController extends Controller
                     ->where('organization_id', $organization->id)
                     ->ignore($department?->id),
             ],
+            'parent_id' => [
+                'nullable',
+                Rule::exists('departments', 'id')->where('organization_id', $organization->id),
+            ],
             'manager_user_id' => [
                 'nullable',
                 Rule::exists('organization_users', 'user_id')->where('organization_id', $organization->id),
@@ -199,10 +178,17 @@ class StructureController extends Controller
             'valid_to' => ['nullable', 'date', 'after_or_equal:valid_from'],
         ]);
 
-        foreach (['code', 'manager_user_id', 'valid_from', 'valid_to'] as $empty) {
+        foreach (['code', 'parent_id', 'manager_user_id', 'valid_from', 'valid_to'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }
+        }
+
+        $parentId = isset($data['parent_id']) ? (int) $data['parent_id'] : null;
+        if (DepartmentTree::wouldCycle($department?->id, $parentId, Department::query()->forOrganization($organization)->get())) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'parent_id' => 'Odjel ne može biti nadređen sam sebi.',
+            ]);
         }
 
         return $data;
@@ -211,17 +197,23 @@ class StructureController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function validatedPosition(Request $request): array
+    private function validatedPosition(Request $request, ?JobPosition $position = null): array
     {
+        $organization = app('currentOrganization');
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
+            'department_id' => [
+                'nullable',
+                Rule::exists('departments', 'id')->where('organization_id', $organization->id),
+            ],
             'rad1g' => ['nullable', 'string', 'max:16'],
             'annual_leave_days' => ['nullable', 'integer', 'min:0', 'max:50'],
+            'description' => ['nullable', 'string', 'max:2000'],
             'valid_from' => ['nullable', 'date'],
             'valid_to' => ['nullable', 'date', 'after_or_equal:valid_from'],
         ]);
 
-        foreach (['rad1g', 'annual_leave_days', 'valid_from', 'valid_to'] as $empty) {
+        foreach (['department_id', 'rad1g', 'annual_leave_days', 'description', 'valid_from', 'valid_to'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }

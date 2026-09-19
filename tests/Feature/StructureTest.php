@@ -28,6 +28,18 @@ class StructureTest extends TestCase
 
         $this->actingAs($owner)
             ->get(route('organization.structure.index', $organization->slug))
+            ->assertRedirect(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'ustroj',
+            ]));
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'ustroj',
+            ]))
             ->assertOk()
             ->assertSee('Struktura organizacije')
             ->assertSee('Stanje na dan');
@@ -62,11 +74,32 @@ class StructureTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->get(route('organization.structure.index', [$organization->slug, 'na' => '2026-09-18']))
+            ->get($this->ustrojUrl($organization, '2026-09-18'))
             ->assertOk()
+            ->assertSee('Shema')
             ->assertSee('Operativa')
+            ->assertSee('org-kutija', false);
+
+        $this->actingAs($owner)
+            ->get($this->ustrojUrl($organization, '2026-09-18', 'mjesta'))
+            ->assertOk()
             ->assertSee('Referent')
             ->assertSee('4110');
+
+        $position = JobPosition::query()->where('organization_id', $organization->id)->where('name', 'Referent')->first();
+        Person::factory()->create([
+            'organization_id' => $organization->id,
+            'first_name' => 'Maja',
+            'last_name' => 'NaMjestu',
+            'job_position_id' => $position->id,
+            'status' => PersonStatus::Employee,
+        ]);
+
+        $this->actingAs($owner)
+            ->get($this->ustrojUrl($organization, '2026-09-18', 'mjesta').'&mjesto='.$position->id)
+            ->assertOk()
+            ->assertSee('Osobe na ovom mjestu')
+            ->assertSee('Maja NaMjestu');
     }
 
     public function test_owner_can_create_cost_center_and_assign_it_on_person_card(): void
@@ -99,7 +132,7 @@ class StructureTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->get(route('organization.structure.index', [$organization->slug, 'na' => '2026-09-18']))
+            ->get($this->ustrojUrl($organization, '2026-09-18', 'troskovi'))
             ->assertOk()
             ->assertSee('Mjesta troška')
             ->assertSee('Proizvodnja')
@@ -158,13 +191,13 @@ class StructureTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->get(route('organization.structure.index', [$organization->slug, 'na' => '2026-09-18']))
+            ->get($this->ustrojUrl($organization, '2026-09-18', 'odjeli'))
             ->assertOk()
             ->assertSee('Novi odjel')
             ->assertDontSee('Stari odjel');
 
         $this->actingAs($owner)
-            ->get(route('organization.structure.index', [$organization->slug, 'na' => '2025-06-01']))
+            ->get($this->ustrojUrl($organization, '2025-06-01', 'odjeli'))
             ->assertOk()
             ->assertSee('Stari odjel')
             ->assertDontSee('>Novi odjel<');
@@ -290,6 +323,56 @@ class StructureTest extends TestCase
         $this->assertDatabaseHas('departments', ['id' => $department->id]);
     }
 
+    public function test_owner_can_nest_update_department_and_open_org_chart(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+        $parent = Department::factory()->create([
+            'organization_id' => $organization->id,
+            'name' => 'Uprava',
+            'code' => 'UPR',
+        ]);
+
+        $this->actingAs($owner)
+            ->post(route('organization.structure.departments.store', $organization->slug), [
+                'name' => 'Operativa',
+                'code' => 'OPS',
+                'parent_id' => $parent->id,
+                'valid_from' => '2026-01-01',
+            ])
+            ->assertRedirect();
+
+        $child = Department::query()->where('organization_id', $organization->id)->where('code', 'OPS')->first();
+        $this->assertNotNull($child);
+        $this->assertSame($parent->id, $child->parent_id);
+
+        $this->actingAs($owner)
+            ->put(route('organization.structure.departments.update', [$organization->slug, $child]), [
+                'name' => 'Operativa plus',
+                'code' => 'OPS',
+                'parent_id' => $parent->id,
+                'valid_from' => '2026-01-01',
+            ])
+            ->assertRedirect();
+        $this->assertDatabaseHas('departments', ['id' => $child->id, 'name' => 'Operativa plus']);
+
+        $this->actingAs($owner)
+            ->from($this->ustrojUrl($organization, null, 'odjeli'))
+            ->put(route('organization.structure.departments.update', [$organization->slug, $child]), [
+                'name' => 'Petlja',
+                'code' => 'OPS',
+                'parent_id' => $child->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHasErrors('parent_id');
+
+        $this->actingAs($owner)
+            ->get($this->ustrojUrl($organization, now()->toDateString(), 'shema'))
+            ->assertOk()
+            ->assertSee('Uprava')
+            ->assertSee('Operativa plus')
+            ->assertSee('Novi odjel');
+    }
+
     /**
      * @return array{0: User, 1: Organization}
      */
@@ -309,6 +392,17 @@ class StructureTest extends TestCase
         ]);
 
         return [$user, $organization];
+    }
+
+    private function ustrojUrl(Organization $organization, ?string $na = null, ?string $katalog = null): string
+    {
+        return route('organization.settings.index', array_filter([
+            'slug' => $organization->slug,
+            'tab' => 'organizacija',
+            'section' => 'ustroj',
+            'na' => $na,
+            'katalog' => $katalog,
+        ]));
     }
 
     /**

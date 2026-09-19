@@ -21,6 +21,18 @@ class OrganizationTeamTest extends TestCase
 
         $this->actingAs($owner)
             ->get(route('organization.team.index', $organization->slug))
+            ->assertRedirect(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'pristup',
+                'section' => 'korisnici',
+            ]));
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'pristup',
+                'section' => 'korisnici',
+            ]))
             ->assertOk()
             ->assertSee('Tim');
     }
@@ -76,7 +88,7 @@ class OrganizationTeamTest extends TestCase
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ])
-            ->assertRedirect(route('organization.dashboard', $organization->slug));
+            ->assertRedirect(route('organization.landing', $organization->slug));
 
         $user = User::query()->where('email', 'novi@firma.hr')->first();
         $this->assertNotNull($user);

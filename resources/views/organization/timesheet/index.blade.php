@@ -1,11 +1,12 @@
 @extends('layouts.organization')
 
 @section('title', 'Šihterica')
+@section('nav-suffix', 'Vrijeme')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-        <h1 class="h4 mb-1">Šihterica</h1>
+    <div class="page-heading mb-0">
+        <h1>Šihterica</h1>
         <p class="text-muted mb-0">{{ $presentIds->count() }} trenutno na poslu</p>
     </div>
     <form class="d-flex gap-2 flex-wrap" method="GET">
@@ -35,7 +36,7 @@
         . Punchovi i odsutnosti se ne mogu mijenjati.
     </div>
 @elseif($canLock)
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="kartica-kontejner mb-4">
         <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
                 <div class="fw-semibold">Zaključaj {{ sprintf('%02d/%d', $from->month, $from->year) }}</div>
@@ -56,14 +57,14 @@
     </div>
 @endif
 
-<div class="card border-0 shadow-sm">
+<div class="kartica-kontejner">
     <div class="table-responsive">
         <table class="table table-sm mb-0 align-middle">
             <thead>
                 <tr>
                     <th>Osoba</th>
                     @foreach($days as $day)
-                        <th class="text-center {{ $day->isSunday() ? 'text-danger' : '' }}">{{ $day->format('d.m.') }}</th>
+                        <th class="text-center {{ $day->isSunday() ? 'nedjelja' : '' }}">{{ $day->format('d.m.') }}</th>
                     @endforeach
                 </tr>
             </thead>
@@ -91,4 +92,16 @@
         </table>
     </div>
 </div>
+
+@if($absenceCodes->isNotEmpty())
+    <div class="kartica-kontejner mt-3">
+        <h2 class="h6 mb-2">Značenje kratica (čl. 18. st. 2.)</h2>
+        <div class="d-flex flex-wrap gap-2">
+            @foreach($absenceCodes as $code)
+                <span class="badge {{ $code->badgeClass() }}" title="{{ $code->legendLine() }}">{{ $code->code }} · {{ $code->name }}</span>
+            @endforeach
+        </div>
+        <p class="small text-muted mb-0 mt-2">Puno značenje vidi se u Postavkama → Vrijeme → Šifrarnik sati i na inspekcijskom ispisu.</p>
+    </div>
+@endif
 @endsection

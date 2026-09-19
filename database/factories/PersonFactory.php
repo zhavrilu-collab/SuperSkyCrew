@@ -28,6 +28,7 @@ class PersonFactory extends Factory
             'started_at' => now()->subMonths(3)->toDateString(),
             'citizenship' => 'HR',
             'annual_leave_days' => 20,
+            'annual_leave_manual' => true,
         ];
     }
 }

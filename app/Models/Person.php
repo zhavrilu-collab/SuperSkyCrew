@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Enums\ContractType;
 use App\Enums\FamilyRight;
+use App\Enums\OtherFoKind;
 use App\Enums\PersonStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Person extends OrganizationModel
 {
@@ -39,6 +42,7 @@ class Person extends OrganizationModel
         'medical_expires_at',
         'certificate_expires_at',
         'annual_leave_days',
+        'annual_leave_manual',
         'iban',
         'pay_coefficient',
         'allowance_percent',
@@ -48,7 +52,16 @@ class Person extends OrganizationModel
         'tax_relief_note',
         'family_right',
         'znr_exam_required',
+        'fo_kind',
+        'instrument_title',
+        'host_employer',
+        'assignment_clocks',
+        'executive_autonomy',
         'clock_pin',
+        'clock_device_id',
+        'cv_path',
+        'cv_original_name',
+        'cv_uploaded_at',
     ];
 
     protected function casts(): array
@@ -63,6 +76,7 @@ class Person extends OrganizationModel
             'work_permit_expires_at' => 'date',
             'medical_expires_at' => 'date',
             'certificate_expires_at' => 'date',
+            'annual_leave_manual' => 'boolean',
             'pay_coefficient' => 'decimal:4',
             'allowance_percent' => 'decimal:2',
             'prior_service_months' => 'integer',
@@ -70,6 +84,10 @@ class Person extends OrganizationModel
             'dependents_count' => 'integer',
             'family_right' => FamilyRight::class,
             'znr_exam_required' => 'boolean',
+            'fo_kind' => OtherFoKind::class,
+            'assignment_clocks' => 'boolean',
+            'executive_autonomy' => 'boolean',
+            'cv_uploaded_at' => 'datetime',
         ];
     }
 
@@ -128,6 +146,44 @@ class Person extends OrganizationModel
         return $this->hasMany(Qualification::class)->orderBy('expires_at')->orderBy('title');
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(PersonDocument::class)->orderBy('expires_on')->orderBy('id');
+    }
+
+    public function interviewNotes(): HasMany
+    {
+        return $this->hasMany(InterviewNote::class)->orderByDesc('occurred_on')->orderByDesc('id');
+    }
+
+    public function hasCv(): bool
+    {
+        return filled($this->cv_path);
+    }
+
+    public function deleteCv(): void
+    {
+        if ($this->cv_path) {
+            Storage::disk('local')->delete($this->cv_path);
+        }
+
+        $this->forceFill([
+            'cv_path' => null,
+            'cv_original_name' => null,
+            'cv_uploaded_at' => null,
+        ])->save();
+    }
+
+    public function engagements(): HasMany
+    {
+        return $this->hasMany(PersonEngagement::class)->orderByDesc('valid_from')->orderByDesc('id');
+    }
+
+    public function assignmentOn(\Carbon\Carbon $on): ?PersonEngagement
+    {
+        return app(\App\Services\PersonEngagementService::class)->forPersonOn($this, $on);
+    }
+
     public function employmentContracts(): HasMany
     {
         return $this->hasMany(EmploymentContract::class)->orderByDesc('starts_at')->orderByDesc('id');
@@ -144,6 +200,11 @@ class Person extends OrganizationModel
         return trim($this->first_name.' '.$this->last_name);
     }
 
+    public function initials(): string
+    {
+        return mb_strtoupper(mb_substr((string) $this->first_name, 0, 1).mb_substr((string) $this->last_name, 0, 1));
+    }
+
     public function genderLabel(): string
     {
         return match ($this->gender) {
@@ -156,12 +217,75 @@ class Person extends OrganizationModel
 
     public function isClockEligible(): bool
     {
-        return $this->status->clocksIn();
+        if (! $this->status->clocksIn()) {
+            return false;
+        }
+
+        if ($this->status === PersonStatus::Assigned) {
+            return (bool) $this->assignment_clocks;
+        }
+
+        return true;
+    }
+
+    public function hasRelaxedTimeRecord(): bool
+    {
+        return $this->status === PersonStatus::Executive && $this->executive_autonomy;
+    }
+
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeClockEligible(Builder $query): Builder
+    {
+        return $query->where(function (Builder $inner) {
+            $inner->whereIn('status', [
+                PersonStatus::Employee->value,
+                PersonStatus::OtherFo->value,
+                PersonStatus::Contractor->value,
+                PersonStatus::Executive->value,
+            ])->orWhere(function (Builder $assigned) {
+                $assigned->where('status', PersonStatus::Assigned->value)
+                    ->where('assignment_clocks', true);
+            });
+        });
     }
 
     public function jobLabel(): string
     {
         return $this->jobPosition?->name ?: ($this->job_title ?: '—');
+    }
+
+    public function engagementLabel(): string
+    {
+        $status = $this->status->label();
+        if ($this->status === PersonStatus::OtherFo && $this->fo_kind) {
+            return $status.' · '.$this->fo_kind->label();
+        }
+        if ($this->status === PersonStatus::Contractor && $this->instrument_title) {
+            return $status.' · '.$this->instrument_title;
+        }
+        if ($this->status === PersonStatus::Assigned && $this->host_employer) {
+            return $status.' · '.$this->host_employer;
+        }
+        if ($this->status === PersonStatus::Executive && $this->executive_autonomy) {
+            return $status.' · samostalnost (čl. 21.)';
+        }
+
+        return $status;
+    }
+
+    public function instrumentLabel(): string
+    {
+        if ($this->instrument_title) {
+            return $this->instrument_title;
+        }
+        if ($this->currentContract()) {
+            return $this->currentContract()->summary();
+        }
+
+        return $this->contract_type?->label() ?: '—';
     }
 
     public function priorServiceLabel(): string

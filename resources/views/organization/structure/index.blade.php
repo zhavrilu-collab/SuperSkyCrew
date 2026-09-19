@@ -8,10 +8,12 @@
 @endif
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-        <h1 class="h4 mb-1">Struktura organizacije</h1>
+        <h2 class="h5 mb-1">Struktura organizacije</h2>
         <p class="text-muted mb-0">Odjeli, radna mjesta i mjesta troška s datumom važenja. Pregled stanja na dan.</p>
     </div>
-    <form method="GET" class="d-flex gap-2 align-items-end">
+    <form method="GET" action="{{ route('organization.settings.index', $organization->slug) }}" class="d-flex gap-2 align-items-end">
+        <input type="hidden" name="tab" value="organizacija">
+        <input type="hidden" name="section" value="ustroj">
         <div>
             <label class="form-label mb-1" for="na">Stanje na dan</label>
             <input type="date" class="form-control" name="na" id="na" value="{{ $on->toDateString() }}">
@@ -20,9 +22,10 @@
     </form>
 </div>
 
+
 <div class="row g-3 mb-4">
     <div class="col-lg-7">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <h2 class="h6">Odjeli na {{ $on->format('d.m.Y.') }}</h2>
                 <div class="table-responsive">
@@ -70,7 +73,7 @@
         </div>
     </div>
     <div class="col-lg-5">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <h2 class="h6">Radna mjesta na {{ $on->format('d.m.Y.') }}</h2>
                 <div class="table-responsive">
@@ -110,7 +113,7 @@
     </div>
 </div>
 
-<div class="card border-0 shadow-sm mb-4">
+<div class="kartica-kontejner mb-4">
     <div class="card-body">
         <h2 class="h6">Osobe prema odjelu (trenutna dodjela)</h2>
         <div class="table-responsive">
@@ -144,7 +147,7 @@
 
 <div class="row g-3">
     <div class="col-lg-6">
-        <form method="POST" action="{{ route('organization.structure.departments.store', $organization->slug) }}" class="card border-0 shadow-sm">
+        <form method="POST" action="{{ route('organization.structure.departments.store', $organization->slug) }}" class="kartica-kontejner">
             @csrf
             <div class="card-body">
                 <h2 class="h6">Novi odjel</h2>
@@ -182,7 +185,7 @@
         </form>
     </div>
     <div class="col-lg-6">
-        <form method="POST" action="{{ route('organization.structure.positions.store', $organization->slug) }}" class="card border-0 shadow-sm">
+        <form method="POST" action="{{ route('organization.structure.positions.store', $organization->slug) }}" class="kartica-kontejner">
             @csrf
             <div class="card-body">
                 <h2 class="h6">Novo radno mjesto</h2>
@@ -218,7 +221,7 @@
 
 <div class="row g-3 mt-1 mb-4">
     <div class="col-lg-7">
-        <div class="card border-0 shadow-sm h-100">
+        <div class="kartica-kontejner h-100">
             <div class="card-body">
                 <h2 class="h6">Mjesta troška na {{ $on->format('d.m.Y.') }}</h2>
                 <div class="table-responsive">
@@ -263,7 +266,7 @@
         </div>
     </div>
     <div class="col-lg-5">
-        <form method="POST" action="{{ route('organization.structure.cost-centers.store', $organization->slug) }}" class="card border-0 shadow-sm h-100">
+        <form method="POST" action="{{ route('organization.structure.cost-centers.store', $organization->slug) }}" class="kartica-kontejner h-100">
             @csrf
             <div class="card-body">
                 <h2 class="h6">Novo mjesto troška</h2>
