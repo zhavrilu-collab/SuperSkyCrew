@@ -12,6 +12,7 @@ use App\Models\LeaveTenureRule;
 use App\Models\Organization;
 use App\Models\Workflow;
 use App\Models\WorkflowStep;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class HrSetupService
@@ -94,12 +95,34 @@ class HrSetupService
         $fill = app(DocumentFillService::class);
 
         foreach ($fill->systemSpecs() as $spec) {
+            $existing = DocumentTemplate::query()
+                ->where('organization_id', $organization->id)
+                ->where('kind', $spec['kind'])
+                ->first();
+            $path = is_string($existing?->file_path) && $existing->file_path !== ''
+                ? $existing->file_path
+                : 'document-templates/'.$organization->id.'/'.$spec['file'];
+
+            if ($existing !== null && Storage::disk('local')->exists($path)) {
+                continue;
+            }
+
             $type = DocumentType::query()
                 ->where('organization_id', $organization->id)
                 ->where('code', $spec['type_code'])
                 ->first();
-            $path = 'document-templates/'.$organization->id.'/'.$spec['file'];
-            Storage::disk('local')->put($path, $fill->systemDocx($spec['kind']));
+
+            try {
+                Storage::disk('local')->put($path, $fill->systemDocx($spec['kind']));
+            } catch (\Throwable $exception) {
+                Log::warning('Sistemski predložak dokumenta nije spremljen.', [
+                    'organization_id' => $organization->id,
+                    'kind' => $spec['kind'],
+                    'message' => $exception->getMessage(),
+                ]);
+
+                continue;
+            }
 
             DocumentTemplate::query()->updateOrCreate(
                 [

@@ -38,6 +38,20 @@ class DocumentTemplatesTest extends TestCase
             ->assertUnprocessable();
     }
 
+    public function test_provision_does_not_overwrite_existing_system_templates(): void
+    {
+        Storage::fake('local');
+        [, $organization] = $this->seedMember();
+        $setup = app(HrSetupService::class);
+        $setup->provision($organization);
+
+        $path = 'document-templates/'.$organization->id.'/uor.docx';
+        Storage::disk('local')->put($path, 'keep-me');
+        $setup->provision($organization);
+
+        $this->assertSame('keep-me', Storage::disk('local')->get($path));
+    }
+
     public function test_fill_replaces_split_word_runs_and_saves_to_dossier(): void
     {
         Storage::fake('local');
