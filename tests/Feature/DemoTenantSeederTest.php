@@ -38,7 +38,7 @@ class DemoTenantSeederTest extends TestCase
             ]);
         }
 
-        $worker = User::query()->where('email', 'radnik@hr-demo.superskytech.com')->first();
+        $worker = User::query()->where('email', 'radnik@hr.demo')->first();
         $this->assertNotNull($worker);
         $this->assertTrue(password_verify(DemoTenantSeeder::PASSWORD, $worker->password));
 
@@ -76,5 +76,18 @@ class DemoTenantSeederTest extends TestCase
         $this->assertSame(1, Organization::query()->where('slug', DemoTenantSeeder::SLUG)->count());
         $this->assertSame(5, User::query()->whereIn('email', collect(DemoTenantSeeder::accounts())->pluck('email'))->count());
         $this->assertSame(10, Punch::query()->count());
+    }
+
+    public function test_legacy_superskytech_demo_emails_are_renamed(): void
+    {
+        User::factory()->create([
+            'email' => 'radnik@hr-demo.superskytech.com',
+            'name' => 'Ivan Horvat',
+        ]);
+
+        $this->seed(DemoTenantSeeder::class);
+
+        $this->assertDatabaseHas('users', ['email' => 'radnik@hr.demo']);
+        $this->assertDatabaseMissing('users', ['email' => 'radnik@hr-demo.superskytech.com']);
     }
 }

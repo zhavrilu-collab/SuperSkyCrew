@@ -50,17 +50,19 @@ class DemoTenantSeeder extends Seeder
 
     public const PASSWORD = 'DemoHr.2026';
 
+    public const MAIL_DOMAIN = 'hr.demo';
+
     /**
      * @return list<array{role: OrganizationRole, email: string, name: string}>
      */
     public static function accounts(): array
     {
         return [
-            ['role' => OrganizationRole::Owner, 'email' => 'vlasnik@hr-demo.superskytech.com', 'name' => 'Marta Vlasnik'],
-            ['role' => OrganizationRole::Hr, 'email' => 'hr@hr-demo.superskytech.com', 'name' => 'HR Administrator'],
-            ['role' => OrganizationRole::Manager, 'email' => 'voditelj@hr-demo.superskytech.com', 'name' => 'Petra Voditelj'],
-            ['role' => OrganizationRole::Accountant, 'email' => 'knjigovo@hr-demo.superskytech.com', 'name' => 'Lana Knjigovođa'],
-            ['role' => OrganizationRole::Employee, 'email' => 'radnik@hr-demo.superskytech.com', 'name' => 'Ivan Horvat'],
+            ['role' => OrganizationRole::Owner, 'email' => 'vlasnik@'.self::MAIL_DOMAIN, 'name' => 'Marta Vlasnik'],
+            ['role' => OrganizationRole::Hr, 'email' => 'hr@'.self::MAIL_DOMAIN, 'name' => 'HR Administrator'],
+            ['role' => OrganizationRole::Manager, 'email' => 'voditelj@'.self::MAIL_DOMAIN, 'name' => 'Petra Voditelj'],
+            ['role' => OrganizationRole::Accountant, 'email' => 'knjigovo@'.self::MAIL_DOMAIN, 'name' => 'Lana Knjigovođa'],
+            ['role' => OrganizationRole::Employee, 'email' => 'radnik@'.self::MAIL_DOMAIN, 'name' => 'Ivan Horvat'],
         ];
     }
 
@@ -86,7 +88,7 @@ class DemoTenantSeeder extends Seeder
                 'plan' => 'premium',
                 'employee_limit' => 200,
                 'features' => $features,
-                'email' => 'info@hr-demo.superskytech.com',
+                'email' => 'info@'.self::MAIL_DOMAIN,
                 'oib' => $this->oib('8182636454'),
                 'phone' => '+385 1 555 0100',
                 'city' => 'Zagreb',
@@ -415,17 +417,31 @@ class DemoTenantSeeder extends Seeder
 
     private function user(string $email, string $name): User
     {
-        $coreUserId = $this->ensureCoreUser($name, $email);
+        $existing = User::query()->where('email', $email)->first()
+            ?? User::query()->where('email', $this->legacyEmail($email))->first();
 
-        return User::query()->updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => $name,
-                'password' => self::PASSWORD,
-                'email_verified_at' => now(),
-                'core_user_id' => $coreUserId,
-            ],
-        );
+        $coreUserId = $this->ensureCoreUser($name, $email) ?? $existing?->core_user_id;
+
+        $payload = [
+            'name' => $name,
+            'email' => $email,
+            'password' => self::PASSWORD,
+            'email_verified_at' => now(),
+            'core_user_id' => $coreUserId,
+        ];
+
+        if ($existing !== null) {
+            $existing->forceFill($payload)->save();
+
+            return $existing->fresh();
+        }
+
+        return User::query()->create($payload);
+    }
+
+    private function legacyEmail(string $email): string
+    {
+        return str_replace('@'.self::MAIL_DOMAIN, '@hr-demo.superskytech.com', $email);
     }
 
     private function ensureCoreUser(string $name, string $email): ?int

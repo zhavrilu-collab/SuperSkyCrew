@@ -35,11 +35,11 @@ Na VPS-u: `cd /var/www/hr-saas && php artisan hr:seed-demo`
 
 | Uloga | E-mail | Lozinka |
 |---|---|---|
-| Vlasnik | `vlasnik@hr-demo.superskytech.com` | `DemoHr.2026` |
-| HR | `hr@hr-demo.superskytech.com` | `DemoHr.2026` |
-| Voditelj | `voditelj@hr-demo.superskytech.com` | `DemoHr.2026` |
-| Računovodstvo | `knjigovo@hr-demo.superskytech.com` | `DemoHr.2026` |
-| Radnik | `radnik@hr-demo.superskytech.com` | `DemoHr.2026` |
+| Vlasnik | `vlasnik@hr.demo` | `DemoHr.2026` |
+| HR | `hr@hr.demo` | `DemoHr.2026` |
+| Voditelj | `voditelj@hr.demo` | `DemoHr.2026` |
+| Računovodstvo | `knjigovo@hr.demo` | `DemoHr.2026` |
+| Radnik | `radnik@hr.demo` | `DemoHr.2026` |
 
 Organizacija: **Demo HR d.o.o.** (`/demo-hr`). Premium paket, kadar, šihterica (14.–18. 9. 2026), otvoreni GO za voditelja i prekovremeni.
 
