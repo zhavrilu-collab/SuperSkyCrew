@@ -27,11 +27,23 @@
                     <option value="overtime" @selected($defaultType === 'overtime')>Prekovremeni</option>
                     <option value="punch_correction" @selected($defaultType === 'punch_correction')>Ispravak prijave</option>
                     <option value="personal_data" @selected($defaultType === 'personal_data')>Promjena podataka</option>
+                    @if($shiftBoard ?? false)
+                        <option value="shift_swap" @selected($defaultType === 'shift_swap')>Zamjena smjene</option>
+                    @endif
                 </select>
             </div>
             <div class="col-md-4 js-from">
                 <label class="form-label" for="from">Od / datum</label>
                 <input type="date" class="form-control" name="from" id="from" value="{{ old('from') }}">
+            </div>
+            <div class="col-md-4 js-swap">
+                <label class="form-label" for="counterpart_id">Kolega za zamjenu</label>
+                <select class="form-select" name="counterpart_id" id="counterpart_id">
+                    <option value="">—</option>
+                    @foreach($colleagues ?? [] as $colleague)
+                        <option value="{{ $colleague->id }}" @selected((string) old('counterpart_id') === (string) $colleague->id)>{{ $colleague->fullName() }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="col-md-4 js-leave">
                 <label class="form-label" for="to">Do</label>
@@ -117,12 +129,13 @@
 <script>
     function toggleRequestFields() {
         var type = document.getElementById('type').value;
-        document.querySelectorAll('.js-from').forEach(function (el) { el.classList.toggle('d-none', type !== 'leave_annual' && type !== 'leave_other' && type !== 'overtime'); });
+        document.querySelectorAll('.js-from').forEach(function (el) { el.classList.toggle('d-none', type !== 'leave_annual' && type !== 'leave_other' && type !== 'overtime' && type !== 'shift_swap'); });
         document.querySelectorAll('.js-leave').forEach(function (el) { el.classList.toggle('d-none', type !== 'leave_annual' && type !== 'leave_other'); });
         document.querySelectorAll('.js-leave-other').forEach(function (el) { el.classList.toggle('d-none', type !== 'leave_other'); });
         document.querySelectorAll('.js-overtime').forEach(function (el) { el.classList.toggle('d-none', type !== 'overtime'); });
         document.querySelectorAll('.js-correction').forEach(function (el) { el.classList.toggle('d-none', type !== 'punch_correction'); });
         document.querySelectorAll('.js-data').forEach(function (el) { el.classList.toggle('d-none', type !== 'personal_data'); });
+        document.querySelectorAll('.js-swap').forEach(function (el) { el.classList.toggle('d-none', type !== 'shift_swap'); });
     }
     document.getElementById('type').addEventListener('change', toggleRequestFields);
     toggleRequestFields();

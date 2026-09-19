@@ -19,6 +19,8 @@ class Organization extends Model
         'slug',
         'status',
         'plan',
+        'employee_limit',
+        'features',
         'status_changed_at',
         'email',
         'oib',
@@ -49,7 +51,14 @@ class Organization extends Model
             'annual_leave_days_per_child' => 'integer',
             'period_lock_day' => 'integer',
             'show_clock_bounds' => 'boolean',
+            'employee_limit' => 'integer',
+            'features' => 'array',
         ];
+    }
+
+    public function feature(string $key): bool
+    {
+        return app(\App\Services\FeatureService::class)->enabled($this, $key);
     }
 
     public function navbarBrandPrefix(): string

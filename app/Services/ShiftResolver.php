@@ -7,6 +7,7 @@ use App\Models\CalendarRule;
 use App\Models\Organization;
 use App\Models\Person;
 use App\Models\Shift;
+use App\Models\ShiftOverride;
 use App\Support\CroatianHolidays;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -20,8 +21,28 @@ class ShiftResolver
      */
     private array $rulesByOrg = [];
 
+    /**
+     * @var array<int, Collection<int, Collection<int, ShiftOverride>>>
+     */
+    private array $overridesByOrg = [];
+
+    public function lateGraceMinutes(Person $person): int
+    {
+        $person->loadMissing('location');
+        $grace = $person->location?->punch_grace_minutes;
+        if ($grace === null) {
+            return self::LATE_GRACE_MINUTES;
+        }
+
+        return max(0, (int) $grace);
+    }
+
     public function forPersonOn(Person $person, Carbon $date): ?Shift
     {
+        $override = $this->overrideFor($person, $date);
+        if ($override !== null) {
+            return $override->shift;
+        }
         $person->loadMissing(['department', 'jobPosition']);
         $weekday = $date->isoWeekday();
         $rules = $this->rulesFor($person->organization_id)
@@ -87,5 +108,23 @@ class ShiftResolver
         }
 
         return $this->rulesByOrg[$organizationId];
+    }
+
+    private function overrideFor(Person $person, Carbon $date): ?ShiftOverride
+    {
+        $organizationId = (int) $person->organization_id;
+        if (! isset($this->overridesByOrg[$organizationId])) {
+            $this->overridesByOrg[$organizationId] = ShiftOverride::query()
+                ->where('organization_id', $organizationId)
+                ->with('shift')
+                ->get()
+                ->groupBy('person_id');
+        }
+
+        $list = $this->overridesByOrg[$organizationId]->get($person->id, collect());
+
+        return $list->first(
+            fn (ShiftOverride $override) => $override->work_date->toDateString() === $date->toDateString()
+        );
     }
 }

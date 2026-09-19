@@ -36,8 +36,8 @@
             request()->routeIs('organization.landing') => 'Moduli',
             request()->routeIs('organization.dashboard') => 'Pregled',
             request()->routeIs('organization.people.*', 'organization.expiries.*', 'organization.handovers.*', 'organization.structure.*') => 'Kadrovi',
-            request()->routeIs('organization.timesheet.*', 'organization.schedule.*', 'organization.exceptions.*') => 'Vrijeme',
-            request()->routeIs('organization.clock', 'organization.requests.*', 'organization.absences.*') => 'Moje',
+            request()->routeIs('organization.timesheet.*', 'organization.schedule.*', 'organization.exceptions.*', 'organization.grants.*') => 'Vrijeme',
+            request()->routeIs('organization.clock', 'organization.requests.*', 'organization.absences.*', 'organization.entrance') => 'Moje',
             request()->routeIs('organization.approvals.*') => 'Odobrenja',
             request()->routeIs('organization.settings.*', 'organization.team.*') => 'Postavke',
             default => null,
@@ -120,7 +120,7 @@
                     @endif
 
                     @if($canTime && ! $isWorker)
-                    @php $vrijemeOpen = request()->routeIs('organization.timesheet.*', 'organization.schedule.*', 'organization.exceptions.*') || (request()->routeIs('organization.settings.*') && request('tab') === 'vrijeme'); @endphp
+                    @php $vrijemeOpen = request()->routeIs('organization.timesheet.*', 'organization.schedule.*', 'organization.exceptions.*', 'organization.grants.*') || (request()->routeIs('organization.settings.*') && request('tab') === 'vrijeme'); @endphp
                     <li class="navbar-modules-group @if($vrijemeOpen) is-open @endif">
                         <div class="navbar-modules-group-head">
                             <a class="dropdown-item navbar-modules-group-link @if($vrijemeOpen) active @endif"
@@ -137,8 +137,11 @@
                             @if($rbac->can($organization->id, $userId, 'payroll.export'))
                                 <li><a class="dropdown-item" href="{{ route('organization.timesheet.payroll-hours', $organization->slug) }}">Sati za plaće</a></li>
                             @endif
-                            @if($rbac->can($organization->id, $userId, 'inspection.export'))
+                            @if($rbac->can($organization->id, $userId, 'inspection.export') && $organization->feature(\App\Support\OrganizationFeatures::INSPECTION_EXPORT))
                                 <li><a class="dropdown-item" href="{{ route('organization.timesheet.inspection', $organization->slug) }}">Inspekcija</a></li>
+                            @endif
+                            @if($organization->feature(\App\Support\OrganizationFeatures::GRANT_HOURS))
+                                <li><a class="dropdown-item" href="{{ route('organization.grants.index', $organization->slug) }}">Grant sati</a></li>
                             @endif
                             <li><a class="dropdown-item" href="{{ $settingsUrl('vrijeme') }}">Postavke</a></li>
                         </ul>
@@ -159,6 +162,9 @@
                             <li><a class="dropdown-item" href="{{ route('organization.timesheet.mine', $organization->slug) }}">Moj tjedan</a></li>
                             <li><a class="dropdown-item" href="{{ route('organization.requests.index', $organization->slug) }}">Zahtjevi</a></li>
                             <li><a class="dropdown-item" href="{{ route('organization.absences.calendar', $organization->slug) }}">Kalendar</a></li>
+                            @if($organization->feature(\App\Support\OrganizationFeatures::SHIFT_BOARD))
+                                <li><a class="dropdown-item" href="{{ route('organization.schedule.index', $organization->slug) }}">Raspored / smjene</a></li>
+                            @endif
                         </ul>
                     </li>
 

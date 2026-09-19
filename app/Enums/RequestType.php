@@ -9,6 +9,7 @@ enum RequestType: string
     case Overtime = 'overtime';
     case PunchCorrection = 'punch_correction';
     case PersonalDataChange = 'personal_data';
+    case ShiftSwap = 'shift_swap';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum RequestType: string
             self::Overtime => 'Prekovremeni',
             self::PunchCorrection => 'Ispravak prijave',
             self::PersonalDataChange => 'Promjena podataka',
+            self::ShiftSwap => 'Zamjena smjene',
         };
     }
 

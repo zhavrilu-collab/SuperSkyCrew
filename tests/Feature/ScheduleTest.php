@@ -306,7 +306,7 @@ class ScheduleTest extends TestCase
 
         $this->actingAs($employee)
             ->get(route('organization.schedule.index', $organization->slug))
-            ->assertForbidden();
+            ->assertOk();
 
         $this->actingAs($employee)
             ->post(route('organization.schedule.plan.transfer', $organization->slug), [

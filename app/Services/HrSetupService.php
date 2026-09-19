@@ -163,7 +163,7 @@ class HrSetupService
                 ['role' => OrganizationRole::Manager->value, 'max_days' => 3, 'min_days' => null],
                 ['role' => OrganizationRole::Hr->value, 'max_days' => null, 'min_days' => 4],
             ],
-            RequestType::Overtime, RequestType::PunchCorrection => [
+            RequestType::Overtime, RequestType::PunchCorrection, RequestType::ShiftSwap => [
                 ['role' => OrganizationRole::Manager->value, 'max_days' => null, 'min_days' => null],
             ],
             default => [

@@ -20,6 +20,8 @@ use App\Services\ShiftResolver;
 use App\Services\TimeEntryRebuilder;
 use App\Services\PlanTransferService;
 use App\Services\AuditService;
+use App\Services\FeatureService;
+use App\Support\OrganizationFeatures;
 use App\Enums\AuditAction;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -42,6 +44,7 @@ class TimesheetController extends Controller
         private readonly TimeEntryRebuilder $rebuilder,
         private readonly AuditService $audit,
         private readonly PlanTransferService $planTransfer,
+        private readonly FeatureService $features,
     ) {}
 
     public function index(Request $request): View
@@ -106,7 +109,8 @@ class TimesheetController extends Controller
             'locations' => Location::query()->forOrganization($organization)->where('is_active', true)->orderBy('name')->get(),
             'canManual' => $this->rbac->can($organization->id, $userId, 'time.access'),
             'canLock' => $this->rbac->can($organization->id, $userId, 'time.lock'),
-            'canInspect' => $this->rbac->can($organization->id, $userId, 'inspection.export'),
+            'canInspect' => $this->rbac->can($organization->id, $userId, 'inspection.export')
+                && $organization->feature(OrganizationFeatures::INSPECTION_EXPORT),
             'canPayroll' => $this->rbac->can($organization->id, $userId, 'payroll.export'),
             'periodLock' => $lock,
             'plan' => $this->shifts->mapForPeople($people, $from, $to),
@@ -430,6 +434,7 @@ class TimesheetController extends Controller
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'inspection.export');
+        $this->features->assertEnabled($organization, OrganizationFeatures::INSPECTION_EXPORT);
         [$from, $to] = $this->range($request);
         $entries = $this->reportEntries($organization->id, $from, $to);
         $showBounds = (bool) $organization->show_clock_bounds;
@@ -460,6 +465,7 @@ class TimesheetController extends Controller
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'inspection.export');
+        $this->features->assertEnabled($organization, OrganizationFeatures::INSPECTION_EXPORT);
         [$from, $to] = $this->range($request);
         $entries = $this->reportEntries($organization->id, $from, $to);
         $showBounds = (bool) $organization->show_clock_bounds;

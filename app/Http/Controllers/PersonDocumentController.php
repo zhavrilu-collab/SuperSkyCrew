@@ -7,7 +7,9 @@ use App\Models\DocumentType;
 use App\Models\Person;
 use App\Models\PersonDocument;
 use App\Services\DocumentFillService;
+use App\Services\FeatureService;
 use App\Services\OrganizationRbacService;
+use App\Support\OrganizationFeatures;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +22,7 @@ class PersonDocumentController extends Controller
     public function __construct(
         private readonly OrganizationRbacService $rbac,
         private readonly DocumentFillService $fill,
+        private readonly FeatureService $features,
     ) {}
 
     public function store(Request $request, string $slug, Person $person): RedirectResponse
@@ -90,6 +93,7 @@ class PersonDocumentController extends Controller
         $this->assertPerson($person);
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
+        $this->features->assertEnabled($organization, OrganizationFeatures::DOCUMENT_TEMPLATES);
         abort_unless($template->organization_id === $organization->id, 404);
         abort_unless(Storage::disk('local')->exists($template->file_path), 404);
 
@@ -108,6 +112,7 @@ class PersonDocumentController extends Controller
         $this->assertPerson($person);
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
+        $this->features->assertEnabled($organization, OrganizationFeatures::DOCUMENT_TEMPLATES);
         abort_unless($template->organization_id === $organization->id, 404);
         abort_unless(Storage::disk('local')->exists($template->file_path), 404);
 

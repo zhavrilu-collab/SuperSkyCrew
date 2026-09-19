@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'organization' => \App\Http\Middleware\EnsureOrganizationAccess::class,
             'kiosk' => \App\Http\Middleware\EnsureKioskLocation::class,
+            'clock.actor' => \App\Http\Middleware\EnsureClockActor::class,
+            'terminal' => \App\Http\Middleware\EnsureTerminalLocation::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

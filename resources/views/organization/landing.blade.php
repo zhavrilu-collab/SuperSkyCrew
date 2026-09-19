@@ -184,7 +184,7 @@
                 <a href="{{ route('organization.timesheet.index', $organization->slug) }}" class="kartica-modula">
                     <span class="ikona" aria-hidden="true">⏱</span>
                     <h3>Vrijeme</h3>
-                    <p>Šihterica, raspored, iznimke i inspekcijski izvoz.</p>
+                    <p>Šihterica, raspored, iznimke, fond i grant sati.</p>
                     <span class="badge-modul">Aktivno</span>
                 </a>
             </div>

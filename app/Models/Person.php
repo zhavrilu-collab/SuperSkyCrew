@@ -59,6 +59,8 @@ class Person extends OrganizationModel
         'assignment_clocks',
         'executive_autonomy',
         'clock_pin',
+        'clock_qr',
+        'clock_api_token',
         'clock_device_id',
         'cv_path',
         'cv_original_name',
@@ -95,10 +97,15 @@ class Person extends OrganizationModel
     protected static function booted(): void
     {
         static::creating(function (Person $person) {
-            if (filled($person->clock_qr) || ! $person->organization_id) {
+            if (! $person->organization_id) {
                 return;
             }
-            $person->clock_qr = app(ClockQrService::class)->uniqueToken((int) $person->organization_id);
+            if (blank($person->clock_qr)) {
+                $person->clock_qr = app(ClockQrService::class)->uniqueToken((int) $person->organization_id);
+            }
+            if (blank($person->clock_api_token)) {
+                $person->clock_api_token = bin2hex(random_bytes(16));
+            }
         });
     }
 

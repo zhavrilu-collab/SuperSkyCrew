@@ -13,6 +13,7 @@ use App\Models\Organization;
 use App\Models\OrganizationUser;
 use App\Models\Person;
 use App\Models\Punch;
+use App\Models\ShiftOverride;
 use App\Models\TimeEntry;
 use App\Models\User;
 use App\Models\Workflow;
@@ -38,6 +39,7 @@ class WorkflowEngine
         private readonly ClockService $clock,
         private readonly AuditService $audit,
         private readonly DocumentFillService $documents,
+        private readonly ShiftResolver $shifts,
     ) {}
 
     /**
@@ -67,6 +69,7 @@ class WorkflowEngine
             RequestType::Overtime => $this->submitOvertime($organization, $person, $actor, $input),
             RequestType::PunchCorrection => $this->submitPunchCorrection($organization, $person, $actor, $input),
             RequestType::PersonalDataChange => $this->submitPersonalData($organization, $person, $actor, $input),
+            RequestType::ShiftSwap => $this->submitShiftSwap($organization, $person, $actor, $input),
             default => $this->submitLeave($organization, $person, $actor, $type, $input),
         };
     }
@@ -280,6 +283,58 @@ class WorkflowEngine
     }
 
     /**
+     * @param  array{from?: string|null, counterpart_id?: int|null, note?: string|null}  $input
+     */
+    private function submitShiftSwap(Organization $organization, Person $person, User $actor, array $input): WorkflowRequest
+    {
+        if (blank($input['from'] ?? null)) {
+            throw ValidationException::withMessages(['from' => 'Odaberite dan zamjene.']);
+        }
+
+        $day = Carbon::parse($input['from'])->timezone(config('app.timezone'))->startOfDay();
+        $this->locks->assertWritable($person, $day);
+
+        $counterpart = Person::query()
+            ->forOrganization($organization)
+            ->where('id', (int) ($input['counterpart_id'] ?? 0))
+            ->first();
+
+        if ($counterpart === null || (int) $counterpart->id === (int) $person->id) {
+            throw ValidationException::withMessages(['counterpart_id' => 'Odaberite kolegu za zamjenu.']);
+        }
+
+        if (! $counterpart->isClockEligible()) {
+            throw ValidationException::withMessages(['counterpart_id' => 'Kolega nije u statusu koji prima smjene.']);
+        }
+
+        $own = $this->shifts->forPersonOn($person, $day);
+        $theirs = $this->shifts->forPersonOn($counterpart, $day);
+        if ($own === null && $theirs === null) {
+            throw ValidationException::withMessages(['from' => 'Nijedna strana nema smjenu na taj dan.']);
+        }
+
+        return $this->createPending(
+            $organization,
+            $person,
+            $actor,
+            RequestType::ShiftSwap,
+            $this->approvalPath($person, RequestType::ShiftSwap, 1),
+            [
+                'from' => $day->toDateString(),
+                'to' => $day->toDateString(),
+                'days' => 1,
+                'dates' => [$day->toDateString()],
+                'counterpart_id' => $counterpart->id,
+                'counterpart_name' => $counterpart->fullName(),
+                'own_shift_id' => $own?->id,
+                'counterpart_shift_id' => $theirs?->id,
+                'note' => $input['note'] ?? null,
+            ],
+            $input['note'] ?? null,
+        );
+    }
+
+    /**
      * @param  list<string>  $path
      * @param  array<string, mixed>  $payload
      */
@@ -475,6 +530,7 @@ class WorkflowEngine
             ($type === RequestType::LeaveAnnual && $days <= 3)
             || $type === RequestType::Overtime
             || $type === RequestType::PunchCorrection
+            || $type === RequestType::ShiftSwap
         );
 
         if ($managerFirst) {
@@ -492,6 +548,7 @@ class WorkflowEngine
             RequestType::Overtime => $this->applyOvertime($person, $request),
             RequestType::PunchCorrection => $this->applyPunchCorrection($person, $actor, $request),
             RequestType::PersonalDataChange => $this->applyPersonalData($person, $request),
+            RequestType::ShiftSwap => $this->applyShiftSwap($person, $request),
             default => $this->applyLeave($person, $request),
         };
 
@@ -524,6 +581,40 @@ class WorkflowEngine
         }
 
         $request->submittedBy?->notify(new WorkflowRequestNotification($request->fresh(['person', 'organization']), 'approved'));
+    }
+
+    private function applyShiftSwap(Person $person, WorkflowRequest $request): void
+    {
+        $day = Carbon::parse($request->fromDate())->timezone(config('app.timezone'))->startOfDay();
+        $counterpart = Person::query()
+            ->where('organization_id', $person->organization_id)
+            ->where('id', (int) ($request->payload['counterpart_id'] ?? 0))
+            ->first();
+
+        if ($counterpart === null) {
+            return;
+        }
+
+        $this->locks->assertWritable($person, $day);
+        $this->locks->assertWritable($counterpart, $day);
+
+        $ownShiftId = $request->payload['own_shift_id'] ?? $this->shifts->forPersonOn($person, $day)?->id;
+        $theirShiftId = $request->payload['counterpart_shift_id'] ?? $this->shifts->forPersonOn($counterpart, $day)?->id;
+
+        ShiftOverride::putForDay(
+            (int) $person->organization_id,
+            (int) $person->id,
+            $day->toDateString(),
+            $theirShiftId ? (int) $theirShiftId : null,
+            (int) $request->id,
+        );
+        ShiftOverride::putForDay(
+            (int) $person->organization_id,
+            (int) $counterpart->id,
+            $day->toDateString(),
+            $ownShiftId ? (int) $ownShiftId : null,
+            (int) $request->id,
+        );
     }
 
     private function applyLeave(Person $person, WorkflowRequest $request): void

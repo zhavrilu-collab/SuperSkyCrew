@@ -18,7 +18,7 @@ UX cilj: prijava u **2 sekunde**, jedno veliko stanje (nisi prijavljen / na pauz
 | P2 | Kalendar/ICS | ne | Samo plan, nikad zakonski punch |
 | Kasnije | Biometrija | ne | Samo uz DPIA; nije default |
 
-Feature flagovi paketa: `clock_mobile`, `clock_kiosk`, `clock_geofence`. Terminal i chat pali konzola kad uđe Faza 2.
+Feature flagovi paketa: `clock_mobile`, `clock_kiosk`, `clock_geofence`, `clock_terminal`, `clock_chat`. Core šalje `employee_limit` i `features`. Token radnika (`people.clock_api_token`, Bearer) zove `POST /api/{slug}/clock/punches`. Terminal: `POST /api/{slug}/terminal/{token}/punches` (PIN ili QR). Chat: `POST /api/{slug}/chat/punches` uz Bearer i tekst prijava/odjava. Ulazni QR: `/{slug}/ulaz/{token}`.
 
 ## Clock API (koncept)
 
@@ -46,6 +46,8 @@ Svaka lokacija ima:
 - `device_bind_mode`: isključeno / upozorenje / strogo (PWA/web, ne kiosk)
 - `kiosk_enabled`
 - `allowed_channels`
+- `punch_grace_minutes` / `punch_round_minutes` (Faza 2)
+- `entrance_token` / `terminal_token`
 
 Rad na daljinu: geofence isključen; bilježi se IP (`client_ip`) i uređaj; samopotvrda. Poslodavac i dalje nadzire ažurnost (čl. 17.).
 
@@ -78,7 +80,7 @@ Ne radimo otisak prsta/lice u v1.
 
 - Cijeli zaslon, veliki PIN pad, kamera ili USB skener iskaznice.
 - QR lokacije (Postavke → Vrijeme → Lokacije → QR za tablet) otvara kiosk URL na dijeljenom tabletu.
-- QR osobe je iskaznica (`hr1:{slug}:{token}`); nije ulazni QR/NFC (to je Faza 2).
+- QR osobe je iskaznica (`hr1:{slug}:{token}`). Ulazni QR lokacije je `/{slug}/ulaz/{token}`.
 - Odjava iste osobe na istom uređaju.
 - Auto-logout nakon puncha.
 

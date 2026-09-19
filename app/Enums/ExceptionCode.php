@@ -13,6 +13,9 @@ enum ExceptionCode: string
     case Geofence = 'geofence';
     case HolidayWork = 'holiday_work';
     case SundayWork = 'sunday_work';
+    case MockGps = 'mock_gps';
+    case WeeklyHours = 'weekly_hours';
+    case WeeklyRest = 'weekly_rest';
 
     public function label(): string
     {
@@ -26,6 +29,9 @@ enum ExceptionCode: string
             self::Geofence => 'Prijava izvan zone',
             self::HolidayWork => 'Rad na blagdan',
             self::SundayWork => 'Rad u nedjelju',
+            self::MockGps => 'Sumnja na lažni GPS',
+            self::WeeklyHours => 'Tjedni fond sati (ZOR)',
+            self::WeeklyRest => 'Narušen tjedni odmor',
         };
     }
 
@@ -33,8 +39,8 @@ enum ExceptionCode: string
     {
         return match ($this) {
             self::MissingOut, self::Overlapping, self::OutWithoutIn, self::Geofence => 'text-bg-danger',
-            self::DailyRest, self::Late, self::HolidayWork, self::SundayWork => 'text-bg-warning',
-            self::MonthlyFund => 'text-bg-info',
+            self::DailyRest, self::Late, self::HolidayWork, self::SundayWork, self::WeeklyHours, self::WeeklyRest => 'text-bg-warning',
+            self::MonthlyFund, self::MockGps => 'text-bg-info',
         };
     }
 

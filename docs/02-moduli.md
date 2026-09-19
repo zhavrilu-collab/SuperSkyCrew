@@ -59,7 +59,7 @@ Zahtjevi za GO, ostale odsutnosti, prekovremeni i korekciju puncha. Detalj: [06-
 - QR/NFC, adapter za fizički terminal, chat kanal
 - Zamjene smjena, otvorene smjene, grace/zaokruživanje
 - Tjedni limiti ZOR-a kao upozorenja (ne slijepa blokada)
-- Projektni / grant sati (udruge), odvojeni od zakonskog sloga
+- Projektni / grant sati (`/grant-sati`), odvojeni od zakonskog sloga
 - Linije (proizvodnja) samo ako kupac traži
 - Push obavijesti
 

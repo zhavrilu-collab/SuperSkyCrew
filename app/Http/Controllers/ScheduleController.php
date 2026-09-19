@@ -7,10 +7,14 @@ use App\Enums\CalendarLevel;
 use App\Models\CalendarRule;
 use App\Models\Department;
 use App\Models\JobPosition;
+use App\Models\OpenShift;
 use App\Models\Person;
 use App\Models\Shift;
+use App\Models\ShiftOverride;
 use App\Services\DepartmentScopeService;
+use App\Services\FeatureService;
 use App\Services\OrganizationRbacService;
+use App\Support\OrganizationFeatures;
 use App\Services\PlanTransferService;
 use App\Services\ShiftResolver;
 use Carbon\Carbon;
@@ -28,6 +32,7 @@ class ScheduleController extends Controller
         private readonly DepartmentScopeService $scope,
         private readonly ShiftResolver $resolver,
         private readonly PlanTransferService $planTransfer,
+        private readonly FeatureService $features,
     ) {}
 
     public function index(Request $request): View
@@ -78,6 +83,18 @@ class ScheduleController extends Controller
             'days' => $days,
             'plan' => $this->resolver->mapForPeople($people, $from, $to),
             'canSend' => $this->canSend($organization->id),
+            'openShifts' => OpenShift::query()
+                ->forOrganization($organization)
+                ->with(['shift', 'department'])
+                ->whereDate('work_date', '>=', $from->toDateString())
+                ->whereDate('work_date', '<=', $to->copy()->addWeeks(2)->toDateString())
+                ->orderBy('work_date')
+                ->get(),
+            'shiftBoard' => $organization->feature(OrganizationFeatures::SHIFT_BOARD),
+            'ownPerson' => Person::query()
+                ->forOrganization($organization)
+                ->where('user_id', $userId)
+                ->first(),
         ]);
     }
 
@@ -304,6 +321,70 @@ class ScheduleController extends Controller
         return back()->with('status', 'Pravilo je obrisano.');
     }
 
+    public function storeOpenShift(Request $request): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->authorizeManage($organization->id);
+        $this->features->assertEnabled($organization, OrganizationFeatures::SHIFT_BOARD);
+
+        $data = $request->validate([
+            'shift_id' => ['required', Rule::exists('shifts', 'id')->where('organization_id', $organization->id)],
+            'work_date' => ['required', 'date'],
+            'department_id' => ['nullable', Rule::exists('departments', 'id')->where('organization_id', $organization->id)],
+            'slots' => ['nullable', 'integer', 'min:1', 'max:20'],
+            'note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        OpenShift::query()->create([
+            'organization_id' => $organization->id,
+            'shift_id' => $data['shift_id'],
+            'department_id' => $data['department_id'] ?? null,
+            'work_date' => $data['work_date'],
+            'slots' => (int) ($data['slots'] ?? 1),
+            'note' => $data['note'] ?? null,
+        ]);
+
+        return back()->with('status', 'Otvorena smjena je objavljena.');
+    }
+
+    public function destroyOpenShift(string $slug, OpenShift $openShift): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->authorizeManage($organization->id);
+        abort_unless($openShift->organization_id === $organization->id, 404);
+        $openShift->delete();
+
+        return back()->with('status', 'Otvorena smjena je uklonjena.');
+    }
+
+    public function claimOpenShift(string $slug, OpenShift $openShift): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+        $this->features->assertEnabled($organization, OrganizationFeatures::SHIFT_BOARD);
+        $person = Person::query()
+            ->forOrganization($organization)
+            ->where('user_id', Auth::id())
+            ->first();
+        abort_if($person === null || ! $person->isClockEligible(), 403, 'Nemate karticu za preuzimanje smjene.');
+
+        if ($openShift->remainingSlots() <= 0) {
+            return back()->withErrors(['open_shift' => 'Nema slobodnih mjesta.']);
+        }
+
+        if ($openShift->department_id && (int) $person->department_id !== (int) $openShift->department_id) {
+            return back()->withErrors(['open_shift' => 'Smjena je za drugi odjel.']);
+        }
+
+        ShiftOverride::putForDay(
+            (int) $organization->id,
+            (int) $person->id,
+            $openShift->work_date->toDateString(),
+            (int) $openShift->shift_id,
+        );
+
+        return back()->with('status', 'Smjena je preuzeta za '.$openShift->work_date->format('d.m.Y.').'.');
+    }
+
     private function authorizeView(int $organizationId): void
     {
         $userId = (int) Auth::id();
@@ -311,6 +392,7 @@ class ScheduleController extends Controller
             $this->rbac->can($organizationId, $userId, 'time.access')
             || $this->rbac->can($organizationId, $userId, 'people.access')
             || $this->rbac->can($organizationId, $userId, 'payroll.export')
+            || $this->rbac->can($organizationId, $userId, 'requests.submit')
         ) {
             return;
         }

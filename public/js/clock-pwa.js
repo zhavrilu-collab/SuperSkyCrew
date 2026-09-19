@@ -7,6 +7,7 @@
     var cfg = window.HR_CLOCK || {};
     var allowOffline = !!cfg.allowOffline;
     var requirePhoto = !!cfg.requirePhoto;
+    var pushEnabled = !!cfg.pushEnabled;
     var deviceInput = document.getElementById('device-id');
     var eventInput = document.getElementById('client-event-id');
     var offlineInput = document.getElementById('offline');
@@ -135,6 +136,15 @@
         });
     }
 
+    function notify(title, body) {
+        if (!pushEnabled || typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+            return;
+        }
+        try {
+            new Notification(title, { body: body, tag: 'hr-clock' });
+        } catch (e) {}
+    }
+
     function payload(offline, photoData) {
         var type = document.getElementById('punch-type').value;
         return {
@@ -148,6 +158,7 @@
             latitude: document.getElementById('latitude').value || null,
             longitude: document.getElementById('longitude').value || null,
             gps_accuracy: document.getElementById('gps-accuracy').value || null,
+            mock_gps: (parseInt(document.getElementById('gps-accuracy').value || '0', 10) >= 200) ? 1 : 0,
             photo_data: photoData
         };
     }
@@ -162,7 +173,8 @@
             occurred_at: data.occurred_at,
             latitude: data.latitude,
             longitude: data.longitude,
-            gps_accuracy: data.gps_accuracy
+            gps_accuracy: data.gps_accuracy,
+            mock_gps: data.mock_gps ? 1 : 0
         };
         if (data.photo_data) {
             body.photo_data = data.photo_data;
@@ -269,11 +281,13 @@
                 data.queued_at = data.occurred_at;
                 return saveQueued(data).then(function () {
                     showFlash('warning', data.type_label + ' spremljena na uređaju. Poslat će se kad bude mreže.');
+                    notify('Prijava čeka mrežu', data.type_label);
                     return refreshQueue();
                 });
             }
             return postPunch(data).then(function (json) {
                 if (json.ok) {
+                    notify('Prijava zabilježena', json.message || data.type_label);
                     window.location.reload();
                     return;
                 }
@@ -296,6 +310,21 @@
     window.addEventListener('offline', syncOfflineFlag);
     syncOfflineFlag();
     refreshQueue().then(syncQueue);
+
+    var pushBtn = document.getElementById('clock-push-enable');
+    if (pushBtn && pushEnabled && typeof Notification !== 'undefined') {
+        pushBtn.addEventListener('click', function () {
+            Notification.requestPermission().then(function (state) {
+                if (state === 'granted') {
+                    notify('Obavijesti uključene', 'PWA će javiti prijavu i offline red.');
+                    pushBtn.classList.add('d-none');
+                }
+            });
+        });
+        if (Notification.permission === 'granted') {
+            pushBtn.classList.add('d-none');
+        }
+    }
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (pos) {

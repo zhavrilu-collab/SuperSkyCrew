@@ -510,6 +510,9 @@
                                 <div><a class="small" href="{{ $location->kioskUrl() }}" target="_blank" rel="noopener">Otvori kiosk</a></div>
                                 <div><a class="small" href="{{ route('organization.settings.locations.kiosk-qr', [$organization->slug, $location]) }}">QR za tablet</a></div>
                             @endif
+                            @if($location->entranceUrl())
+                                <div><a class="small" href="{{ route('organization.settings.locations.entrance-qr', [$organization->slug, $location]) }}">Ulazni QR</a></div>
+                            @endif
                         </td>
                         <td>
                             <form method="POST" action="{{ route('organization.settings.locations.update', [$organization->slug, $location]) }}" class="row g-2 align-items-end">
@@ -526,6 +529,14 @@
                                 <div class="col-md-2">
                                     <label class="form-label small mb-0">Radius m</label>
                                     <input type="number" class="form-control form-control-sm" name="radius_meters" value="{{ $location->radius_meters }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-0">Grace min</label>
+                                    <input type="number" min="0" max="60" class="form-control form-control-sm" name="punch_grace_minutes" value="{{ $location->punch_grace_minutes ?? 5 }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-0">Zaokruži</label>
+                                    <input type="number" min="0" max="30" class="form-control form-control-sm" name="punch_round_minutes" value="{{ $location->punch_round_minutes ?? 0 }}">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label small mb-0">Uređaj</label>
@@ -549,6 +560,15 @@
                                         <label class="form-check-label" for="kiosk-{{ $location->id }}">Kiosk</label>
                                     </div>
                                     <button class="btn btn-outline-primary btn-sm" type="submit">Spremi</button>
+                                </div>
+                                <div class="col-12">
+                                    <span class="small text-muted me-2">Kanali (prazno = svi):</span>
+                                    @foreach($clockChannels as $channel)
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" name="allowed_channels[]" value="{{ $channel->value }}" id="ch-{{ $location->id }}-{{ $channel->value }}" @checked(is_array($location->allowed_channels) && in_array($channel->value, $location->allowed_channels, true))>
+                                            <label class="form-check-label small" for="ch-{{ $location->id }}-{{ $channel->value }}">{{ $channel->label() }}</label>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </form>
                         </td>
@@ -949,7 +969,20 @@
         <dt class="col-sm-3">Stripe</dt>
         <dd class="col-sm-9">{{ $organization->stripe_subscription_id ?: 'nije povezano' }}</dd>
         <dt class="col-sm-3">Limit osoba</dt>
-        <dd class="col-sm-9">uređuje se u Core konzoli</dd>
+        <dd class="col-sm-9">
+            @php
+                $features = app(\App\Services\FeatureService::class);
+                $limit = $features->employeeLimit($organization);
+                $used = $features->countedHeadcount($organization);
+            @endphp
+            {{ $limit ? $used.' / '.$limit : $used.' (bez limita)' }}
+        </dd>
     </dl>
+    <p class="text-muted small mt-3">Značajke paketa (Core konzola):</p>
+    <ul class="small mb-0">
+        @foreach($features->resolved($organization) as $key => $on)
+            <li>{{ \App\Support\OrganizationFeatures::label($key) }}: {{ $on ? 'uključeno' : 'isključeno' }}</li>
+        @endforeach
+    </ul>
     <p class="text-muted small mt-3 mb-0">Naplata i limiti uređuju se u Core konzoli.</p>
 @endif

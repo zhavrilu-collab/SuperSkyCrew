@@ -9,7 +9,9 @@ use App\Models\Person;
 use App\Models\Punch;
 use App\Models\TimeEntry;
 use App\Models\User;
+use App\Services\FeatureService;
 use App\Support\CroatianHolidays;
+use App\Support\OrganizationFeatures;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
@@ -20,6 +22,7 @@ class PlanTransferService
         private readonly ShiftResolver $shifts,
         private readonly PeriodLockService $locks,
         private readonly AuditService $audit,
+        private readonly FeatureService $features,
     ) {}
 
     /**
@@ -32,6 +35,12 @@ class PlanTransferService
         CarbonInterface $to,
         User $actor,
     ): int {
+        $this->features->assertEnabled(
+            $organization,
+            OrganizationFeatures::SHIFT_PLANNING,
+            'Prijenos plana nije uključen u paketu.',
+        );
+
         $count = 0;
         $start = Carbon::parse($from->toDateString(), config('app.timezone'))->startOfDay();
         $end = Carbon::parse($to->toDateString(), config('app.timezone'))->startOfDay();

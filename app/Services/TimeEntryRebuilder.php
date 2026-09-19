@@ -66,7 +66,7 @@ class TimeEntryRebuilder
         $shift = $this->shifts->forPersonOn($person, $day);
         $plannedStart = $shift?->startsOn($day);
         $plannedEnd = $shift?->endsOn($day);
-        $late = $this->lateException($firstIn, $plannedStart);
+        $late = $this->lateException($person, $firstIn, $plannedStart);
 
         if ($openIn !== null) {
             if ($late !== null && ! $day->isBefore(Carbon::now($tz)->startOfDay())) {
@@ -94,9 +94,15 @@ class TimeEntryRebuilder
             $exception ??= ExceptionCode::Geofence->value;
         }
 
+        if ($punches->contains(fn (Punch $punch) => $punch->device_result === 'mock_gps')) {
+            $exception ??= ExceptionCode::MockGps->value;
+        }
+
         $exception ??= $this->dailyRestException($person, $firstIn);
         $exception ??= $this->specialDayException($day, $totalMinutes);
         $exception ??= $this->monthlyFundException($person, $day, $totalMinutes, $existing?->id);
+        $exception ??= $this->weeklyHoursException($person, $day, $totalMinutes, $existing?->id);
+        $exception ??= $this->weeklyRestException($person, $day, $totalMinutes);
         $exception ??= $late;
 
         if ($person->hasRelaxedTimeRecord()) {
@@ -104,6 +110,8 @@ class TimeEntryRebuilder
                 ExceptionCode::DailyRest->value,
                 ExceptionCode::MonthlyFund->value,
                 ExceptionCode::Late->value,
+                ExceptionCode::WeeklyHours->value,
+                ExceptionCode::WeeklyRest->value,
             ];
             if (in_array($exception, $relaxed, true)) {
                 $exception = null;
@@ -278,13 +286,13 @@ class TimeEntryRebuilder
         return ($prior + $todayMinutes) > $expected ? ExceptionCode::MonthlyFund->value : null;
     }
 
-    private function lateException(?Carbon $firstIn, ?Carbon $plannedStart): ?string
+    private function lateException(Person $person, ?Carbon $firstIn, ?Carbon $plannedStart): ?string
     {
         if ($firstIn === null || $plannedStart === null) {
             return null;
         }
 
-        $limit = $plannedStart->copy()->addMinutes(ShiftResolver::LATE_GRACE_MINUTES);
+        $limit = $plannedStart->copy()->addMinutes($this->shifts->lateGraceMinutes($person));
 
         return $firstIn->gt($limit) ? ExceptionCode::Late->value : null;
     }
@@ -300,5 +308,49 @@ class TimeEntryRebuilder
         }
 
         return $day->isSunday() ? ExceptionCode::SundayWork->value : null;
+    }
+
+    private function weeklyHoursException(Person $person, Carbon $day, int $todayMinutes, ?int $existingId): ?string
+    {
+        if ($todayMinutes <= 0) {
+            return null;
+        }
+
+        $weekStart = $day->copy()->startOfWeek(Carbon::MONDAY);
+        $weekEnd = $day->copy()->endOfWeek(Carbon::SUNDAY);
+        $prior = (int) TimeEntry::query()
+            ->where('person_id', $person->id)
+            ->whereDate('work_date', '>=', $weekStart->toDateString())
+            ->whereDate('work_date', '<=', $weekEnd->toDateString())
+            ->when($existingId, fn ($query) => $query->where('id', '!=', $existingId))
+            ->sum('total_minutes');
+
+        $cap = $this->fund->weeklyHours($person) * 60;
+
+        return ($prior + $todayMinutes) > $cap ? ExceptionCode::WeeklyHours->value : null;
+    }
+
+    private function weeklyRestException(Person $person, Carbon $day, int $todayMinutes): ?string
+    {
+        if ($todayMinutes <= 0) {
+            return null;
+        }
+
+        $weekStart = $day->copy()->startOfWeek(Carbon::MONDAY);
+        $daysWorked = TimeEntry::query()
+            ->where('person_id', $person->id)
+            ->whereDate('work_date', '>=', $weekStart->toDateString())
+            ->whereDate('work_date', '<=', $day->toDateString())
+            ->where('total_minutes', '>', 0)
+            ->pluck('work_date')
+            ->map(fn ($date) => Carbon::parse($date)->toDateString())
+            ->unique()
+            ->values();
+
+        if (! $daysWorked->contains($day->toDateString())) {
+            $daysWorked->push($day->toDateString());
+        }
+
+        return $daysWorked->count() >= 6 ? ExceptionCode::WeeklyRest->value : null;
     }
 }

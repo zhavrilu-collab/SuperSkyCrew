@@ -40,6 +40,11 @@
             <a class="small" href="{{ route('organization.requests.create', $organization->slug) }}">Ispravak</a>
         </div>
     </div>
+    @if($pushEnabled ?? false)
+        <button class="btn btn-outline-light btn-sm mb-3" type="button" id="clock-push-enable">Uključi obavijesti</button>
+    @endif
+        </div>
+    </div>
 
     @if(session('status'))
         <div class="alert alert-success">{{ session('status') }}</div>
@@ -127,7 +132,8 @@
 <script>
     window.HR_CLOCK = {
         allowOffline: {{ ($allowOffline ?? true) ? 'true' : 'false' }},
-        requirePhoto: {{ ($requirePhoto ?? false) ? 'true' : 'false' }}
+        requirePhoto: {{ ($requirePhoto ?? false) ? 'true' : 'false' }},
+        pushEnabled: {{ ($pushEnabled ?? false) ? 'true' : 'false' }}
     };
 </script>
 <script src="{{ asset('js/clock-pwa.js') }}"></script>

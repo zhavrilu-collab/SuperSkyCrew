@@ -24,6 +24,11 @@ class Location extends OrganizationModel
         'require_photo',
         'allow_offline',
         'device_bind_mode',
+        'allowed_channels',
+        'punch_grace_minutes',
+        'punch_round_minutes',
+        'entrance_token',
+        'terminal_token',
     ];
 
     protected function casts(): array
@@ -38,7 +43,22 @@ class Location extends OrganizationModel
             'allow_offline' => 'boolean',
             'device_bind_mode' => DeviceBindMode::class,
             'is_active' => 'boolean',
+            'allowed_channels' => 'array',
+            'punch_grace_minutes' => 'integer',
+            'punch_round_minutes' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Location $location) {
+            if (blank($location->entrance_token)) {
+                $location->entrance_token = \Illuminate\Support\Str::random(32);
+            }
+            if (blank($location->terminal_token)) {
+                $location->terminal_token = \Illuminate\Support\Str::random(32);
+            }
+        });
     }
 
     public function people(): HasMany
@@ -61,5 +81,28 @@ class Location extends OrganizationModel
             'slug' => $this->organization->slug,
             'token' => $this->kiosk_token,
         ]);
+    }
+
+    public function entranceUrl(): ?string
+    {
+        $slug = $this->organization?->slug;
+        if (blank($this->entrance_token) || $slug === null) {
+            return null;
+        }
+
+        return route('organization.entrance', [
+            'slug' => $slug,
+            'token' => $this->entrance_token,
+        ]);
+    }
+
+    public function allowsChannel(\App\Enums\ClockChannel $channel): bool
+    {
+        $allowed = $this->allowed_channels;
+        if (! is_array($allowed) || $allowed === []) {
+            return true;
+        }
+
+        return in_array($channel->value, $allowed, true);
     }
 }

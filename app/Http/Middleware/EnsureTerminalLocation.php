@@ -11,7 +11,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureKioskLocation
+class EnsureTerminalLocation
 {
     public function __construct(private readonly FeatureService $features) {}
 
@@ -29,14 +29,13 @@ class EnsureKioskLocation
             abort(404);
         }
 
-        if (! $this->features->enabled($organization, OrganizationFeatures::CLOCK_KIOSK)) {
+        if (! $this->features->enabled($organization, OrganizationFeatures::CLOCK_TERMINAL)) {
             abort(404);
         }
 
         $location = Location::query()
             ->where('organization_id', $organization->id)
-            ->where('kiosk_token', $token)
-            ->where('kiosk_enabled', true)
+            ->where('terminal_token', $token)
             ->where('is_active', true)
             ->first();
 
@@ -45,9 +44,9 @@ class EnsureKioskLocation
         }
 
         $request->attributes->set('currentOrganization', $organization);
-        $request->attributes->set('currentKioskLocation', $location);
+        $request->attributes->set('currentTerminalLocation', $location);
         app()->instance('currentOrganization', $organization);
-        app()->instance('currentKioskLocation', $location);
+        app()->instance('currentTerminalLocation', $location);
 
         return $next($request);
     }

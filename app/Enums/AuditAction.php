@@ -21,6 +21,7 @@ enum AuditAction: string
     case RetentionDispose = 'retention.dispose';
     case PersonHire = 'person.hire';
     case ClockQrRotate = 'person.clock_qr';
+    case ClockTokenRotate = 'person.clock_token';
     case PeopleImport = 'people.import';
     case RequestApprove = 'request.approve';
     case RequestReject = 'request.reject';
@@ -45,6 +46,7 @@ enum AuditAction: string
             self::RetentionDispose => 'Brisanje dosjea',
             self::PersonHire => 'Prijenos kandidata',
             self::ClockQrRotate => 'Obnova QR koda kioska',
+            self::ClockTokenRotate => 'Obnova Clock API tokena',
             self::PeopleImport => 'Uvoz kadra',
             self::RequestApprove => 'Odobrenje zahtjeva',
             self::RequestReject => 'Odbijanje zahtjeva',

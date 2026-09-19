@@ -10,6 +10,9 @@ enum ClockChannel: string
     case Manager = 'manager';
     case Workflow = 'workflow';
     case Api = 'api';
+    case Entrance = 'entrance';
+    case Terminal = 'terminal';
+    case Chat = 'chat';
 
     public function label(): string
     {
@@ -20,6 +23,9 @@ enum ClockChannel: string
             self::Manager => 'Ručni unos',
             self::Workflow => 'Radni slijed',
             self::Api => 'API',
+            self::Entrance => 'Ulazni QR',
+            self::Terminal => 'Terminal',
+            self::Chat => 'Chat',
         };
     }
 }

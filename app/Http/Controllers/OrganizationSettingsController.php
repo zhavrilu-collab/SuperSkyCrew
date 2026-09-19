@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AuditAction;
 use App\Enums\CalendarLevel;
+use App\Enums\ClockChannel;
 use App\Enums\DeviceBindMode;
 use App\Enums\GeofenceMode;
 use App\Enums\OrganizationRole;
@@ -529,6 +530,10 @@ class OrganizationSettingsController extends Controller
             'longitude' => ['nullable', 'numeric'],
             'radius_meters' => ['nullable', 'integer', 'min:10', 'max:5000'],
             'device_bind_mode' => ['nullable', Rule::enum(DeviceBindMode::class)],
+            'punch_grace_minutes' => ['nullable', 'integer', 'min:0', 'max:60'],
+            'punch_round_minutes' => ['nullable', 'integer', 'min:0', 'max:30'],
+            'allowed_channels' => ['nullable', 'array'],
+            'allowed_channels.*' => ['string', Rule::enum(ClockChannel::class)],
         ]);
 
         Location::query()->create([
@@ -543,6 +548,9 @@ class OrganizationSettingsController extends Controller
             'require_photo' => $request->boolean('require_photo'),
             'allow_offline' => $request->has('allow_offline') ? $request->boolean('allow_offline') : true,
             'device_bind_mode' => $request->input('device_bind_mode', DeviceBindMode::Off->value),
+            'punch_grace_minutes' => (int) ($data['punch_grace_minutes'] ?? 5),
+            'punch_round_minutes' => (int) ($data['punch_round_minutes'] ?? 0),
+            'allowed_channels' => $data['allowed_channels'] ?? null,
             'is_active' => true,
         ]);
 
@@ -559,6 +567,10 @@ class OrganizationSettingsController extends Controller
             'geofence_mode' => ['required', Rule::enum(GeofenceMode::class)],
             'radius_meters' => ['nullable', 'integer', 'min:10', 'max:5000'],
             'device_bind_mode' => ['nullable', Rule::enum(DeviceBindMode::class)],
+            'punch_grace_minutes' => ['nullable', 'integer', 'min:0', 'max:60'],
+            'punch_round_minutes' => ['nullable', 'integer', 'min:0', 'max:30'],
+            'allowed_channels' => ['nullable', 'array'],
+            'allowed_channels.*' => ['string', Rule::enum(ClockChannel::class)],
         ]);
 
         $location->geofence_mode = $data['geofence_mode'];
@@ -567,6 +579,9 @@ class OrganizationSettingsController extends Controller
         $location->require_photo = $request->boolean('require_photo');
         $location->allow_offline = $request->boolean('allow_offline');
         $location->device_bind_mode = $data['device_bind_mode'] ?? DeviceBindMode::Off;
+        $location->punch_grace_minutes = (int) ($data['punch_grace_minutes'] ?? 5);
+        $location->punch_round_minutes = (int) ($data['punch_round_minutes'] ?? 0);
+        $location->allowed_channels = $data['allowed_channels'] ?? null;
         if ($location->kiosk_enabled && blank($location->kiosk_token)) {
             $location->kiosk_token = Str::random(32);
         }
@@ -588,6 +603,22 @@ class OrganizationSettingsController extends Controller
             'organization' => $organization,
             'location' => $location,
             'kioskUrl' => $url,
+        ]);
+    }
+
+    public function entrancePoster(string $slug, Location $location): View
+    {
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
+        abort_unless($location->organization_id === $organization->id, 404);
+        $location->setRelation('organization', $organization);
+        $url = $location->entranceUrl();
+        abort_unless($url, 404);
+
+        return view('organization.settings.entrance-poster', [
+            'organization' => $organization,
+            'location' => $location,
+            'entranceUrl' => $url,
         ]);
     }
 
@@ -682,6 +713,7 @@ class OrganizationSettingsController extends Controller
                 'levels' => CalendarLevel::cases(),
                 'geofenceModes' => GeofenceMode::cases(),
                 'deviceBindModes' => DeviceBindMode::cases(),
+                'clockChannels' => ClockChannel::cases(),
                 'weekdayNames' => [1 => 'Ponedjeljak', 2 => 'Utorak', 3 => 'Srijeda', 4 => 'Četvrtak', 5 => 'Petak', 6 => 'Subota', 7 => 'Nedjelja'],
                 'reminderTodayCount' => ReminderSend::query()
                     ->forOrganization($organization)

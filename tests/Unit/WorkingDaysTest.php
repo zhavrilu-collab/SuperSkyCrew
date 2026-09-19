@@ -17,4 +17,14 @@ class WorkingDaysTest extends TestCase
 
         $this->assertSame(['2026-05-04'], $dates);
     }
+
+    public function test_skips_easter_monday(): void
+    {
+        $dates = WorkingDays::dates(
+            Carbon::parse('2026-04-06', 'Europe/Zagreb'),
+            Carbon::parse('2026-04-07', 'Europe/Zagreb'),
+        );
+
+        $this->assertSame(['2026-04-07'], $dates);
+    }
 }

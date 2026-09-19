@@ -72,6 +72,7 @@ Route::prefix('{slug}')
         Route::post('/postavke/lokacije', [OrganizationSettingsController::class, 'storeLocation'])->name('organization.settings.locations.store');
         Route::put('/postavke/lokacije/{location}', [OrganizationSettingsController::class, 'updateLocation'])->name('organization.settings.locations.update');
         Route::get('/postavke/lokacije/{location}/kiosk', [OrganizationSettingsController::class, 'kioskPoster'])->name('organization.settings.locations.kiosk-qr');
+        Route::get('/postavke/lokacije/{location}/ulaz', [OrganizationSettingsController::class, 'entrancePoster'])->name('organization.settings.locations.entrance-qr');
         Route::post('/postavke/dokumenti', [OrganizationSettingsController::class, 'storeDocumentType'])->name('organization.settings.document-types.store');
         Route::delete('/postavke/dokumenti/{documentType}', [OrganizationSettingsController::class, 'destroyDocumentType'])->name('organization.settings.document-types.destroy');
         Route::post('/postavke/slijedovi/{workflow}/koraci', [OrganizationSettingsController::class, 'storeWorkflowStep'])->name('organization.settings.workflow-steps.store');
@@ -85,6 +86,8 @@ Route::prefix('{slug}')
         Route::get('/prijava/manifest.webmanifest', [\App\Http\Controllers\ClockController::class, 'manifest'])->name('organization.clock.manifest');
         Route::post('/prijava', [\App\Http\Controllers\ClockController::class, 'store'])->name('organization.clock.store');
         Route::post('/api/clock/punches', [\App\Http\Controllers\ClockController::class, 'store'])->name('organization.clock.api');
+        Route::get('/ulaz/{token}', [\App\Http\Controllers\EntranceClockController::class, 'show'])->name('organization.entrance');
+        Route::post('/ulaz/{token}', [\App\Http\Controllers\EntranceClockController::class, 'store'])->name('organization.entrance.store');
         Route::get('/struktura', [\App\Http\Controllers\StructureController::class, 'index'])->name('organization.structure.index');
         Route::post('/struktura/odjeli', [\App\Http\Controllers\StructureController::class, 'storeDepartment'])->name('organization.structure.departments.store');
         Route::put('/struktura/odjeli/{department}', [\App\Http\Controllers\StructureController::class, 'updateDepartment'])->name('organization.structure.departments.update');
@@ -106,6 +109,7 @@ Route::prefix('{slug}')
         Route::get('/kadrovi/{person}/pregled', [\App\Http\Controllers\PersonController::class, 'review'])->name('organization.people.review');
         Route::get('/kadrovi/{person}/iskaznica', [\App\Http\Controllers\PersonPrintController::class, 'badge'])->name('organization.people.badge');
         Route::post('/kadrovi/{person}/qr', [\App\Http\Controllers\PersonController::class, 'rotateQr'])->name('organization.people.qr.rotate');
+        Route::post('/kadrovi/{person}/clock-token', [\App\Http\Controllers\PersonController::class, 'rotateClockToken'])->name('organization.people.clock-token.rotate');
         Route::get('/kadrovi/{person}/clanak-10', [\App\Http\Controllers\PersonPrintController::class, 'articleTen'])->name('organization.people.article-ten');
         Route::get('/kadrovi/{person}/uor', [\App\Http\Controllers\PersonPrintController::class, 'contract'])->name('organization.people.contract');
         Route::get('/kadrovi/{person}/uputnica', [\App\Http\Controllers\PersonPrintController::class, 'referral'])->name('organization.people.referral');
@@ -137,6 +141,9 @@ Route::prefix('{slug}')
         Route::delete('/raspored/smjene/{shift}', [\App\Http\Controllers\ScheduleController::class, 'destroyShift'])->name('organization.schedule.shifts.destroy');
         Route::post('/raspored/pravila', [\App\Http\Controllers\ScheduleController::class, 'storeRule'])->name('organization.schedule.rules.store');
         Route::delete('/raspored/pravila/{rule}', [\App\Http\Controllers\ScheduleController::class, 'destroyRule'])->name('organization.schedule.rules.destroy');
+        Route::post('/raspored/otvorene-smjene', [\App\Http\Controllers\ScheduleController::class, 'storeOpenShift'])->name('organization.schedule.open.store');
+        Route::delete('/raspored/otvorene-smjene/{openShift}', [\App\Http\Controllers\ScheduleController::class, 'destroyOpenShift'])->name('organization.schedule.open.destroy');
+        Route::post('/raspored/otvorene-smjene/{openShift}/preuzmi', [\App\Http\Controllers\ScheduleController::class, 'claimOpenShift'])->name('organization.schedule.open.claim');
         Route::get('/sihterica', [\App\Http\Controllers\TimesheetController::class, 'index'])->name('organization.timesheet.index');
         Route::get('/iznimke', [\App\Http\Controllers\ExceptionQueueController::class, 'index'])->name('organization.exceptions.index');
         Route::post('/iznimke/{entry}/rijesi', [\App\Http\Controllers\ExceptionQueueController::class, 'resolve'])->name('organization.exceptions.resolve');
@@ -146,6 +153,10 @@ Route::prefix('{slug}')
         Route::get('/sihterica/fond/izvoz', [\App\Http\Controllers\TimesheetReportController::class, 'exportFund'])->name('organization.timesheet.fund-export');
         Route::get('/sihterica/sati-place', [\App\Http\Controllers\TimesheetReportController::class, 'payrollHours'])->name('organization.timesheet.payroll-hours');
         Route::get('/sihterica/sati-place/izvoz', [\App\Http\Controllers\TimesheetReportController::class, 'exportPayrollHours'])->name('organization.timesheet.payroll-hours-export');
+        Route::get('/grant-sati', [\App\Http\Controllers\GrantHoursController::class, 'index'])->name('organization.grants.index');
+        Route::post('/grant-sati/projekti', [\App\Http\Controllers\GrantHoursController::class, 'storeProject'])->name('organization.grants.projects.store');
+        Route::post('/grant-sati', [\App\Http\Controllers\GrantHoursController::class, 'storeEntry'])->name('organization.grants.store');
+        Route::delete('/grant-sati/{entry}', [\App\Http\Controllers\GrantHoursController::class, 'destroyEntry'])->name('organization.grants.destroy');
         Route::get('/api/payroll/hours', [\App\Http\Controllers\TimesheetReportController::class, 'apiPayrollHours'])->name('organization.payroll.hours.api');
         Route::get('/sihterica/izvoz', [\App\Http\Controllers\TimesheetController::class, 'export'])->name('organization.timesheet.export');
         Route::post('/sihterica/zakljucaj', [\App\Http\Controllers\TimesheetController::class, 'lock'])->name('organization.timesheet.lock');

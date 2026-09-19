@@ -209,7 +209,11 @@
             <label class="form-label" for="clock_pin">PIN za kiosk</label>
             <input class="form-control" name="clock_pin" id="clock_pin" value="{{ old('clock_pin', $person->clock_pin) }}" maxlength="6" inputmode="numeric">
             @if($person->exists && $person->isClockEligible())
-                <p class="form-text mb-0">QR iskaznica za kiosk: <a href="{{ route('organization.people.badge', [$organization->slug, $person]) }}">ispiši</a></p>
+                <p class="form-text mb-1">QR iskaznica za kiosk: <a href="{{ route('organization.people.badge', [$organization->slug, $person]) }}">ispiši</a></p>
+                <form method="POST" action="{{ route('organization.people.clock-token.rotate', [$organization->slug, $person]) }}" class="mt-1">
+                    @csrf
+                    <button class="btn btn-outline-secondary btn-sm" type="submit">Obnovi Clock API token</button>
+                </form>
             @endif
             @if($person->clock_device_id)
                 <div class="form-check mt-1">

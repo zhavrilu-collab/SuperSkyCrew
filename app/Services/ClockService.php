@@ -26,6 +26,7 @@ class ClockService
         private readonly TimeEntryRebuilder $rebuilder,
         private readonly PeriodLockService $locks,
         private readonly AuditService $audit,
+        private readonly FeatureService $features,
     ) {}
 
     /**
@@ -59,6 +60,12 @@ class ClockService
         $channel = ClockChannel::tryFrom((string) ($payload['channel'] ?? ClockChannel::Web->value))
             ?? ClockChannel::Web;
 
+        $person->loadMissing(['organization', 'location']);
+        $organization = $person->organization;
+        if ($organization) {
+            $this->assertChannelEnabled($organization, $channel);
+        }
+
         if ($channel === ClockChannel::Manager && blank($payload['reason'] ?? null)) {
             throw ValidationException::withMessages([
                 'reason' => 'Ručni unos zahtijeva razlog.',
@@ -70,8 +77,16 @@ class ClockService
             : now();
 
         $location = $this->resolveLocation($person, $payload['location_id'] ?? null);
-        $channelPersonal = in_array($channel, [ClockChannel::Pwa, ClockChannel::Web], true);
+        if ($location && ! $location->allowsChannel($channel)) {
+            throw ValidationException::withMessages([
+                'channel' => 'Ova lokacija ne prima prijavu s kanala '.$channel->label().'.',
+            ]);
+        }
+
+        $channelPersonal = in_array($channel, [ClockChannel::Pwa, ClockChannel::Web, ClockChannel::Entrance], true);
         $offline = (bool) ($payload['offline'] ?? false);
+
+        $occurredAt = $this->roundOccurredAt($occurredAt, $location);
 
         if ($channel === ClockChannel::Pwa && $occurredAt->gt(now()->addMinutes(2))) {
             throw ValidationException::withMessages([
@@ -95,6 +110,7 @@ class ClockService
             $location,
             isset($payload['latitude']) ? (float) $payload['latitude'] : null,
             isset($payload['longitude']) ? (float) $payload['longitude'] : null,
+            $organization,
         );
 
         if ($geofence === 'fail' && $location?->geofence_mode === GeofenceMode::Strict) {
@@ -129,6 +145,9 @@ class ClockService
         $this->assertSequence($person, $type);
 
         $deviceResult = $this->evaluateDevice($person, $location, $channel, $payload['device_id'] ?? null);
+        if ($this->detectMockGps($payload)) {
+            $deviceResult = 'mock_gps';
+        }
         $photoPath = $this->storePhoto($person, $photoInput);
         if ($channelPersonal && $location?->require_photo && $photoPath === null) {
             throw ValidationException::withMessages([
@@ -366,8 +385,12 @@ class ClockService
         return $person->location;
     }
 
-    private function evaluateGeofence(?Location $location, ?float $lat, ?float $lng): string
+    private function evaluateGeofence(?Location $location, ?float $lat, ?float $lng, ?Organization $organization = null): string
     {
+        if ($organization && ! $this->features->enabled($organization, \App\Support\OrganizationFeatures::CLOCK_GEOFENCE)) {
+            return 'skipped';
+        }
+
         if ($location === null || $location->geofence_mode === GeofenceMode::Off || ! $location->hasCoordinates()) {
             return 'skipped';
         }
@@ -384,6 +407,48 @@ class ClockService
         );
 
         return $distance <= (int) $location->radius_meters ? 'pass' : 'fail';
+    }
+
+    private function assertChannelEnabled(Organization $organization, ClockChannel $channel): void
+    {
+        $key = match ($channel) {
+            ClockChannel::Pwa, ClockChannel::Web, ClockChannel::Api, ClockChannel::Entrance => \App\Support\OrganizationFeatures::CLOCK_MOBILE,
+            ClockChannel::Kiosk => \App\Support\OrganizationFeatures::CLOCK_KIOSK,
+            ClockChannel::Terminal => \App\Support\OrganizationFeatures::CLOCK_TERMINAL,
+            ClockChannel::Chat => \App\Support\OrganizationFeatures::CLOCK_CHAT,
+            default => null,
+        };
+
+        if ($key !== null) {
+            $this->features->assertEnabled($organization, $key, 'Ovaj kanal prijave nije uključen u paketu.');
+        }
+    }
+
+    private function roundOccurredAt(Carbon $at, ?Location $location): Carbon
+    {
+        $step = (int) ($location?->punch_round_minutes ?? 0);
+        if ($step <= 0) {
+            return $at;
+        }
+
+        $rounded = (int) (round($at->minute / $step) * $step);
+        $copy = $at->copy()->second(0)->microsecond(0);
+        if ($rounded >= 60) {
+            return $copy->minute(0)->addHour();
+        }
+
+        return $copy->minute($rounded);
+    }
+
+    private function detectMockGps(array $payload): bool
+    {
+        if (! empty($payload['mock_gps']) || ! empty($payload['mocked'])) {
+            return true;
+        }
+
+        $accuracy = $payload['gps_accuracy'] ?? null;
+
+        return $accuracy !== null && (int) $accuracy >= 200;
     }
 
     private function distanceMeters(float $lat1, float $lon1, float $lat2, float $lon2): float

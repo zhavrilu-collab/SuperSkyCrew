@@ -23,6 +23,7 @@ use App\Services\LeaveService;
 use App\Services\ClockQrService;
 use App\Services\OrganizationRbacService;
 use App\Services\AuditService;
+use App\Services\FeatureService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +40,7 @@ class PersonController extends Controller
         private readonly AuditService $audit,
         private readonly LeaveService $leave,
         private readonly ClockQrService $clockQr,
+        private readonly FeatureService $features,
     ) {}
 
     public function index(Request $request): View
@@ -79,6 +81,7 @@ class PersonController extends Controller
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
         $data = $this->validated($request);
+        $this->features->assertSeat($organization, $data['status'] ?? null);
         $data['organization_id'] = $organization->id;
 
         $person = Person::query()->create($data);
@@ -104,6 +107,7 @@ class PersonController extends Controller
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
         $data = $this->validated($request, $person);
+        $this->features->assertSeat($organization, $data['status'] ?? null, $person);
         if ($request->boolean('clock_device_reset')) {
             $data['clock_device_id'] = null;
         }
@@ -130,6 +134,8 @@ class PersonController extends Controller
                 ->route('organization.people.edit', [$organization->slug, $person])
                 ->withErrors(['status' => 'U kadar se može prenijeti samo kandidat.']);
         }
+
+        $this->features->assertSeat($organization, PersonStatus::Employee->value, $person);
 
         $person->update([
             'status' => PersonStatus::Employee,
@@ -172,6 +178,28 @@ class PersonController extends Controller
         return redirect()
             ->route('organization.people.badge', [$organization->slug, $person])
             ->with('status', 'Novi QR kod je spreman. Stari više ne vrijedi.');
+    }
+
+    public function rotateClockToken(Request $request, string $slug, Person $person): RedirectResponse
+    {
+        $this->assertPerson($person);
+        $organization = app('currentOrganization');
+        $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
+
+        $person->forceFill(['clock_api_token' => bin2hex(random_bytes(16))])->save();
+        $this->audit->record(
+            $organization,
+            AuditAction::ClockTokenRotate,
+            $request->user(),
+            'Obnovljen Clock API token: '.$person->fullName(),
+            $person,
+            Person::class,
+            $person->id,
+        );
+
+        return redirect()
+            ->route('organization.people.edit', [$organization->slug, $person, 'tab' => 'angazman'])
+            ->with('status', 'Novi Clock API token je spreman. Stari više ne vrijedi.');
     }
 
     public function review(string $slug, Person $person): View

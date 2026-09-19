@@ -41,6 +41,8 @@ class OrganizationSyncController extends Controller
         $validated = $request->validate([
             'status' => ['sometimes', 'required', Rule::enum(OrganizationStatus::class)],
             'plan' => ['sometimes', 'required', 'string', Rule::in(self::PLAN_SLUGS)],
+            'employee_limit' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:10000'],
+            'features' => ['sometimes', 'nullable', 'array'],
             'stripe_customer_id' => ['sometimes', 'nullable', 'string', 'max:255'],
             'stripe_subscription_id' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
@@ -58,6 +60,14 @@ class OrganizationSyncController extends Controller
 
         if (array_key_exists('plan', $validated)) {
             $organization->plan = $validated['plan'];
+        }
+
+        if (array_key_exists('employee_limit', $validated)) {
+            $organization->employee_limit = $validated['employee_limit'];
+        }
+
+        if (array_key_exists('features', $validated)) {
+            $organization->features = $validated['features'];
         }
 
         if (array_key_exists('stripe_customer_id', $validated)) {
@@ -86,6 +96,8 @@ class OrganizationSyncController extends Controller
             'slug' => $organization->slug,
             'status' => $organization->status->value,
             'plan' => $organization->plan,
+            'employee_limit' => $organization->employee_limit,
+            'features' => app(\App\Services\FeatureService::class)->resolved($organization),
             'email' => $organization->email,
             'oib' => $organization->oib,
             'stripe_customer_id' => $organization->stripe_customer_id,

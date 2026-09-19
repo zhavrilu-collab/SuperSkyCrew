@@ -82,6 +82,14 @@ class StaffRequestController extends Controller
                 ->limit(40)
                 ->get(),
             'selectedPunchId' => request('punch_id'),
+            'colleagues' => Person::query()
+                ->forOrganization($organization)
+                ->where('id', '!=', $person->id)
+                ->clockEligible()
+                ->orderBy('last_name')
+                ->orderBy('first_name')
+                ->get(),
+            'shiftBoard' => $organization->feature(\App\Support\OrganizationFeatures::SHIFT_BOARD),
         ]);
     }
 
@@ -109,6 +117,7 @@ class StaffRequestController extends Controller
             'date_of_birth' => ['nullable', 'date'],
             'citizenship' => ['nullable', 'string', 'max:80'],
             'residence' => ['nullable', 'string', 'max:255'],
+            'counterpart_id' => ['nullable', 'integer'],
         ]);
 
         $created = $this->engine->submit(
@@ -132,6 +141,7 @@ class StaffRequestController extends Controller
                 'date_of_birth' => $data['date_of_birth'] ?? null,
                 'citizenship' => $data['citizenship'] ?? null,
                 'residence' => $data['residence'] ?? null,
+                'counterpart_id' => isset($data['counterpart_id']) ? (int) $data['counterpart_id'] : null,
             ],
         );
 
