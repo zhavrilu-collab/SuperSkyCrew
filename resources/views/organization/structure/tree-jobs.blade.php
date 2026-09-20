@@ -43,6 +43,9 @@
                                 data-rad1g="{{ $position->rad1g }}"
                                 data-go="{{ $position->annual_leave_days }}"
                                 data-description="{{ $position->description }}"
+                                data-pay="{{ $position->pay_grade }}"
+                                data-duties="{{ $position->duties }}"
+                                data-req="{{ $position->requirements }}"
                                 data-from="{{ $position->valid_from?->toDateString() }}"
                                 data-to="{{ $position->valid_to?->toDateString() }}"
                                 data-people="{{ $people->where('job_position_id', $position->id)->map(fn ($person) => $person->fullName().' · '.($person->contract_type?->label() ?: '—').' · '.($person->started_at?->format('d.m.Y.') ?: '—'))->implode("\n") }}">Uredi</button>

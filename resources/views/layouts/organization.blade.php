@@ -42,7 +42,7 @@
             request()->routeIs('organization.segments.*', 'organization.positions.index') => 'Ustroj tvrtke',
             request()->routeIs('organization.people.*', 'organization.expiries.*', 'organization.handovers.*', 'organization.contracts.index', 'organization.document-creator.*', 'organization.family.*') => 'Zaposlenici',
             request()->routeIs('organization.timesheet.*', 'organization.schedule.*', 'organization.exceptions.*', 'organization.grants.*') => 'Vrijeme',
-            request()->routeIs('organization.clock', 'organization.requests.*', 'organization.absences.*', 'organization.entrance') => 'Moje',
+            request()->routeIs('organization.clock', 'organization.requests.*', 'organization.absences.*', 'organization.entrance', 'organization.my-documents.*') => 'Moje',
             request()->routeIs('organization.approvals.*') => 'Odobrenja',
             request()->routeIs('organization.settings.*') && request('section') === 'osnovni-podaci' => 'Osnovni podaci',
             request()->routeIs('organization.settings.*', 'organization.team.*') => 'Postavke',

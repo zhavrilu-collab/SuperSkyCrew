@@ -16,6 +16,7 @@ class Department extends OrganizationModel
         'parent_id',
         'enterprise_unit_id',
         'manager_user_id',
+        'deputy_user_id',
         'name',
         'code',
         'valid_from',
@@ -48,6 +49,11 @@ class Department extends OrganizationModel
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_user_id');
+    }
+
+    public function deputy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deputy_user_id');
     }
 
     public function people(): HasMany

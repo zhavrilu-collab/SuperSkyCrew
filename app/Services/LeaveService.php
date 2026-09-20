@@ -96,6 +96,33 @@ class LeaveService
         ];
     }
 
+    /**
+     * @return array{employer_months: int, prior_months: int, total_months: int, total_label: string, retirement_years: int|null, retirement_date: string|null}
+     */
+    public function serviceCard(Person $person, ?int $year = null): array
+    {
+        $total = $this->tenureMonths($person, $year);
+        $prior = (int) ($person->prior_service_months ?? 0);
+        $employer = max(0, $total - $prior);
+        $retirement = null;
+        $yearsLeft = null;
+        if ($person->date_of_birth) {
+            $now = now()->timezone(config('app.timezone'))->startOfDay();
+            $target = $person->date_of_birth->copy()->addYears(65);
+            $retirement = $target->format('d.m.Y.');
+            $yearsLeft = $now->lt($target) ? (int) $now->diffInYears($target) : 0;
+        }
+
+        return [
+            'employer_months' => $employer,
+            'prior_months' => $prior,
+            'total_months' => $total,
+            'total_label' => intdiv($total, 12).' g. '.($total % 12).' mj.',
+            'retirement_years' => $yearsLeft,
+            'retirement_date' => $retirement,
+        ];
+    }
+
     public function tenureMonths(Person $person, ?int $year = null): int
     {
         $year ??= $this->currentYear();

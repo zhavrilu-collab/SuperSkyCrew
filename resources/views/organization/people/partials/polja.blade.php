@@ -32,9 +32,17 @@
             <label class="form-label" for="citizenship">Državljanstvo</label>
             <input class="form-control" name="citizenship" id="citizenship" value="{{ old('citizenship', $person->citizenship) }}">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label class="form-label" for="residence">Prebivalište / boravište</label>
             <input class="form-control" name="residence" id="residence" value="{{ old('residence', $person->residence) }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="email">E-mail</label>
+            <input type="email" class="form-control" name="email" id="email" value="{{ old('email', $person->email) }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="phone">Telefon</label>
+            <input class="form-control" name="phone" id="phone" value="{{ old('phone', $person->phone) }}">
         </div>
         <div class="col-md-4">
             <label class="form-label" for="user_id">Korisnički račun</label>
@@ -98,6 +106,17 @@
             </select>
         </div>
         <div class="col-md-3">
+            <label class="form-label" for="org_position_id">Radna pozicija (stolica)</label>
+            <select class="form-select" name="org_position_id" id="org_position_id">
+                <option value="">—</option>
+                @foreach($orgSeats ?? [] as $seat)
+                    @if(! $seat->person_id || (int) $seat->person_id === (int) $person->id)
+                        <option value="{{ $seat->id }}" @selected((string) old('org_position_id', $person->org_position_id) === (string) $seat->id)>{{ $seat->label() }}</option>
+                    @endif
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
             <label class="form-label" for="cost_center_id">Mjesto troška</label>
             <select class="form-select" name="cost_center_id" id="cost_center_id">
                 <option value="">—</option>
@@ -127,6 +146,11 @@
             <label class="form-label" for="ended_at">Prestanak</label>
             <input type="date" class="form-control" name="ended_at" id="ended_at" value="{{ old('ended_at', $person->ended_at?->toDateString()) }}">
         </div>
+        @if(! empty($serviceCard))
+            <div class="col-12">
+                <p class="small text-muted mb-0">Staž kod poslodavca: {{ intdiv($serviceCard['employer_months'], 12) }} g. {{ $serviceCard['employer_months'] % 12 }} mj. · prije: {{ $serviceCard['prior_months'] }} mj. · ukupno {{ $serviceCard['total_label'] }}@if($serviceCard['retirement_date']) · mirovina (65): {{ $serviceCard['retirement_date'] }} ({{ $serviceCard['retirement_years'] }} g.)@endif</p>
+            </div>
+        @endif
         <div class="col-md-6">
             <label class="form-label" for="ended_reason">Razlog prestanka</label>
             <input class="form-control" name="ended_reason" id="ended_reason" value="{{ old('ended_reason', $person->ended_reason) }}">
@@ -203,6 +227,15 @@
                 <option value="">—</option>
                 @foreach($managers as $manager)
                     <option value="{{ $manager->id }}" @selected((string) old('manager_user_id', $person->manager_user_id) === (string) $manager->id)>{{ $manager->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="dotted_manager_user_id">Dotted line</label>
+            <select class="form-select" name="dotted_manager_user_id" id="dotted_manager_user_id">
+                <option value="">—</option>
+                @foreach($managers as $manager)
+                    <option value="{{ $manager->id }}" @selected((string) old('dotted_manager_user_id', $person->dotted_manager_user_id) === (string) $manager->id)>{{ $manager->name }}</option>
                 @endforeach
             </select>
         </div>

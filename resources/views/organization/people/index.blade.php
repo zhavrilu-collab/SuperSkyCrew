@@ -10,13 +10,27 @@
         <p class="text-muted mb-0">Osobni kartoni radnika prema Pravilniku NN 55/2024.</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <form method="GET" class="d-flex">
+        <form method="GET" class="d-flex flex-wrap gap-2">
+            <input class="form-control" name="q" value="{{ $q ?? '' }}" placeholder="Ime, prezime, OIB" style="min-width: 12rem;">
             <select class="form-select" name="status" onchange="this.form.submit()">
                 <option value="">Svi statusi</option>
                 @foreach($statuses as $status)
                     <option value="{{ $status->value }}" @selected($statusFilter === $status->value)>{{ $status->label() }}</option>
                 @endforeach
             </select>
+            <select class="form-select" name="department_id" onchange="this.form.submit()">
+                <option value="">Svi odjeli</option>
+                @foreach($departments as $department)
+                    <option value="{{ $department->id }}" @selected((string) ($departmentFilter ?? '') === (string) $department->id)>{{ $department->name }}</option>
+                @endforeach
+            </select>
+            <select class="form-select" name="legal_entity_id" onchange="this.form.submit()">
+                <option value="">Sve pravne osobe</option>
+                @foreach($legalEntities as $legalEntity)
+                    <option value="{{ $legalEntity->id }}" @selected((string) ($legalFilter ?? '') === (string) $legalEntity->id)>{{ $legalEntity->name }}</option>
+                @endforeach
+            </select>
+            <button class="btn btn-outline-secondary" type="submit">Traži</button>
         </form>
         <a href="{{ route('organization.people.book', $organization->slug) }}" class="btn btn-outline-secondary">Matična knjiga</a>
         <a href="{{ route('organization.people.turnover', $organization->slug) }}" class="btn btn-outline-secondary">Fluktuacija</a>

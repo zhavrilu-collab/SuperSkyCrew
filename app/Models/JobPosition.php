@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobPosition extends OrganizationModel
@@ -17,7 +18,10 @@ class JobPosition extends OrganizationModel
         'name',
         'rad1g',
         'annual_leave_days',
+        'pay_grade',
         'description',
+        'duties',
+        'requirements',
         'valid_from',
         'valid_to',
     ];
@@ -39,6 +43,18 @@ class JobPosition extends OrganizationModel
     public function people(): HasMany
     {
         return $this->hasMany(Person::class);
+    }
+
+    public function orgPositions(): HasMany
+    {
+        return $this->hasMany(OrgPosition::class);
+    }
+
+    public function competencies(): BelongsToMany
+    {
+        return $this->belongsToMany(Competency::class, 'job_position_competency')
+            ->withPivot(['organization_id', 'required_level'])
+            ->withTimestamps();
     }
 
     public function isValidOn(Carbon $date): bool

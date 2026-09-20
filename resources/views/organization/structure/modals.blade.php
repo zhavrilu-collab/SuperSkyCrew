@@ -43,6 +43,15 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-12">
+                        <label class="form-label" for="dept_deputy">Zamjenik</label>
+                        <select class="form-select" name="deputy_user_id" id="dept_deputy">
+                            <option value="">—</option>
+                            @foreach($managers as $manager)
+                                <option value="{{ $manager->id }}">{{ $manager->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-md-6">
                         <label class="form-label" for="dept_from">Važi od</label>
                         <input type="date" class="form-control" name="valid_from" id="dept_from" value="{{ $on->toDateString() }}">
@@ -108,7 +117,19 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label" for="pos_description">Opis</label>
-                                <textarea class="form-control" name="description" id="pos_description" rows="3"></textarea>
+                                <textarea class="form-control" name="description" id="pos_description" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="pos_pay">Platni razred</label>
+                                <input class="form-control" name="pay_grade" id="pos_pay">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="pos_duties">Dužnosti</label>
+                                <textarea class="form-control" name="duties" id="pos_duties" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="pos_req">Zahtjevi</label>
+                                <textarea class="form-control" name="requirements" id="pos_req" rows="2"></textarea>
                             </div>
                         </div>
                     </div>
@@ -218,6 +239,22 @@
                     <div class="col-md-6">
                         <label class="form-label" for="le_country">Država</label>
                         <input class="form-control" name="country" id="le_country" value="Hrvatska">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="le_iban">IBAN</label>
+                        <input class="form-control" name="iban" id="le_iban" maxlength="34">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="le_court">Trgovački sud</label>
+                        <input class="form-control" name="court" id="le_court">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="le_capital">Temeljni kapital</label>
+                        <input class="form-control" name="capital" id="le_capital">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="le_signatories">Potpisnici</label>
+                        <input class="form-control" name="signatories" id="le_signatories">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="le_from">Važi od</label>
@@ -381,6 +418,7 @@
         document.getElementById('dept_parent').value = (btn && btn.getAttribute('data-parent')) || '';
         document.getElementById('dept_unit').value = (btn && btn.getAttribute('data-unit')) || document.getElementById('dept_unit').value;
         document.getElementById('dept_manager').value = '';
+        document.getElementById('dept_deputy').value = '';
         document.getElementById('dept_from').value = today;
         document.getElementById('dept_to').value = '';
     }
@@ -394,6 +432,9 @@
         document.getElementById('pos_rad1g').value = '';
         document.getElementById('pos_go').value = '';
         document.getElementById('pos_description').value = '';
+        document.getElementById('pos_pay').value = '';
+        document.getElementById('pos_duties').value = '';
+        document.getElementById('pos_req').value = '';
         document.getElementById('pos_from').value = today;
         document.getElementById('pos_to').value = '';
         document.getElementById('pos_people').textContent = '—';
@@ -419,6 +460,10 @@
         document.getElementById('le_street').value = '';
         document.getElementById('le_city').value = '';
         document.getElementById('le_country').value = 'Hrvatska';
+        document.getElementById('le_iban').value = '';
+        document.getElementById('le_court').value = '';
+        document.getElementById('le_capital').value = '';
+        document.getElementById('le_signatories').value = '';
         document.getElementById('le_from').value = today;
         document.getElementById('le_to').value = '';
     }
@@ -458,6 +503,7 @@
         document.getElementById('dept_parent').value = btn.getAttribute('data-parent') || '';
         document.getElementById('dept_unit').value = btn.getAttribute('data-unit') || '';
         document.getElementById('dept_manager').value = btn.getAttribute('data-manager') || '';
+        document.getElementById('dept_deputy').value = btn.getAttribute('data-deputy') || '';
         document.getElementById('dept_from').value = btn.getAttribute('data-from') || '';
         document.getElementById('dept_to').value = btn.getAttribute('data-to') || '';
     });
@@ -472,6 +518,9 @@
         document.getElementById('pos_rad1g').value = btn.getAttribute('data-rad1g') || '';
         document.getElementById('pos_go').value = btn.getAttribute('data-go') || '';
         document.getElementById('pos_description').value = btn.getAttribute('data-description') || '';
+        document.getElementById('pos_pay').value = btn.getAttribute('data-pay') || '';
+        document.getElementById('pos_duties').value = btn.getAttribute('data-duties') || '';
+        document.getElementById('pos_req').value = btn.getAttribute('data-req') || '';
         document.getElementById('pos_from').value = btn.getAttribute('data-from') || '';
         document.getElementById('pos_to').value = btn.getAttribute('data-to') || '';
         document.getElementById('pos_people').textContent = btn.getAttribute('data-people') || '—';
@@ -501,6 +550,10 @@
         document.getElementById('le_street').value = btn.getAttribute('data-street') || '';
         document.getElementById('le_city').value = btn.getAttribute('data-city') || '';
         document.getElementById('le_country').value = btn.getAttribute('data-country') || 'Hrvatska';
+        document.getElementById('le_iban').value = btn.getAttribute('data-iban') || '';
+        document.getElementById('le_court').value = btn.getAttribute('data-court') || '';
+        document.getElementById('le_capital').value = btn.getAttribute('data-capital') || '';
+        document.getElementById('le_signatories').value = btn.getAttribute('data-signatories') || '';
         document.getElementById('le_from').value = btn.getAttribute('data-from') || '';
         document.getElementById('le_to').value = btn.getAttribute('data-to') || '';
     });

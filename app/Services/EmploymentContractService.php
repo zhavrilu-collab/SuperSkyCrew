@@ -35,6 +35,8 @@ class EmploymentContractService
                 'ends_at' => $data['ends_at'] ?? null,
                 'trial_ends_at' => $data['trial_ends_at'] ?? null,
                 'weekly_hours' => $data['weekly_hours'] ?? null,
+                'gross_salary' => $data['gross_salary'] ?? null,
+                'notice_days' => $data['notice_days'] ?? null,
                 'is_current' => $current,
                 'note' => $data['note'] ?? null,
                 'created_by_user_id' => $actor?->id,

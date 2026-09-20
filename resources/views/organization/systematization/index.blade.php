@@ -34,6 +34,7 @@
                     <th>Poslovna jedinica</th>
                     <th>RAD1G</th>
                     <th>Fond GO</th>
+                    <th>Platni razred</th>
                     <th>Popunjeno</th>
                     <th>Važi od</th>
                     <th>Važi do</th>
@@ -45,14 +46,15 @@
                     <tr>
                         <td>
                             <div class="fw-semibold">{{ $position->name }}</div>
-                            @if($position->description)
-                                <div class="text-muted small">{{ \Illuminate\Support\Str::limit($position->description, 90) }}</div>
+                            @if($position->duties)
+                                <div class="text-muted small">Dužnosti: {{ \Illuminate\Support\Str::limit($position->duties, 80) }}</div>
                             @endif
                         </td>
                         <td>{{ $position->department?->name ?: '—' }}</td>
                         <td>{{ $position->department?->enterpriseUnit?->name ?: '—' }}</td>
                         <td>{{ $position->rad1g ?: '—' }}</td>
                         <td>{{ $position->annual_leave_days !== null ? $position->annual_leave_days : '—' }}</td>
+                        <td>{{ $position->pay_grade ?: '—' }}</td>
                         <td>{{ (int) ($filled[$position->id] ?? 0) }}</td>
                         <td>{{ $position->valid_from?->format('d.m.Y.') ?: '—' }}</td>
                         <td>{{ $position->valid_to?->format('d.m.Y.') ?: '—' }}</td>
@@ -62,7 +64,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="text-muted">Nema radnih mjesta na odabrani dan.</td>
+                        <td colspan="10" class="text-muted">Nema radnih mjesta na odabrani dan.</td>
                     </tr>
                 @endforelse
             </tbody>

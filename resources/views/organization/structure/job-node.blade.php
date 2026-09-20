@@ -21,6 +21,9 @@
                         data-rad1g="{{ $job->rad1g }}"
                         data-go="{{ $job->annual_leave_days }}"
                         data-description="{{ $job->description }}"
+                        data-pay="{{ $job->pay_grade }}"
+                        data-duties="{{ $job->duties }}"
+                        data-req="{{ $job->requirements }}"
                         data-from="{{ $job->valid_from?->toDateString() }}"
                         data-to="{{ $job->valid_to?->toDateString() }}"
                         title="Uredi">✎</button>

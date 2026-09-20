@@ -5,8 +5,9 @@
                 <th>Naziv</th>
                 <th>Šifra</th>
                 <th>OIB</th>
-                <th>Sjedište</th>
-                <th>Važenje</th>
+                    <th>Sjedište</th>
+                    <th>IBAN</th>
+                    <th>Važenje</th>
                 <th></th>
             </tr>
         </thead>
@@ -22,6 +23,7 @@
                     <td>{{ $entity->code ?: '—' }}</td>
                     <td>{{ $entity->oib ?: '—' }}</td>
                     <td class="small">{{ collect([$entity->street, $entity->city, $entity->country])->filter()->implode(', ') ?: '—' }}</td>
+                    <td class="small">{{ $entity->iban ?: '—' }}</td>
                     <td class="small">{{ $entity->valid_from?->format('d.m.Y.') ?: '—' }} – {{ $entity->valid_to?->format('d.m.Y.') ?: 'otvoreno' }}</td>
                     <td class="text-end">
                         <button class="btn btn-outline-secondary btn-sm" type="button"
@@ -35,6 +37,10 @@
                             data-street="{{ $entity->street }}"
                             data-city="{{ $entity->city }}"
                             data-country="{{ $entity->country }}"
+                            data-iban="{{ $entity->iban }}"
+                            data-court="{{ $entity->court }}"
+                            data-capital="{{ $entity->capital }}"
+                            data-signatories="{{ $entity->signatories }}"
                             data-from="{{ $entity->valid_from?->toDateString() }}"
                             data-to="{{ $entity->valid_to?->toDateString() }}">Uredi</button>
                         <form method="POST" action="{{ route('organization.structure.legal-entities.destroy', [$organization->slug, $entity]) }}" class="d-inline" onsubmit="return confirm('Obrisati pravnu osobu?');">
@@ -45,7 +51,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="text-muted">Nema pravnih osoba važećih na taj dan.</td></tr>
+                <tr><td colspan="7" class="text-muted">Nema pravnih osoba važećih na taj dan.</td></tr>
             @endforelse
         </tbody>
     </table>

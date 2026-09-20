@@ -19,6 +19,8 @@ class EmploymentContract extends OrganizationModel
         'ends_at',
         'trial_ends_at',
         'weekly_hours',
+        'gross_salary',
+        'notice_days',
         'is_current',
         'note',
         'created_by_user_id',
@@ -35,6 +37,8 @@ class EmploymentContract extends OrganizationModel
             'trial_ends_at' => 'date',
             'is_current' => 'boolean',
             'weekly_hours' => 'integer',
+            'gross_salary' => 'decimal:2',
+            'notice_days' => 'integer',
         ];
     }
 

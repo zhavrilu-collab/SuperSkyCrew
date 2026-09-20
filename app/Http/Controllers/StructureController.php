@@ -312,11 +312,15 @@ class StructureController extends Controller
                 'nullable',
                 Rule::exists('organization_users', 'user_id')->where('organization_id', $organization->id),
             ],
+            'deputy_user_id' => [
+                'nullable',
+                Rule::exists('organization_users', 'user_id')->where('organization_id', $organization->id),
+            ],
             'valid_from' => ['nullable', 'date'],
             'valid_to' => ['nullable', 'date', 'after_or_equal:valid_from'],
         ]);
 
-        foreach (['code', 'parent_id', 'enterprise_unit_id', 'manager_user_id', 'valid_from', 'valid_to'] as $empty) {
+        foreach (['code', 'parent_id', 'enterprise_unit_id', 'manager_user_id', 'deputy_user_id', 'valid_from', 'valid_to'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }
@@ -357,11 +361,14 @@ class StructureController extends Controller
             'rad1g' => ['nullable', 'string', 'max:16'],
             'annual_leave_days' => ['nullable', 'integer', 'min:0', 'max:50'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'duties' => ['nullable', 'string', 'max:4000'],
+            'requirements' => ['nullable', 'string', 'max:4000'],
+            'pay_grade' => ['nullable', 'string', 'max:32'],
             'valid_from' => ['nullable', 'date'],
             'valid_to' => ['nullable', 'date', 'after_or_equal:valid_from'],
         ]);
 
-        foreach (['department_id', 'rad1g', 'annual_leave_days', 'description', 'valid_from', 'valid_to'] as $empty) {
+        foreach (['department_id', 'rad1g', 'annual_leave_days', 'description', 'duties', 'requirements', 'pay_grade', 'valid_from', 'valid_to'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }
@@ -427,11 +434,15 @@ class StructureController extends Controller
             'street' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:80'],
             'country' => ['nullable', 'string', 'max:80'],
+            'iban' => ['nullable', 'string', 'max:34'],
+            'court' => ['nullable', 'string', 'max:120'],
+            'capital' => ['nullable', 'string', 'max:80'],
+            'signatories' => ['nullable', 'string', 'max:255'],
             'valid_from' => ['nullable', 'date'],
             'valid_to' => ['nullable', 'date', 'after_or_equal:valid_from'],
         ]);
 
-        foreach (['code', 'oib', 'parent_id', 'street', 'city', 'country', 'valid_from', 'valid_to'] as $empty) {
+        foreach (['code', 'oib', 'parent_id', 'street', 'city', 'country', 'iban', 'court', 'capital', 'signatories', 'valid_from', 'valid_to'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }

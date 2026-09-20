@@ -11,6 +11,8 @@
                     <th>Trajanje</th>
                     <th>Probni</th>
                     <th>Sati/tj.</th>
+                    <th>Bruto</th>
+                    <th>Otkaz</th>
                     <th></th>
                 </tr>
             </thead>
@@ -22,6 +24,8 @@
                         <td>{{ $item->starts_at->format('d.m.Y.') }}{{ $item->ends_at ? ' – '.$item->ends_at->format('d.m.Y.') : '' }}</td>
                         <td>{{ $item->trial_ends_at?->format('d.m.Y.') ?: '—' }}</td>
                         <td>{{ $item->weekly_hours ?: '—' }}</td>
+                        <td>{{ $item->gross_salary !== null ? number_format((float) $item->gross_salary, 2, ',', '.').' €' : '—' }}</td>
+                        <td>{{ $item->notice_days !== null ? $item->notice_days.' d.' : '—' }}</td>
                         <td class="text-end">
                             <form method="POST" action="{{ route('organization.contracts.destroy', [$organization->slug, $person, $item]) }}" onsubmit="return confirm('Ukloniti ovaj ugovor?')">
                                 @csrf
@@ -31,7 +35,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="text-muted">Još nema ugovora. Ispis UOR-a i istek određenog čitaju važeći slog.</td></tr>
+                    <tr><td colspan="8" class="text-muted">Još nema ugovora. Ispis UOR-a i istek određenog čitaju važeći slog.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -62,6 +66,14 @@
         <div class="col-md-3">
             <label class="form-label" for="instrument_weekly_hours">Sati tjedno</label>
             <input type="number" min="1" max="60" class="form-control" name="weekly_hours" id="instrument_weekly_hours" value="{{ old('weekly_hours', 40) }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="instrument_gross">Bruto (€)</label>
+            <input type="number" min="0" step="0.01" class="form-control" name="gross_salary" id="instrument_gross" value="{{ old('gross_salary') }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="instrument_notice">Otkazni rok (dana)</label>
+            <input type="number" min="0" max="365" class="form-control" name="notice_days" id="instrument_notice" value="{{ old('notice_days') }}">
         </div>
         <div class="col-md-3">
             <label class="form-label" for="instrument_signed_at">Potpis</label>

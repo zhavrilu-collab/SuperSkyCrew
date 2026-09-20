@@ -6,21 +6,28 @@ use App\Http\Controllers\Auth\CoreOAuthCallbackController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OrganizationRegistrationController;
 use App\Http\Controllers\Auth\StaffInviteAcceptController;
+use App\Http\Controllers\BusinessSegmentController;
 use App\Http\Controllers\ClockController;
-use App\Http\Controllers\ComingSoonController;
+use App\Http\Controllers\CompetencyController;
+use App\Http\Controllers\ContractRegisterController;
+use App\Http\Controllers\DocumentCreatorController;
 use App\Http\Controllers\DocumentHandoverController;
 use App\Http\Controllers\EmploymentContractController;
 use App\Http\Controllers\EntranceClockController;
 use App\Http\Controllers\ExceptionQueueController;
 use App\Http\Controllers\ExpiryController;
+use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\GrantHoursController;
+use App\Http\Controllers\InternalActController;
 use App\Http\Controllers\KioskController;
+use App\Http\Controllers\MyDocumentsController;
 use App\Http\Controllers\OrganizationDashboardController;
 use App\Http\Controllers\OrganizationLandingController;
 use App\Http\Controllers\OrganizationPickerController;
 use App\Http\Controllers\OrganizationSettingsController;
 use App\Http\Controllers\OrganizationSuspendedController;
 use App\Http\Controllers\OrganizationTeamController;
+use App\Http\Controllers\OrgPositionController;
 use App\Http\Controllers\PeopleRegisterController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\PersonDocumentController;
@@ -33,7 +40,6 @@ use App\Http\Controllers\StructureController;
 use App\Http\Controllers\SystematizationController;
 use App\Http\Controllers\TimesheetController;
 use App\Http\Controllers\TimesheetReportController;
-use App\Support\ComingSoonCatalog;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -80,30 +86,32 @@ Route::prefix('{slug}')
         Route::get('/', OrganizationLandingController::class)->name('organization.landing');
         Route::get('/pregled', OrganizationDashboardController::class)->name('organization.dashboard');
         Route::get('/sistematizacija', [SystematizationController::class, 'index'])->name('organization.systematization.index');
-        Route::get('/sistematizacija/plan', [ComingSoonController::class, 'show'])
-            ->defaults('modul', ComingSoonCatalog::POSITION_PLAN)
-            ->name('organization.systematization.plan');
-        Route::get('/sistematizacija/kompetencije', [ComingSoonController::class, 'show'])
-            ->defaults('modul', ComingSoonCatalog::COMPETENCIES)
-            ->name('organization.systematization.competencies');
-        Route::get('/sistematizacija/akti', [ComingSoonController::class, 'show'])
-            ->defaults('modul', ComingSoonCatalog::INTERNAL_ACTS)
-            ->name('organization.systematization.acts');
-        Route::get('/ustroj/segmenti', [ComingSoonController::class, 'show'])
-            ->defaults('modul', ComingSoonCatalog::SEGMENTS)
-            ->name('organization.segments.index');
-        Route::get('/ustroj/pozicije', [ComingSoonController::class, 'show'])
-            ->defaults('modul', ComingSoonCatalog::POSITIONS)
-            ->name('organization.positions.index');
-        Route::get('/zaposlenici/ugovori', [ComingSoonController::class, 'show'])
-            ->defaults('modul', ComingSoonCatalog::CONTRACTS)
-            ->name('organization.contracts.index');
-        Route::get('/zaposlenici/dokumenti', [ComingSoonController::class, 'show'])
-            ->defaults('modul', ComingSoonCatalog::DOCUMENT_CREATOR)
-            ->name('organization.document-creator.index');
-        Route::get('/zaposlenici/obitelj', [ComingSoonController::class, 'show'])
-            ->defaults('modul', ComingSoonCatalog::FAMILY)
-            ->name('organization.family.index');
+        Route::get('/sistematizacija/plan', [OrgPositionController::class, 'plan'])->name('organization.systematization.plan');
+        Route::get('/sistematizacija/kompetencije', [CompetencyController::class, 'index'])->name('organization.systematization.competencies');
+        Route::post('/sistematizacija/kompetencije', [CompetencyController::class, 'store'])->name('organization.competencies.store');
+        Route::delete('/sistematizacija/kompetencije/{competency}', [CompetencyController::class, 'destroy'])->name('organization.competencies.destroy');
+        Route::post('/sistematizacija/kompetencije/veza', [CompetencyController::class, 'attach'])->name('organization.competencies.attach');
+        Route::delete('/sistematizacija/kompetencije/veza', [CompetencyController::class, 'detach'])->name('organization.competencies.detach');
+        Route::get('/sistematizacija/akti', [InternalActController::class, 'index'])->name('organization.systematization.acts');
+        Route::post('/sistematizacija/akti', [InternalActController::class, 'store'])->name('organization.acts.store');
+        Route::get('/sistematizacija/akti/{act}/preuzmi', [InternalActController::class, 'download'])->name('organization.acts.download');
+        Route::delete('/sistematizacija/akti/{act}', [InternalActController::class, 'destroy'])->name('organization.acts.destroy');
+        Route::get('/ustroj/segmenti', [BusinessSegmentController::class, 'index'])->name('organization.segments.index');
+        Route::post('/ustroj/segmenti', [BusinessSegmentController::class, 'store'])->name('organization.segments.store');
+        Route::put('/ustroj/segmenti/{segment}', [BusinessSegmentController::class, 'update'])->name('organization.segments.update');
+        Route::delete('/ustroj/segmenti/{segment}', [BusinessSegmentController::class, 'destroy'])->name('organization.segments.destroy');
+        Route::get('/ustroj/pozicije', [OrgPositionController::class, 'index'])->name('organization.positions.index');
+        Route::post('/ustroj/pozicije', [OrgPositionController::class, 'store'])->name('organization.positions.store');
+        Route::put('/ustroj/pozicije/{position}', [OrgPositionController::class, 'update'])->name('organization.positions.update');
+        Route::delete('/ustroj/pozicije/{position}', [OrgPositionController::class, 'destroy'])->name('organization.positions.destroy');
+        Route::get('/zaposlenici/ugovori', [ContractRegisterController::class, 'index'])->name('organization.contracts.index');
+        Route::get('/zaposlenici/dokumenti', [DocumentCreatorController::class, 'index'])->name('organization.document-creator.index');
+        Route::post('/zaposlenici/dokumenti', [DocumentCreatorController::class, 'store'])->name('organization.document-creator.store');
+        Route::get('/zaposlenici/obitelj', [FamilyMemberController::class, 'index'])->name('organization.family.index');
+        Route::post('/zaposlenici/obitelj', [FamilyMemberController::class, 'store'])->name('organization.family.store');
+        Route::delete('/zaposlenici/obitelj/{member}', [FamilyMemberController::class, 'destroy'])->name('organization.family.destroy');
+        Route::get('/moje/dokumenti', [MyDocumentsController::class, 'index'])->name('organization.my-documents.index');
+        Route::get('/moje/dokumenti/{document}/preuzmi', [MyDocumentsController::class, 'download'])->name('organization.my-documents.download');
         Route::get('/postavke', [OrganizationSettingsController::class, 'index'])->name('organization.settings.index');
         Route::put('/postavke/organizacija', [OrganizationSettingsController::class, 'updateOrganization'])->name('organization.settings.organization');
         Route::put('/postavke/izgled', [OrganizationSettingsController::class, 'updateTheme'])->name('organization.settings.theme');

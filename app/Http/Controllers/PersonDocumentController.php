@@ -7,6 +7,7 @@ use App\Models\DocumentType;
 use App\Models\Person;
 use App\Models\PersonDocument;
 use App\Services\DocumentFillService;
+use App\Services\DocumentInboxService;
 use App\Services\FeatureService;
 use App\Services\OrganizationRbacService;
 use App\Support\OrganizationFeatures;
@@ -23,6 +24,7 @@ class PersonDocumentController extends Controller
         private readonly OrganizationRbacService $rbac,
         private readonly DocumentFillService $fill,
         private readonly FeatureService $features,
+        private readonly DocumentInboxService $inbox,
     ) {}
 
     public function store(Request $request, string $slug, Person $person): RedirectResponse
@@ -57,7 +59,7 @@ class PersonDocumentController extends Controller
             $mime = $file->getClientMimeType();
         }
 
-        PersonDocument::query()->create([
+        $created = PersonDocument::query()->create([
             'organization_id' => $organization->id,
             'person_id' => $person->id,
             'document_type_id' => $type->id,
@@ -69,6 +71,7 @@ class PersonDocumentController extends Controller
             'original_name' => $original,
             'mime' => $mime,
         ]);
+        $this->inbox->notifyNew($organization, $person->loadMissing('user'), $created);
 
         return redirect()
             ->route('organization.people.edit', [$organization->slug, $person, 'tab' => 'dokumenti'])
@@ -117,6 +120,8 @@ class PersonDocumentController extends Controller
         abort_unless(Storage::disk('local')->exists($template->file_path), 404);
 
         $document = $this->fill->storeFilled($template, $person);
+
+        $this->inbox->notifyNew($organization, $person->loadMissing('user'), $document);
 
         return redirect()
             ->route('organization.people.edit', [$organization->slug, $person, 'tab' => 'dokumenti'])

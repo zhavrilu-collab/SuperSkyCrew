@@ -126,6 +126,18 @@
         </form>
     </div>
 
+    @if(($scheduledChanges ?? []) !== [])
+        <div class="kartica-kontejner mx-3 mb-3">
+            <h2 class="h6">Zakazane buduće promjene</h2>
+            <p class="text-muted small">Zapisi s datumom važenja u budućnosti. Pregled na taj dan: polje „Stanje na dan“.</p>
+            <ul class="mb-0 small">
+                @foreach($scheduledChanges as $change)
+                    <li>{{ $change['from'] }} · {{ $change['type'] }}: {{ $change['name'] }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @if($katalog === 'pravne')
         @include('organization.structure.catalog-legal')
     @elseif($katalog === 'poslovnice')

@@ -134,7 +134,7 @@ class OrganizationUiChromeTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_owner_opens_coming_soon_modules_and_employee_cannot(): void
+    public function test_owner_opens_kadrovski_modules_and_employee_cannot(): void
     {
         [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
         $employee = User::factory()->create();
@@ -148,13 +148,13 @@ class OrganizationUiChromeTest extends TestCase
             ->get(route('organization.segments.index', $organization->slug))
             ->assertOk()
             ->assertSee('Poslovni segmenti')
-            ->assertSee('Uskoro');
+            ->assertDontSee('Uskoro');
 
         $this->actingAs($owner)
             ->get(route('organization.contracts.index', $organization->slug))
             ->assertOk()
             ->assertSee('Ugovori o radu')
-            ->assertSee('Uskoro');
+            ->assertDontSee('Uskoro');
 
         $this->actingAs($owner)
             ->get(route('organization.settings.index', [
@@ -164,7 +164,8 @@ class OrganizationUiChromeTest extends TestCase
             ]))
             ->assertOk()
             ->assertSee('Osnovni podaci')
-            ->assertSee('Naziv organizacije');
+            ->assertSee('Naziv organizacije')
+            ->assertSee('MBS');
 
         $this->actingAs($employee)
             ->get(route('organization.segments.index', $organization->slug))

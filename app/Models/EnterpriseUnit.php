@@ -17,6 +17,7 @@ class EnterpriseUnit extends OrganizationModel
         'parent_id',
         'legal_entity_id',
         'work_center_id',
+        'business_segment_id',
         'name',
         'valid_from',
         'valid_to',
@@ -48,6 +49,11 @@ class EnterpriseUnit extends OrganizationModel
     public function workCenter(): BelongsTo
     {
         return $this->belongsTo(WorkCenter::class);
+    }
+
+    public function businessSegment(): BelongsTo
+    {
+        return $this->belongsTo(BusinessSegment::class);
     }
 
     public function departments(): HasMany

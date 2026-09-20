@@ -21,6 +21,10 @@ class LegalEntity extends OrganizationModel
         'street',
         'city',
         'country',
+        'iban',
+        'court',
+        'capital',
+        'signatories',
         'valid_from',
         'valid_to',
     ];

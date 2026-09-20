@@ -28,6 +28,22 @@
                 <input class="form-control" name="city" id="city" value="{{ old('city', $organization->city) }}">
             </div>
             <div class="col-md-8">
+                <label class="form-label" for="street">Adresa sjedišta</label>
+                <input class="form-control" name="street" id="street" value="{{ old('street', $organization->street) }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="mbs">MBS</label>
+                <input class="form-control" name="mbs" id="mbs" value="{{ old('mbs', $organization->mbs) }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="nkd">NKD</label>
+                <input class="form-control" name="nkd" id="nkd" value="{{ old('nkd', $organization->nkd) }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="website">Web</label>
+                <input class="form-control" name="website" id="website" value="{{ old('website', $organization->website) }}" placeholder="https://">
+            </div>
+            <div class="col-md-8">
                 <label class="form-label" for="organization_type">Tip organizacije</label>
                 <select class="form-select" name="organization_type" id="organization_type">
                     @foreach(\App\Enums\OrganizationType::cases() as $type)
@@ -40,6 +56,12 @@
             <button class="btn btn-primary" type="submit">Spremi</button>
         </div>
     </form>
+    @if($organization->logoUrl())
+        <div class="mt-4 p-3 border rounded-3 bg-white d-inline-block">
+            <div class="text-muted small mb-2">Logotip (upload u Izgledu)</div>
+            <img src="{{ $organization->logoUrl() }}" alt="" style="max-height: 64px;">
+        </div>
+    @endif
 @elseif($tab === 'organizacija' && $section === 'izgled')
     @include('organization.settings.partials.izgled')
 @elseif($tab === 'organizacija' && $section === 'ustroj')

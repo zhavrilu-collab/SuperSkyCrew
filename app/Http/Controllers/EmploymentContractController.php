@@ -35,6 +35,8 @@ class EmploymentContractController extends Controller
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'trial_ends_at' => ['nullable', 'date'],
             'weekly_hours' => ['nullable', 'integer', 'min:1', 'max:60'],
+            'gross_salary' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
+            'notice_days' => ['nullable', 'integer', 'min:0', 'max:365'],
             'note' => ['nullable', 'string', 'max:255'],
             'is_current' => ['nullable', 'boolean'],
         ]);
@@ -46,7 +48,7 @@ class EmploymentContractController extends Controller
             $data['ends_at'] = $request->input('ends_at');
         }
 
-        foreach (['number', 'contract_type', 'ends_at', 'trial_ends_at', 'weekly_hours', 'note'] as $empty) {
+        foreach (['number', 'contract_type', 'ends_at', 'trial_ends_at', 'weekly_hours', 'gross_salary', 'notice_days', 'note'] as $empty) {
             if (($data[$empty] ?? null) === '') {
                 $data[$empty] = null;
             }

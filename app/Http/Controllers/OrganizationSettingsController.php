@@ -9,10 +9,10 @@ use App\Enums\DeviceBindMode;
 use App\Enums\GeofenceMode;
 use App\Enums\OrganizationRole;
 use App\Enums\OrganizationType;
+use App\Enums\PersonStatus;
 use App\Enums\RetentionClass;
 use App\Models\AbsenceCode;
 use App\Models\CalendarRule;
-use App\Models\CostCenter;
 use App\Models\Department;
 use App\Models\DocumentTemplate;
 use App\Models\DocumentType;
@@ -34,10 +34,13 @@ use App\Services\HrSetupService;
 use App\Services\LeaveService;
 use App\Services\OrganizationRbacService;
 use App\Services\OrganizationStructureService;
+use App\Services\OrgScheduleService;
 use App\Services\PeopleImportService;
 use App\Services\RetentionService;
+use App\Support\DepartmentTree;
 use App\Support\DocumentMergeFields;
 use App\Support\OrganizationThemes;
+use App\Support\OrgTree;
 use App\Support\PersonReportingTree;
 use App\Support\SettingsCatalog;
 use App\Support\StructureCatalog;
@@ -49,6 +52,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrganizationSettingsController extends Controller
 {
@@ -111,6 +115,10 @@ class OrganizationSettingsController extends Controller
             'oib' => ['required', 'string', 'max:11'],
             'phone' => ['nullable', 'string', 'max:50'],
             'city' => ['nullable', 'string', 'max:100'],
+            'street' => ['nullable', 'string', 'max:255'],
+            'mbs' => ['nullable', 'string', 'max:32'],
+            'website' => ['nullable', 'string', 'max:255'],
+            'nkd' => ['nullable', 'string', 'max:16'],
             'organization_type' => ['required', Rule::enum(OrganizationType::class)],
         ]);
 
@@ -120,6 +128,10 @@ class OrganizationSettingsController extends Controller
             'oib' => preg_replace('/\s+/', '', $data['oib']),
             'phone' => $data['phone'] ?? null,
             'city' => $data['city'] ?? null,
+            'street' => $data['street'] ?? null,
+            'mbs' => $data['mbs'] ?? null,
+            'website' => $data['website'] ?? null,
+            'nkd' => $data['nkd'] ?? null,
             'organization_type' => $data['organization_type'],
         ]);
 
@@ -288,7 +300,7 @@ class OrganizationSettingsController extends Controller
         return back()->with('status', 'Predložak je spremljen.');
     }
 
-    public function downloadDocumentTemplate(string $slug, DocumentTemplate $template): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function downloadDocumentTemplate(string $slug, DocumentTemplate $template): StreamedResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
@@ -341,7 +353,7 @@ class OrganizationSettingsController extends Controller
             ->with('import_skipped', $result['skipped']);
     }
 
-    public function importPeopleTemplate(): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function importPeopleTemplate(): StreamedResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
@@ -651,7 +663,7 @@ class OrganizationSettingsController extends Controller
                 config('app.timezone')
             )->startOfDay();
             $katalog = StructureCatalog::resolve($request->input('katalog'));
-            $departments = $this->scope->departmentsOn($organization, $on)->load('enterpriseUnit');
+            $departments = $this->scope->departmentsOn($organization, $on)->load(['enterpriseUnit', 'manager', 'deputy']);
             $positions = $this->scope->positionsOn($organization, $on);
             $costCenters = $this->scope->costCentersOn($organization, $on);
             $legalEntities = $this->scope->legalEntitiesOn($organization, $on);
@@ -691,7 +703,7 @@ class OrganizationSettingsController extends Controller
                 ->get();
 
             $chartPeople = $people->filter(function (Person $person) use ($on, $unitIds, $selectedDepartment) {
-                if ($person->status === \App\Enums\PersonStatus::Candidate || $person->status === \App\Enums\PersonStatus::Former) {
+                if ($person->status === PersonStatus::Candidate || $person->status === PersonStatus::Former) {
                     return false;
                 }
                 if ($person->ended_at && $person->ended_at->toDateString() < $on->toDateString()) {
@@ -745,14 +757,14 @@ class OrganizationSettingsController extends Controller
                 'selectedPersonId' => $osobaId > 0 ? $osobaId : null,
                 'departments' => $departments,
                 'functionalDepartments' => $functionalDepartments,
-                'departmentRows' => \App\Support\DepartmentTree::flatten($departments),
-                'functionalDepartmentRows' => \App\Support\DepartmentTree::flatten($functionalDepartments),
+                'departmentRows' => DepartmentTree::flatten($departments),
+                'functionalDepartmentRows' => DepartmentTree::flatten($functionalDepartments),
                 'positions' => $positions,
                 'costCenters' => $costCenters,
                 'legalEntities' => $legalEntities,
                 'workCenters' => $workCenters,
                 'enterpriseUnits' => $enterpriseUnits,
-                'enterpriseForest' => \App\Support\OrgTree::forest($enterpriseUnits),
+                'enterpriseForest' => OrgTree::forest($enterpriseUnits),
                 'people' => $people,
                 'chartForest' => PersonReportingTree::forest($chartPeople),
                 'locations' => Location::query()->forOrganization($organization)->where('is_active', true)->orderBy('name')->get(),
@@ -765,6 +777,7 @@ class OrganizationSettingsController extends Controller
                     ->filter()
                     ->unique('id')
                     ->values(),
+                'scheduledChanges' => app(OrgScheduleService::class)->upcoming($organization, $on),
             ];
         }
 
@@ -814,9 +827,9 @@ class OrganizationSettingsController extends Controller
                     ->forOrganization($organization)
                     ->with(['jobPosition', 'leaveBalances' => fn ($query) => $query->where('year', $year)])
                     ->whereIn('status', [
-                        \App\Enums\PersonStatus::Employee->value,
-                        \App\Enums\PersonStatus::Assigned->value,
-                        \App\Enums\PersonStatus::Executive->value,
+                        PersonStatus::Employee->value,
+                        PersonStatus::Assigned->value,
+                        PersonStatus::Executive->value,
                     ])
                     ->orderBy('last_name')
                     ->orderBy('first_name')

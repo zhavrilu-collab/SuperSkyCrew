@@ -7,6 +7,8 @@ use App\Enums\FamilyRight;
 use App\Enums\OtherFoKind;
 use App\Enums\PersonStatus;
 use App\Services\ClockQrService;
+use App\Services\PersonEngagementService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,9 +23,11 @@ class Person extends OrganizationModel
         'organization_id',
         'user_id',
         'manager_user_id',
+        'dotted_manager_user_id',
         'location_id',
         'department_id',
         'job_position_id',
+        'org_position_id',
         'cost_center_id',
         'legal_entity_id',
         'work_center_id',
@@ -34,6 +38,8 @@ class Person extends OrganizationModel
         'date_of_birth',
         'citizenship',
         'residence',
+        'email',
+        'phone',
         'job_title',
         'contract_type',
         'status',
@@ -156,6 +162,21 @@ class Person extends OrganizationModel
         return $this->belongsTo(User::class, 'manager_user_id');
     }
 
+    public function dottedManager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dotted_manager_user_id');
+    }
+
+    public function orgPosition(): BelongsTo
+    {
+        return $this->belongsTo(OrgPosition::class);
+    }
+
+    public function familyMembers(): HasMany
+    {
+        return $this->hasMany(PersonFamilyMember::class)->orderBy('last_name')->orderBy('first_name');
+    }
+
     public function leaveBalances(): HasMany
     {
         return $this->hasMany(LeaveBalance::class);
@@ -209,9 +230,9 @@ class Person extends OrganizationModel
         return $this->hasMany(PersonEngagement::class)->orderByDesc('valid_from')->orderByDesc('id');
     }
 
-    public function assignmentOn(\Carbon\Carbon $on): ?PersonEngagement
+    public function assignmentOn(Carbon $on): ?PersonEngagement
     {
-        return app(\App\Services\PersonEngagementService::class)->forPersonOn($this, $on);
+        return app(PersonEngagementService::class)->forPersonOn($this, $on);
     }
 
     public function employmentContracts(): HasMany

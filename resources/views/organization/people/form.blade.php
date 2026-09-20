@@ -15,6 +15,7 @@
         'zaposlenje' => 'Zaposlenje',
         'angazman' => 'Angažman',
         'ugovori' => 'Ugovori',
+        'obitelj' => 'Obitelj',
         'dokumenti' => 'Dokumenti',
         'kvalifikacije' => 'Kvalifikacije',
         'place' => 'Plaće i prava',
@@ -258,6 +259,8 @@
                 @include('organization.people.partials.odabir')
             @elseif($profileTab === 'ugovori')
                 @include('organization.people.partials.ugovori')
+            @elseif($profileTab === 'obitelj')
+                @include('organization.people.partials.obitelj')
             @elseif($profileTab === 'dokumenti')
                 @include('organization.people.partials.dokumenti')
             @elseif($profileTab === 'angazman')

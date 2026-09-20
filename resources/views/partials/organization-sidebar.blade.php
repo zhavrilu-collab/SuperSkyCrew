@@ -118,7 +118,7 @@
     </div>
     @endif
 
-    @php $mojeOpen = request()->routeIs('organization.clock', 'organization.timesheet.mine', 'organization.requests.*', 'organization.absences.*'); @endphp
+    @php $mojeOpen = request()->routeIs('organization.clock', 'organization.timesheet.mine', 'organization.requests.*', 'organization.absences.*', 'organization.my-documents.*'); @endphp
     <div class="app-sidebar-group @if($mojeOpen) is-open @endif">
         <div class="app-sidebar-group-head">
             <a class="app-sidebar-group-link @if($mojeOpen) active @endif"
@@ -132,6 +132,7 @@
             <a class="app-sidebar-link @if(request()->routeIs('organization.timesheet.mine')) active @endif" href="{{ route('organization.timesheet.mine', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'week'])Moj tjedan</a>
             <a class="app-sidebar-link @if(request()->routeIs('organization.requests.*')) active @endif" href="{{ route('organization.requests.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'mail'])Zahtjevi</a>
             <a class="app-sidebar-link @if(request()->routeIs('organization.absences.*')) active @endif" href="{{ route('organization.absences.calendar', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'calendar'])Kalendar</a>
+            <a class="app-sidebar-link @if(request()->routeIs('organization.my-documents.*')) active @endif" href="{{ route('organization.my-documents.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'file'])Dokumenti</a>
             @if($organization->feature(\App\Support\OrganizationFeatures::SHIFT_BOARD))
                 <a class="app-sidebar-link @if(request()->routeIs('organization.schedule.*')) active @endif" href="{{ route('organization.schedule.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'shifts'])Raspored / smjene</a>
             @endif

@@ -54,6 +54,7 @@
                                 data-parent="{{ $department->parent_id }}"
                                 data-unit="{{ $department->enterprise_unit_id }}"
                                 data-manager="{{ $department->manager_user_id }}"
+                                data-deputy="{{ $department->deputy_user_id }}"
                                 data-from="{{ $department->valid_from?->toDateString() }}"
                                 data-to="{{ $department->valid_to?->toDateString() }}">Uredi</button>
                             <form method="POST" action="{{ route('organization.structure.departments.destroy', [$organization->slug, $department]) }}" class="d-inline" onsubmit="return confirm('Obrisati odjel?');">
