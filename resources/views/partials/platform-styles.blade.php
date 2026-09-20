@@ -618,6 +618,22 @@
 
     .guest-shell { min-height: 100vh; display: flex; align-items: center; }
     .app-guest-lockup { display: block; max-width: 210px; width: 100%; height: auto; margin: 0 auto 1.15rem; }
+    .plan-kartica {
+        border: 1px solid color-mix(in srgb, var(--primarna-zelena) 18%, #dfe8e6);
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+        height: 100%;
+        display: block;
+        background: #fff;
+        position: relative;
+    }
+    .plan-kartica .plan-kartica-radio { position: absolute; top: .75rem; right: .75rem; }
+    .plan-kartica.aktivna {
+        border-color: var(--primarna-zelena);
+        background: var(--svijetlo-zelena);
+        box-shadow: 0 0 0 1px var(--primarna-zelena);
+    }
     .page-heading { margin-bottom: 1rem; }
     .page-heading h1 { font-size: 1.15rem; font-weight: 700; color: var(--primarna-zelena); margin-bottom: .2rem; }
     .page-heading p { color: #6a7a6a; margin-bottom: 0; }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Enums\OrganizationRole;
 use App\Enums\OrganizationStatus;
+use App\Enums\OrganizationType;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\OrganizationUser;
@@ -11,7 +12,9 @@ use App\Models\User;
 use App\Rules\ValidOib;
 use App\Services\AdminConsoleWebhookService;
 use App\Services\CoreAuthService;
+use App\Services\HrSetupService;
 use App\Services\OrganizationOnboardingService;
+use App\Support\OrganizationFeatures;
 use App\Support\UserOrganizationNavigation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,8 +29,20 @@ class OrganizationRegistrationController extends Controller
 {
     public function create(): View
     {
+        $selectedPlan = old('plan', 'standard');
+        if (! in_array($selectedPlan, OrganizationFeatures::planSlugs(), true)) {
+            $selectedPlan = 'standard';
+        }
+
         return view('auth.register-organization', [
             'isLoggedIn' => Auth::check(),
+            'plans' => collect(OrganizationFeatures::planSlugs())->map(fn (string $slug) => [
+                'slug' => $slug,
+                'name' => OrganizationFeatures::planLabel($slug),
+                'summary' => OrganizationFeatures::planSummary($slug),
+                'recommended' => $slug === 'standard',
+            ]),
+            'selectedPlan' => $selectedPlan,
         ]);
     }
 
@@ -78,7 +93,8 @@ class OrganizationRegistrationController extends Controller
             'organization_email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'city' => ['nullable', 'string', 'max:100'],
-            'organization_type' => ['nullable', Rule::enum(\App\Enums\OrganizationType::class)],
+            'organization_type' => ['nullable', Rule::enum(OrganizationType::class)],
+            'plan' => ['nullable', Rule::in(OrganizationFeatures::planSlugs())],
         ];
 
         if (! Auth::check()) {
@@ -93,7 +109,7 @@ class OrganizationRegistrationController extends Controller
 
         $data = $request->validate($rules);
 
-        $organization = DB::transaction(function () use ($data, $coreAuth, $request) {
+        $organization = DB::transaction(function () use ($data, $coreAuth) {
             $user = Auth::user();
 
             if ($user === null) {
@@ -120,18 +136,23 @@ class OrganizationRegistrationController extends Controller
                 }
             }
 
+            $type = OrganizationType::tryFrom((string) ($data['organization_type'] ?? OrganizationType::Company->value))
+                ?? OrganizationType::Company;
+            $plan = (string) ($data['plan'] ?? 'standard');
+
             $organization = Organization::query()->create([
                 'name' => $data['name'],
                 'slug' => OrganizationOnboardingService::makeUniqueSlug($data['name']),
                 'status' => OrganizationStatus::Pending,
-                'plan' => 'basic',
+                'plan' => $plan,
+                'employee_limit' => OrganizationFeatures::defaultLimit($plan),
                 'status_changed_at' => now(),
                 'email' => $data['organization_email'],
                 'oib' => preg_replace('/\s+/', '', $data['oib']),
                 'phone' => $data['phone'] ?? null,
                 'city' => $data['city'] ?? null,
-                'organization_type' => $data['organization_type'] ?? \App\Enums\OrganizationType::Company,
-                'volunteer_module' => ($data['organization_type'] ?? 'company') === \App\Enums\OrganizationType::Nonprofit->value,
+                'organization_type' => $type,
+                'volunteer_module' => $type === OrganizationType::Nonprofit,
             ]);
 
             OrganizationUser::query()->create([
@@ -140,7 +161,7 @@ class OrganizationRegistrationController extends Controller
                 'role' => OrganizationRole::Owner,
             ]);
 
-            app(\App\Services\HrSetupService::class)->provision($organization);
+            app(HrSetupService::class)->provision($organization);
 
             return $organization;
         });
@@ -156,6 +177,6 @@ class OrganizationRegistrationController extends Controller
 
         return redirect()
             ->route('registration.pending')
-            ->with('status', 'Organizacija je registrirana i čeka odobrenje administratora.');
+            ->with('status', 'Tvrtka je registrirana i čeka odobrenje administratora.');
     }
 }

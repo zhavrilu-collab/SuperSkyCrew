@@ -101,6 +101,31 @@ class OrganizationFeatures
         };
     }
 
+    /** @return list<string> */
+    public static function planSlugs(): array
+    {
+        return ['basic', 'standard', 'premium'];
+    }
+
+    public static function planLabel(?string $plan): string
+    {
+        return match ($plan) {
+            'basic' => 'Osnovni',
+            'standard' => 'Standardni',
+            'premium' => 'Premium',
+            default => (string) $plan,
+        };
+    }
+
+    public static function planSummary(?string $plan): string
+    {
+        $limit = self::defaultLimit($plan);
+
+        return $limit !== null
+            ? 'do '.$limit.' aktivnih osoba'
+            : 'neograničeno';
+    }
+
     public static function label(string $key): string
     {
         return match ($key) {

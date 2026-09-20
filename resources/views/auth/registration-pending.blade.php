@@ -1,12 +1,13 @@
 @extends('layouts.guest')
 
-@section('title', 'Čekanje odobrenja — HR SaaS')
+@section('title', 'Čekanje odobrenja — SuperSkyCrew')
 @section('guest-width', 'col-lg-6')
 
 @section('content')
 <div class="kartica-kontejner">
+    <img src="{{ asset('brand/superskycrew-lockup.png') }}" alt="SuperSkyCrew" class="app-guest-lockup">
     <h1 class="h4 text-tema mb-3">Registracija na čekanju</h1>
-    <p class="text-muted">Super-administrator mora odobriti organizaciju prije pristupa sustavu.</p>
+    <p class="text-muted">Super-administrator mora odobriti tvrtku prije pristupa SuperSkyCrewu.</p>
 
     @if(session('status'))
         <div class="alert alert-success">{{ session('status') }}</div>

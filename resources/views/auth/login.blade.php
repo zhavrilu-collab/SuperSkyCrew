@@ -46,7 +46,7 @@
     @endif
 
     <p class="text-center mt-3 mb-0 small">
-        Nemate organizaciju? <a href="{{ route('register.organization') }}">Registrirajte novu</a>
+        Nemate tvrtku? <a href="{{ route('register.organization') }}">Registrirajte novu</a>
     </p>
 </div>
 @endsection
