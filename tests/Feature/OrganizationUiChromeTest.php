@@ -26,7 +26,7 @@ class OrganizationUiChromeTest extends TestCase
             ->get(route('organization.landing', $organization->slug))
             ->assertRedirect(route('organization.dashboard', $organization->slug));
 
-        $this->actingAs($owner)
+        $dashboard = $this->actingAs($owner)
             ->get(route('organization.dashboard', $organization->slug))
             ->assertOk()
             ->assertSee('app-sidebar', false)
@@ -34,6 +34,11 @@ class OrganizationUiChromeTest extends TestCase
             ->assertSee('SuperSkyCrew')
             ->assertSee('app-sidebar-mark', false)
             ->assertSee('nav-home', false)
+            ->assertSee('nav-clipboard', false)
+            ->assertSee('nav-buildings', false)
+            ->assertSee('nav-contract', false)
+            ->assertSee('nav-timesheet', false)
+            ->assertSee('nav-palette', false)
             ->assertSee('Nadzorna ploča')
             ->assertSee('Profil tvrtke')
             ->assertSee('Ustroj tvrtke')
@@ -47,7 +52,19 @@ class OrganizationUiChromeTest extends TestCase
             ->assertSee('Poslovni segmenti')
             ->assertSee('Ugovori o radu')
             ->assertSee('Postavke')
-            ->assertSee('Prijavljeni korisnik')
+            ->assertSee('Prijavljeni korisnik');
+
+        preg_match_all('/href="#nav-([a-z0-9-]+)"/', $dashboard->getContent(), $iconMatches);
+        foreach (array_count_values($iconMatches[1]) as $icon => $count) {
+            if (in_array($icon, ['list', 'flow'], true)) {
+                $this->assertSame(2, $count, $icon);
+
+                continue;
+            }
+            $this->assertSame(1, $count, "Ikona {$icon} se ponavlja {$count} puta.");
+        }
+
+        $dashboard
             ->assertSee('#0f6b64', false)
             ->assertDontSee('odaberite modul');
 

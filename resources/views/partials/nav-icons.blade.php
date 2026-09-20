@@ -161,4 +161,76 @@
         <circle cx="12" cy="12" r="1.6"/>
         <path d="M4 19v-1.2A3.2 3.2 0 0 1 7.2 14.6h1.4M18.8 14.6h.4A3.2 3.2 0 0 1 22 17.8V19M9.4 19v-1.4A2.6 2.6 0 0 1 12 15a2.6 2.6 0 0 1 2.6 2.6V19"/>
     </symbol>
+    <symbol id="nav-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="4" width="12" height="17" rx="2"/>
+        <rect x="9" y="2.5" width="6" height="3" rx="1"/>
+        <path d="M9 10h6M9 14h6M9 18h4"/>
+    </symbol>
+    <symbol id="nav-buildings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 21V8l6-3 6 3v13"/>
+        <path d="M15 10h6v11h-6"/>
+        <path d="M6 12h.01M9 12h.01M6 16h.01M9 16h.01M18 14h.01M18 17h.01"/>
+    </symbol>
+    <symbol id="nav-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 4h6a4 4 0 0 1 4 4v13H9a4 4 0 0 0-4 4V4Z"/>
+        <path d="M15 8h4a2 2 0 0 1 2 2v11h-6V8Z"/>
+    </symbol>
+    <symbol id="nav-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/>
+        <path d="M15 3v5h5M9 13h6M9 17h4"/>
+    </symbol>
+    <symbol id="nav-layout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="16" rx="2"/>
+        <path d="M3 10h18M10 10v10"/>
+    </symbol>
+    <symbol id="nav-stamp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 14h10v3H7z"/>
+        <path d="M9 14V9a3 3 0 0 1 6 0v5"/>
+        <path d="M5 20h14"/>
+    </symbol>
+    <symbol id="nav-contract" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/>
+        <path d="M15 3v5h5M9 12h6"/>
+        <path d="M9 16c1.2 1.8 2.4 2.4 3.5 1.2 1.5-1.6 2.8.8 4 0"/>
+    </symbol>
+    <symbol id="nav-timesheet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="16" rx="2"/>
+        <path d="M3 9h18M8 4v16M13 9v11M18 9v11"/>
+    </symbol>
+    <symbol id="nav-week" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="5" width="18" height="15" rx="2"/>
+        <path d="M8 3v4M16 3v4M3 10h18"/>
+        <path d="M6.5 14h.01M10 14h.01M13.5 14h.01M17 14h.01M8 17.5h8"/>
+    </symbol>
+    <symbol id="nav-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="5" width="18" height="14" rx="2"/>
+        <path d="m3 8 9 6 9-6"/>
+    </symbol>
+    <symbol id="nav-shifts" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="12" r="5"/>
+        <path d="M12.2 8.2A5 5 0 1 1 12.2 15.8"/>
+        <path d="M8 9.5v2.5l1.6 1"/>
+    </symbol>
+    <symbol id="nav-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3a9 9 0 1 0 0 18h1.5a2.5 2.5 0 0 0 0-5H13a2 2 0 0 1-2-2 9 9 0 0 1 1-4.5A9 9 0 0 0 12 3Z"/>
+        <circle cx="7.5" cy="10" r=".8"/>
+        <circle cx="10" cy="7" r=".8"/>
+        <circle cx="14.5" cy="7.5" r=".8"/>
+        <circle cx="16.5" cy="11" r=".8"/>
+    </symbol>
+    <symbol id="nav-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7h6l2 2h10v10H3V7Z"/>
+        <path d="M3 7V5h5l2 2"/>
+    </symbol>
+    <symbol id="nav-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 7h11M9 12h11M9 17h11"/>
+        <circle cx="5" cy="7" r="1"/>
+        <circle cx="5" cy="12" r="1"/>
+        <circle cx="5" cy="17" r="1"/>
+    </symbol>
+    <symbol id="nav-flow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2.5" y="8" width="6" height="8" rx="1.5"/>
+        <rect x="15.5" y="8" width="6" height="8" rx="1.5"/>
+        <path d="M8.5 12h7M13.5 9.5 16 12l-2.5 2.5"/>
+    </symbol>
 </svg>
