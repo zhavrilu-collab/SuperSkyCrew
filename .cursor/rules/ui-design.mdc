@@ -1,34 +1,36 @@
 ---
-description: HR vizualni jezik — tokeni, paleta, obitelj s udruga-saasom. Uvijek primijeni.
+description: HR vizualni jezik — tokeni, paleta, Fledge shell. Uvijek primijeni.
 alwaysApply: true
 ---
 
 # HR dizajn — obvezni parametri
 
-HR je zaseban proizvod na Core platformi, **ista obitelj** kao udruga-saas: zelena tema, zlatni rub, hamburger, kartice, guste tablice. Ne dijelimo osobe ni module s udrugom. Ne izmišljaj novi vizualni jezik.
+HR je zaseban proizvod na Core platformi, **ista obitelj** kao udruga-saas (tokeni, kartice, guste tablice), uz **Fledge chrome**: lijevi izbornik + gornja traka. Ne dijelimo osobe ni module s udrugom. Ne izmišljaj novi vizualni jezik. Ne kopiraj Fledgeovu tešku plavu — zadana paleta je tirkizna.
 
 ## Tokeni (`:root` u `partials/platform-styles` + override u `partials/organization-theme`)
 
-| Varijabla | Zadano |
-|-----------|--------|
-| `--primarna-zelena` | `#1b431c` |
-| `--primarna-tamna` | `#112b12` |
-| `--svijetlo-zelena` | `#f4f8f4` |
-| `--zlatna-tradicija` | `#d4af37` |
+| Varijabla | Zadano (tirkizna) |
+|-----------|-------------------|
+| `--primarna-zelena` | `#0f6b64` |
+| `--primarna-tamna` | `#08403c` |
+| `--svijetlo-zelena` | `#eef8f7` |
+| `--zlatna-tradicija` | `#7fd8ce` |
 | `--bordo-crvena` | `#8b1414` |
-| `--tekst-tamni` | `#2b3a2b` |
+| `--tekst-tamni` | `#1a3d3a` |
 
-Pozadina `#f5f7f5`, font Segoe UI / system, **13px**. Tenant paleta (`Organization.theme_key`, `OrganizationThemes`) overridea iste varijable — nemoj hardkodirati Bootstrap plavu `#0d6efd`.
+Pozadina `--svijetlo-zelena`, font Segoe UI / system, **13px**. Tenant paleta (`Organization.theme_key`, `OrganizationThemes`) overridea iste varijable — nemoj hardkodirati Bootstrap plavu `#0d6efd` ni zelenu `#1b431c`. `OrganizationThemes::DEFAULT = tirkizna`.
+
+Ustroj kutije: `--org-sloj-poslovna` `#0f6b64`, `--org-sloj-funkcijska` `#1a4a6b`, `--org-sloj-mjesto` `#e8a317`.
 
 ## Što koristiti
 
+- Chrome: `.app-shell` + svijetli `.app-sidebar` (tamni brand blok SuperSkyCrew, stavke svijetle, zatamnjen samo odabir, ikone) + `.app-topbar` (hamburger samo overlay na mobitelu)
 - Gumbi: `btn-primary` / `btn-success` (mapirani na temu), radius 9px
-- Kartice: `.kartica-kontejner` (bijela, 16px radius)
-- Landing moduli: `.kartica-modula` + emoji `.ikona` (bez novog icon packa)
-- Tablice: `.table-responsive` (sticky thead, zeleni header, 12px ćelije); nedjelja `.nedjelja`
+- Kartice: `.kartica-kontejner` (bijela, 16px radius); Ustroj platno `.kartica-kontejner--platno` + `.org-platno`
+- Tablice: `.table-responsive` (sticky thead, 12px ćelije); nedjelja `.nedjelja`
 - Naglasci: `text-tema`, ne `.text-primary`
-- Alerti: success = zelena, danger = bordo, warning = zlato
+- Alerti: success = tema, danger = bordo, warning = zlato
 
 ## Izgled
 
-Postavke → Organizacija → Izgled mora raditi kao u udruzi: klik na `.tema-svatch` odmah previewa `:root` (`public/js/theme-preview.js`), zatim **Spremi temu**. Logotip u bijelom okviru (navbar + landing). Bez custom palette editora u v1.
+Postavke → Organizacija → Izgled mora raditi kao u udruzi: klik na `.tema-svatch` odmah previewa `:root` (`public/js/theme-preview.js`), zatim **Spremi temu**. Tenant logotip u bijelom okviru gdje se prikazuje. U sidebaru je **app** marka SuperSkyCrew (sfera + naziv), ne naziv udruge. Bez custom palette editora u v1.

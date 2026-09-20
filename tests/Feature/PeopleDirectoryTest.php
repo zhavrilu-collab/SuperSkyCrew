@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\ContractType;
+use App\Enums\EmploymentInstrument;
 use App\Enums\OrganizationRole;
 use App\Enums\OrganizationStatus;
 use App\Enums\PersonStatus;
@@ -24,7 +25,7 @@ class PeopleDirectoryTest extends TestCase
         $this->actingAs($owner)
             ->get(route('organization.people.index', $organization->slug))
             ->assertOk()
-            ->assertSee('Kadrovi')
+            ->assertSee('Dosjei zaposlenika')
             ->assertSee('Nema unesenih osoba.');
 
         $response = $this->actingAs($owner)
@@ -116,7 +117,7 @@ class PeopleDirectoryTest extends TestCase
         $this->assertSame(now()->toDateString(), $candidate->started_at->toDateString());
         $this->assertDatabaseHas('employment_contracts', [
             'person_id' => $candidate->id,
-            'kind' => \App\Enums\EmploymentInstrument::EmploymentContract->value,
+            'kind' => EmploymentInstrument::EmploymentContract->value,
             'is_current' => 1,
         ]);
     }

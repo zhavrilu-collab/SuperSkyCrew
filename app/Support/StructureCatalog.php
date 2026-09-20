@@ -29,17 +29,32 @@ class StructureCatalog
         self::ORGANIGRAM,
     ];
 
+    /** @var list<string> */
+    public const PROFIL_KEYS = [
+        self::PRAVNE,
+        self::POSLOVNICE,
+        self::TROSKOVI,
+    ];
+
+    /** @var list<string> */
+    public const USTROJ_KEYS = [
+        self::POSLOVNA,
+        self::FUNKCIJSKA,
+        self::MJESTA,
+        self::ORGANIGRAM,
+    ];
+
     /** @return array<string, string> */
     public static function tabs(): array
     {
         return [
-            self::PRAVNE => 'Pravne osobe',
+            self::PRAVNE => 'Članice grupacije',
             self::POSLOVNICE => 'Poslovnice',
             self::TROSKOVI => 'Mjesta troška',
-            self::POSLOVNA => 'Poslovna struktura',
-            self::FUNKCIJSKA => 'Funkcijski ustroj',
+            self::POSLOVNA => 'Poslovni ustroj',
+            self::FUNKCIJSKA => 'Funkcionalni ustroj',
             self::MJESTA => 'Radna mjesta',
-            self::ORGANIGRAM => 'Organigram',
+            self::ORGANIGRAM => 'Organizacijska shema',
         ];
     }
 
@@ -54,5 +69,15 @@ class StructureCatalog
         }
 
         return self::POSLOVNA;
+    }
+
+    public static function isProfil(string $katalog): bool
+    {
+        return in_array($katalog, self::PROFIL_KEYS, true);
+    }
+
+    public static function isUstrojTvrtke(string $katalog): bool
+    {
+        return in_array($katalog, self::USTROJ_KEYS, true);
     }
 }

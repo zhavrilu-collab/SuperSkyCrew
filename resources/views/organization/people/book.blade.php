@@ -4,7 +4,7 @@
 @section('document-class', 'ispis-dokument--wide')
 
 @section('toolbar')
-    <a href="{{ route('organization.people.index', $organization->slug) }}" class="small">← Kadrovi</a>
+    <a href="{{ route('organization.people.index', $organization->slug) }}" class="small">← Dosjei zaposlenika</a>
     <form method="GET" class="d-flex gap-2">
         <label class="form-label mb-0 align-self-center" for="na">Stanje na dan</label>
         <input type="date" class="form-control" name="na" id="na" value="{{ $on->toDateString() }}">

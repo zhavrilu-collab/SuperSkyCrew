@@ -1,7 +1,7 @@
 @extends('layouts.organization')
 
 @section('title', $person ? 'Uredi osobu' : 'Nova osoba')
-@section('nav-suffix', 'Kadrovi')
+@section('nav-suffix', 'Zaposlenici')
 
 @section('content')
 @php

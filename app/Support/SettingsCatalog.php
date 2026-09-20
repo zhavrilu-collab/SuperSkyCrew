@@ -25,8 +25,8 @@ class SettingsCatalog
     {
         $tabs = [];
 
-        if ($isOwner || $canHr) {
-            $tabs[] = ['key' => self::TAB_ORGANIZACIJA, 'label' => 'Organizacija', 'section' => $isOwner ? 'osnovni-podaci' : 'ustroj'];
+        if ($isOwner) {
+            $tabs[] = ['key' => self::TAB_ORGANIZACIJA, 'label' => 'Organizacija', 'section' => 'izgled'];
         }
         if ($canHr) {
             $tabs[] = ['key' => self::TAB_KADAR, 'label' => 'Kadrovi', 'section' => 'vrste-dokumenata'];
@@ -70,7 +70,7 @@ class SettingsCatalog
             self::TAB_PRISTUP => 'Korisnici aplikacije, pozivnice i prava po ulogama.',
             self::TAB_PODACI => 'Izvoz i uvoz kadra, šihterica, inspekcijski paket i revizijski trag.',
             self::TAB_PRETPLATA => 'Plan i status pretplate. Naplata se vodi u Core konzoli.',
-            default => 'Osnovni podaci, izgled i ustroj organizacije.',
+            default => 'Izgled i tema organizacije.',
         };
     }
 
@@ -79,12 +79,8 @@ class SettingsCatalog
     {
         return match ($tab) {
             self::TAB_ORGANIZACIJA => $isOwner ? [
-                'osnovni-podaci' => 'Osnovni podaci',
                 'izgled' => 'Izgled',
-                'ustroj' => 'Ustroj',
-            ] : [
-                'ustroj' => 'Ustroj',
-            ],
+            ] : [],
             self::TAB_KADAR => [
                 'vrste-dokumenata' => 'Vrste dokumenata',
                 'predlosci' => 'Predlošci',
@@ -120,7 +116,7 @@ class SettingsCatalog
     public static function defaultSection(string $tab, bool $isOwner = false): string
     {
         return match ($tab) {
-            self::TAB_ORGANIZACIJA => $isOwner ? 'osnovni-podaci' : 'ustroj',
+            self::TAB_ORGANIZACIJA => $isOwner ? 'izgled' : 'ustroj',
             self::TAB_KADAR => 'vrste-dokumenata',
             self::TAB_VRIJEME => 'sifarnik',
             self::TAB_ODOBRENJA => 'radni-slijedovi',
@@ -136,9 +132,18 @@ class SettingsCatalog
             return '';
         }
 
+        if ($tab === self::TAB_ORGANIZACIJA) {
+            if ($section === 'ustroj') {
+                return 'ustroj';
+            }
+            if ($section === 'osnovni-podaci') {
+                return $isOwner ? 'osnovni-podaci' : self::defaultSection($tab, $isOwner);
+            }
+        }
+
         $valid = array_keys(self::sectionsFor($tab, $isOwner));
         if ($valid === []) {
-            return '';
+            return self::defaultSection($tab, $isOwner);
         }
 
         if ($section !== '' && in_array($section, $valid, true)) {

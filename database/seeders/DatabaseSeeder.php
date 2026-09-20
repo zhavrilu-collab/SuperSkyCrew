@@ -6,6 +6,7 @@ use App\Enums\ContractType;
 use App\Enums\GeofenceMode;
 use App\Enums\OrganizationRole;
 use App\Enums\OrganizationStatus;
+use App\Enums\OtherFoKind;
 use App\Enums\PersonStatus;
 use App\Models\CalendarRule;
 use App\Models\CostCenter;
@@ -19,6 +20,7 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Services\EmploymentContractService;
 use App\Services\HrSetupService;
+use App\Services\LeaveService;
 use App\Services\PersonEngagementService;
 use Illuminate\Database\Seeder;
 
@@ -80,6 +82,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'info@demo-tvrtka.hr',
                 'oib' => '12345678903',
                 'annual_leave_days_per_child' => 2,
+                'theme_key' => 'tirkizna',
             ],
             [
                 'name' => 'Demo udruga Split',
@@ -88,6 +91,7 @@ class DatabaseSeeder extends Seeder
                 'plan' => 'basic',
                 'email' => 'ured@demo-udruga.hr',
                 'oib' => '10987654326',
+                'theme_key' => 'tirkizna',
             ],
         ];
 
@@ -256,7 +260,7 @@ class DatabaseSeeder extends Seeder
             [
                 'job_title' => 'Pomoćni referent',
                 'status' => PersonStatus::OtherFo,
-                'fo_kind' => \App\Enums\OtherFoKind::Student,
+                'fo_kind' => OtherFoKind::Student,
                 'instrument_title' => 'Ugovor o obavljanju studentskih poslova',
                 'started_at' => now()->subMonths(2)->toDateString(),
                 'location_id' => $location->id,
@@ -312,7 +316,7 @@ class DatabaseSeeder extends Seeder
             ->each(fn (Person $person) => $engagements->sync($person));
 
         app(HrSetupService::class)->provision($activeOrg);
-        app(\App\Services\LeaveService::class)->recalculateOrganization($activeOrg);
+        app(LeaveService::class)->recalculateOrganization($activeOrg);
 
         $prva = Shift::query()->updateOrCreate(
             ['organization_id' => $activeOrg->id, 'code' => 'P1'],

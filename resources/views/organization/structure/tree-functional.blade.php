@@ -1,16 +1,5 @@
-<div class="d-flex justify-content-between align-items-end mb-3 flex-wrap gap-2">
-    <div>
-        <label class="form-label mb-1" for="jedinica">Poslovna jedinica</label>
-        <select class="form-select" id="jedinica" onchange="window.location = this.value">
-            @foreach($enterpriseUnits as $unit)
-                <option value="{{ $ustrojUrl('funkcijska', $on->toDateString(), null, false, $unit->id) }}" @selected($selectedUnit?->id === $unit->id)>{{ $unit->name }}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#odjeli-tablica">Tablica odjela</button>
-        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-odjel" @if($selectedUnit) data-unit="{{ $selectedUnit->id }}" @endif>Novi odjel</button>
-    </div>
+<div class="d-flex justify-content-end mb-0 px-3 pt-3">
+    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#odjeli-tablica">Tablica odjela</button>
 </div>
 <div class="org-shema org-shema-funkcijska">
     <ul>
@@ -32,7 +21,7 @@
         </li>
     </ul>
 </div>
-<div class="collapse mt-3" id="odjeli-tablica">
+<div class="collapse mt-3 px-3 pb-3" id="odjeli-tablica">
     <div class="table-responsive table-responsive-no-sticky">
         <table class="table table-sm align-middle mb-0">
             <thead>

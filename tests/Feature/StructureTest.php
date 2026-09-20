@@ -9,6 +9,7 @@ use App\Enums\PersonStatus;
 use App\Enums\PunchType;
 use App\Models\CostCenter;
 use App\Models\Department;
+use App\Models\EnterpriseUnit;
 use App\Models\JobPosition;
 use App\Models\Organization;
 use App\Models\OrganizationUser;
@@ -41,9 +42,8 @@ class StructureTest extends TestCase
                 'section' => 'ustroj',
             ]))
             ->assertOk()
-            ->assertSee('Struktura organizacije')
-            ->assertSee('Stanje na dan')
-            ->assertSee('Poslovna struktura');
+            ->assertSee('Poslovni ustroj')
+            ->assertSee('Stanje na dan');
 
         $this->actingAs($owner)
             ->post(route('organization.structure.departments.store', $organization->slug), [
@@ -77,7 +77,7 @@ class StructureTest extends TestCase
         $this->actingAs($owner)
             ->get($this->ustrojUrl($organization, '2026-09-18', 'funkcijska'))
             ->assertOk()
-            ->assertSee('Funkcijski ustroj')
+            ->assertSee('Funkcionalni ustroj')
             ->assertSee('Operativa')
             ->assertSee('org-kutija', false);
 
@@ -397,7 +397,7 @@ class StructureTest extends TestCase
             ])
             ->assertRedirect();
 
-        $root = \App\Models\EnterpriseUnit::query()->where('organization_id', $organization->id)->whereNull('parent_id')->first();
+        $root = EnterpriseUnit::query()->where('organization_id', $organization->id)->whereNull('parent_id')->first();
         $this->assertNotNull($root);
 
         $this->actingAs($owner)
@@ -408,7 +408,7 @@ class StructureTest extends TestCase
             ])
             ->assertRedirect();
 
-        $split = \App\Models\EnterpriseUnit::query()->where('organization_id', $organization->id)->where('name', 'Split')->first();
+        $split = EnterpriseUnit::query()->where('organization_id', $organization->id)->where('name', 'Split')->first();
         $this->assertNotNull($split);
 
         $this->actingAs($owner)
@@ -424,7 +424,7 @@ class StructureTest extends TestCase
             ->get($this->ustrojUrl($organization, '2026-09-18', 'poslovna'))
             ->assertOk()
             ->assertSee('Split')
-            ->assertSee('Funkcijski ustroj');
+            ->assertSee('Funkcionalni ustroj');
 
         $this->actingAs($owner)
             ->get($this->ustrojUrl($organization, '2026-09-18', 'pravne'))

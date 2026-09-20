@@ -1,6 +1,3 @@
-<div class="d-flex justify-content-end mb-2">
-    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-jedinica">Nova poslovna jedinica</button>
-</div>
 <div class="org-shema org-shema-poslovna">
     <ul>
         @forelse($enterpriseForest as $unit)

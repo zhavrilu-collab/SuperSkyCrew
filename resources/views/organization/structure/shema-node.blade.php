@@ -18,8 +18,8 @@
             <strong>{{ $peopleCount }} osoba</strong>
         </div>
         <div class="org-kutija-akcije">
-            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="modal" data-bs-target="#modal-odjel" data-parent="{{ $department->id }}" data-unit="{{ $department->enterprise_unit_id }}" title="Dodaj pododjel">+</button>
-            <button class="btn btn-sm btn-light" type="button"
+            <button class="org-kutija-akcija" type="button" data-bs-toggle="modal" data-bs-target="#modal-odjel" data-parent="{{ $department->id }}" data-unit="{{ $department->enterprise_unit_id }}" title="Dodaj pododjel">+</button>
+            <button class="org-kutija-akcija" type="button"
                 data-bs-toggle="modal" data-bs-target="#modal-odjel"
                 data-ustroj-edit="odjel"
                 data-action="{{ route('organization.structure.departments.update', [$organization->slug, $department]) }}"
@@ -29,8 +29,9 @@
                 data-unit="{{ $department->enterprise_unit_id }}"
                 data-manager="{{ $department->manager_user_id }}"
                 data-from="{{ $department->valid_from?->toDateString() }}"
-                data-to="{{ $department->valid_to?->toDateString() }}">Uredi</button>
-            <a class="btn btn-sm btn-light" href="{{ $ustrojUrl('mjesta', $on->toDateString(), null, false, $department->enterprise_unit_id) }}">Radna mjesta</a>
+                data-to="{{ $department->valid_to?->toDateString() }}"
+                title="Uredi">✎</button>
+            <a class="org-kutija-akcija" href="{{ $ustrojUrl('mjesta', $on->toDateString(), null, false, $department->enterprise_unit_id) }}" title="Radna mjesta">↗</a>
         </div>
     </div>
     @if($department->children->isNotEmpty())

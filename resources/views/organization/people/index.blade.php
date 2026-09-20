@@ -1,13 +1,13 @@
 @extends('layouts.organization')
 
-@section('title', 'Kadrovi')
-@section('nav-suffix', 'Kadrovi')
+@section('title', 'Dosjei zaposlenika')
+@section('nav-suffix', 'Zaposlenici')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div class="page-heading mb-0">
-        <h1>Kadrovi</h1>
-        <p class="text-muted mb-0">Evidencija osoba prema Pravilniku NN 55/2024.</p>
+        <h1>Dosjei zaposlenika</h1>
+        <p class="text-muted mb-0">Osobni kartoni radnika prema Pravilniku NN 55/2024.</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
         <form method="GET" class="d-flex">

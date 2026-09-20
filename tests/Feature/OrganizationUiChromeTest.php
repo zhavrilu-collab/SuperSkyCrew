@@ -7,6 +7,7 @@ use App\Enums\OrganizationStatus;
 use App\Models\Organization;
 use App\Models\OrganizationUser;
 use App\Models\User;
+use App\Support\OrganizationThemes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,21 +15,46 @@ class OrganizationUiChromeTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_owner_sees_landing_and_settings(): void
+    public function test_owner_sees_shell_and_settings(): void
     {
         [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
 
+        $this->assertSame('tirkizna', $organization->theme_key);
+        $this->assertSame('tirkizna', OrganizationThemes::DEFAULT);
+
         $this->actingAs($owner)
             ->get(route('organization.landing', $organization->slug))
+            ->assertRedirect(route('organization.dashboard', $organization->slug));
+
+        $this->actingAs($owner)
+            ->get(route('organization.dashboard', $organization->slug))
             ->assertOk()
-            ->assertSee('odaberite modul')
+            ->assertSee('app-sidebar', false)
+            ->assertSee('app-topbar', false)
+            ->assertSee('SuperSkyCrew')
+            ->assertSee('app-sidebar-mark', false)
+            ->assertSee('nav-home', false)
+            ->assertSee('Nadzorna ploča')
+            ->assertSee('Profil tvrtke')
+            ->assertSee('Ustroj tvrtke')
+            ->assertSee('Sistematizacija')
+            ->assertSee('Zaposlenici')
+            ->assertSee('Članice grupacije')
+            ->assertSee('Poslovnice')
+            ->assertSee('Osnovni podaci')
+            ->assertSee('Dosjei zaposlenika')
+            ->assertSee('Opisi radnih mjesta')
+            ->assertSee('Poslovni segmenti')
+            ->assertSee('Ugovori o radu')
             ->assertSee('Postavke')
-            ->assertSee('Kadrovi')
-            ->assertSee('👥')
-            ->assertSee('⚙')
-            ->assertSee('top-bar', false)
             ->assertSee('Prijavljeni korisnik')
-            ->assertDontSee('navModulesMenuBtn', false);
+            ->assertSee('#0f6b64', false)
+            ->assertDontSee('odaberite modul');
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', $organization->slug))
+            ->assertOk()
+            ->assertSee('TEMA IZGLEDA');
 
         $this->actingAs($owner)
             ->get(route('organization.settings.index', [
@@ -61,7 +87,7 @@ class OrganizationUiChromeTest extends TestCase
             ->assertSee('#1b3a5c');
     }
 
-    public function test_employee_does_not_see_staff_modules_on_landing(): void
+    public function test_employee_does_not_see_staff_modules_in_shell(): void
     {
         [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
         $employee = User::factory()->create();
@@ -73,13 +99,58 @@ class OrganizationUiChromeTest extends TestCase
 
         $this->actingAs($employee)
             ->get(route('organization.landing', $organization->slug))
+            ->assertRedirect(route('organization.dashboard', $organization->slug));
+
+        $this->actingAs($employee)
+            ->get(route('organization.dashboard', $organization->slug))
             ->assertOk()
             ->assertSee('Moje')
-            ->assertDontSee('Evidencija osoba prema Pravilniku')
-            ->assertDontSee('Izgled, ustroj i konfiguracija');
+            ->assertDontSee('Profil tvrtke')
+            ->assertDontSee('Ustroj tvrtke')
+            ->assertDontSee('Sistematizacija')
+            ->assertDontSee('Zaposlenici')
+            ->assertDontSee('Dosjei zaposlenika')
+            ->assertDontSee('Evidencija');
 
         $this->actingAs($employee)
             ->get(route('organization.settings.index', $organization->slug))
+            ->assertForbidden();
+    }
+
+    public function test_owner_opens_coming_soon_modules_and_employee_cannot(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+        $employee = User::factory()->create();
+        OrganizationUser::query()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $employee->id,
+            'role' => OrganizationRole::Employee,
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('organization.segments.index', $organization->slug))
+            ->assertOk()
+            ->assertSee('Poslovni segmenti')
+            ->assertSee('Uskoro');
+
+        $this->actingAs($owner)
+            ->get(route('organization.contracts.index', $organization->slug))
+            ->assertOk()
+            ->assertSee('Ugovori o radu')
+            ->assertSee('Uskoro');
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'osnovni-podaci',
+            ]))
+            ->assertOk()
+            ->assertSee('Osnovni podaci')
+            ->assertSee('Naziv organizacije');
+
+        $this->actingAs($employee)
+            ->get(route('organization.segments.index', $organization->slug))
             ->assertForbidden();
     }
 

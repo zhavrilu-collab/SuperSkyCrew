@@ -1,6 +1,6 @@
 ---
-description: HR chrome i IA — landing, navbar, hamburger, Postavke, Blade komponente
-globs: resources/views/**/*.blade.php,public/js/**/*.js,app/Support/{SettingsCatalog,OrganizationThemes}.php
+description: HR chrome i IA — shell, sidebar, Postavke, Blade komponente
+globs: resources/views/**/*.blade.php,public/js/**/*.js,app/Support/{SettingsCatalog,OrganizationThemes,StructureCatalog,ComingSoonCatalog}.php
 alwaysApply: false
 ---
 
@@ -8,29 +8,31 @@ alwaysApply: false
 
 Stack: **Blade + Bootstrap 5.3 CDN**. Bez Alpine/Tailwind za UI.
 
-## Landing (`organization/landing`) — SAMOSTALNA stranica
+## Ulaz
 
-Kao udruga-saas: **nema** org navbara / hamburgera. Struktura:
+`GET /{slug}/` (`organization.landing`) **redirecta** na Pregled (`organization.dashboard`). Nema landing kartica ni heroja. Post-auth i picker i dalje mogu ciljati `organization.landing`.
 
-1. Bijeli `.top-bar` (~52px): avatar, e-mail · uloga, Odjava
-2. Zeleni `.hero` (gradient 135deg, **3px zlatni** donji rub): naziv org + „odaberite modul”
-3. Kartice **2 reda × 3** (`.col-md-4`), max-width ~960px
-4. Footer
+## Org shell (`layouts/organization`)
 
-Ikone (isti ritam kao udruga, emoji): Pregled 📊, **Kadrovi** 👥, Vrijeme ⏱, Moje 🙋, Odobrenja ✅, Postavke ⚙. Badge **Aktivno**. Radnik: Pregled, Moje, Moj tjedan, Zahtjevi — bez Kadra/šihterice/Postavki.
+Fledge layout na svim org stranicama osim clock/kiosk/print/guest:
 
-## Org navbar (`layouts/organization`) — ostale stranice
+1. Lijevi `.app-sidebar` (~260px, bijelo tijelo): tamni brand (`--primarna-tamna`) s markom i **SuperSkyCrew**, ugniježđeno stablo s ikonama prema RBAC. Stavke su svijetle; zatamnjuje se samo odabrana grupa/stavka.
 
-Jedini stalni elementi: brand `NAZIV ORG - Modul` (uppercase prefix), user chip, Odjava, hamburger. **Nema** trake od 12 linkova. Clock je u **Moje**, ne kao gumb u headeru.
+   Redoslijed za kadar (nije radnik): **Nadzorna ploča**, **Profil tvrtke** (Osnovni podaci, Članice grupacije, Poslovnice, Mjesta troška), **Ustroj tvrtke** (Poslovni segmenti, Poslovni ustroj, Funkcionalni ustroj, Radna mjesta, Radne pozicije, Organizacijska shema), **Sistematizacija** (Opisi radnih mjesta, Plan radnih pozicija, Kompetencije, Interni akti), **Zaposlenici** (Dosjei zaposlenika, Ugovori o radu, Izrada dokumenata, Članovi obitelji, Isteci, Predaje, Postavke), zatim **Vrijeme**, **Moje**, **Odobrenja**, **Postavke**.
 
-Hamburger: Pregled · Kadrovi (evidencija, isteci, predaje, Struktura→Postavke ustroj, Postavke) · Vrijeme (šihterica, plan tjedna, iznimke, inspekcija, Postavke) · Moje · Odobrenja+Postavke · Postavke tabovi. Modulska stavka **Postavke** uvijek otvara isti tab kataloga.
+2. Bijela `.app-topbar` (~52px): `NAZIV ORG — Modul`, user chip, Odjava, zlatni/tirkizni donji rub. **Nema** trake od 12 linkova.
+3. Hamburger (`#navModulesMenuBtn`) samo na uskom ekranu otvara overlay sidebar.
 
-`@section('nav-suffix')` = putanja (npr. `Kadrovi`, `Postavke - Organizacija`). Naziv modula kadra: **Kadrovi**, ne Kadar.
+Katalozi profila i ustroja ostaju na `/{slug}/postavke?tab=organizacija&section=ustroj&katalog=` (`pravne`, `poslovnice`, `troskovi`, `poslovna`, `funkcijska`, `mjesta`, `organigram`). Osnovni podaci: `section=osnovni-podaci` (samo vlasnik; chrome Postavki se skriva). Opisi radnih mjesta: `/{slug}/sistematizacija`. Segmenti, radne pozicije, plan, kompetencije, akti, registar ugovora, Document Creator i članovi obitelji su placeholderi (`ComingSoonCatalog`). Clock je u **Moje**, ne kao gumb u headeru.
+
+`@section('nav-suffix')` = putanja (npr. `Zaposlenici`, `Poslovni ustroj`, `Sistematizacija`). Naziv grupe kadra: **Zaposlenici**.
+
+Radnik: Nadzorna ploča, Moje (prijava, tjedan, zahtjevi) — bez Profila/Ustroja/sistematizacije/Zaposlenika/šihterice/Postavki.
 
 ## Postavke `/{slug}/postavke?tab=&section=`
 
-Jedna `.kartica-kontejner`: gornji tabovi + pill sekcije. Katalog: `SettingsCatalog`. Tim i Ustroj žive ovdje (GET `/tim` i `/struktura` redirectaju). Plan tjedna ostaje u Vrijeme; CRUD smjena/kalendara u Postavkama.
+Jedna `.kartica-kontejner`: gornji tabovi + pill sekcije. Na **Ustroju** i **Osnovnim podacima** tabovi se skrivaju; ustroj je platno `.org-platno`. Katalog: `SettingsCatalog`. Tab Organizacija (samo vlasnik) ima pill **Izgled**. Tim živi ovdje (GET `/tim` redirecta). Plan tjedna ostaje u Vrijeme; CRUD smjena/kalendara u Postavkama.
 
 ## Operativni ekrani
 
-Page heading (`h1` + muted opis + toolbar desno) + `.kartica-kontejner` + sticky tablica. Clock/kiosk ostaju tamni touch; `theme-color` i punch gumb na `--primarna-zelena`.
+Page heading (`h1` + muted opis + toolbar desno) + `.kartica-kontejner` + sticky tablica. Clock/kiosk ostaju tamni touch; `theme-color` i punch gumb na `--primarna-zelena`. Natrag s clocka vodi na Pregled.

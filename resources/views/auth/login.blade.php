@@ -1,11 +1,12 @@
 @extends('layouts.guest')
 
-@section('title', 'Prijava — HR SaaS')
+@section('title', 'Prijava — SuperSkyCrew')
 
 @section('content')
 <div class="kartica-kontejner">
+    <img src="{{ asset('brand/superskycrew-lockup.png') }}" alt="SuperSkyCrew" class="app-guest-lockup">
     <h1 class="h4 text-tema mb-3">Prijava</h1>
-    <p class="text-muted small">Prijava u platformu za upravljanje ljudskim resursima.</p>
+    <p class="text-muted small">Prijava u SuperSkyCrew — platformu za upravljanje ljudskim resursima.</p>
 
     @if ($errors->any())
         <div class="alert alert-danger small">{{ $errors->first() }}</div>

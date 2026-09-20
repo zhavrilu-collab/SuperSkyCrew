@@ -1,14 +1,3 @@
-<div class="d-flex justify-content-between align-items-end mb-3 flex-wrap gap-2">
-    <div>
-        <label class="form-label mb-1" for="jedinica-mjesta">Poslovna jedinica</label>
-        <select class="form-select" id="jedinica-mjesta" onchange="window.location = this.value">
-            @foreach($enterpriseUnits as $unit)
-                <option value="{{ $ustrojUrl('mjesta', $on->toDateString(), $q, false, $unit->id) }}" @selected($selectedUnit?->id === $unit->id)>{{ $unit->name }}</option>
-            @endforeach
-        </select>
-    </div>
-    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-mjesto">Novo radno mjesto</button>
-</div>
 <div class="org-shema org-shema-mjesta">
     <ul>
         @forelse($forest as $department)
@@ -23,7 +12,7 @@
         @endforelse
     </ul>
 </div>
-<div class="ustroj-split mt-4">
+<div class="ustroj-split mt-0 p-3">
     <div class="table-responsive table-responsive-no-sticky">
         <table class="table table-sm align-middle mb-0">
             <thead>

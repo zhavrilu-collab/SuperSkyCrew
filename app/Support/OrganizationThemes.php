@@ -6,7 +6,7 @@ use App\Models\Organization;
 
 class OrganizationThemes
 {
-    public const DEFAULT = 'zelena';
+    public const DEFAULT = 'tirkizna';
 
     /**
      * @return array<string, array{label: string, primary: string, dark: string, gold: string, light: string, text: string, accent: string}>
@@ -15,7 +15,7 @@ class OrganizationThemes
     {
         return [
             'zelena' => [
-                'label' => 'Zelena (zadano)',
+                'label' => 'Zelena',
                 'primary' => '#1b431c',
                 'dark' => '#112b12',
                 'gold' => '#d4af37',
@@ -51,7 +51,7 @@ class OrganizationThemes
                 'accent' => '#8b1414',
             ],
             'tirkizna' => [
-                'label' => 'Tirkizna',
+                'label' => 'Tirkizna (zadano)',
                 'primary' => '#0f6b64',
                 'dark' => '#08403c',
                 'gold' => '#7fd8ce',

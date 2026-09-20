@@ -22,7 +22,7 @@
 <body>
 <div class="container py-4" style="max-width: 480px;">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{{ route('organization.landing', $organization->slug) }}" class="text-white-50 text-decoration-none">Natrag</a>
+        <a href="{{ route('organization.dashboard', $organization->slug) }}" class="text-white-50 text-decoration-none">Natrag</a>
         <span class="small text-white-50">{{ now()->timezone(config('app.timezone'))->format('H:i') }}</span>
     </div>
 

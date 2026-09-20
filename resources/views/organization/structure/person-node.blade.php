@@ -1,13 +1,13 @@
 <li>
     <a class="org-kutija org-kutija-osoba text-decoration-none" href="{{ route('organization.people.edit', [$organization->slug, $person]) }}">
-        <div class="org-kutija-kapa">{{ $person->fullName() }}</div>
-        <div class="org-kutija-tijelo org-kutija-osoba-tijelo">
+        <div class="org-kutija-osoba-head">
             <span class="org-inicijali" aria-hidden="true">{{ $person->initials() }}</span>
-            <span>
-                {{ $person->department?->name ?: '—' }}<br>
-                {{ $person->jobLabel() }}<br>
-                {{ $person->user?->email ?: '—' }}
-            </span>
+            <strong>{{ $person->fullName() }}</strong>
+        </div>
+        <div class="org-kutija-osoba-redovi">
+            <div>🏢 {{ $person->department?->name ?: '—' }}</div>
+            <div>💼 {{ $person->jobLabel() }}</div>
+            <div>✉ {{ $person->user?->email ?: '—' }}</div>
         </div>
     </a>
     @if($person->reports->isNotEmpty())

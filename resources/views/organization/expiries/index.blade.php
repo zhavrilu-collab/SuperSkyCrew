@@ -1,7 +1,7 @@
 @extends('layouts.organization')
 
 @section('title', 'Isteci dokumenata')
-@section('nav-suffix', 'Kadrovi')
+@section('nav-suffix', 'Zaposlenici')
 
 @section('content')
 <div class="page-heading">

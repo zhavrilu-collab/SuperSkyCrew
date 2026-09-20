@@ -20,14 +20,14 @@
                             aria-label="{{ $theme['label'] }}"></button>
                 @endforeach
             </div>
-            <div class="form-text">Kliknite paletu za odabir. Pregled se odmah vidi na navbaru; spremite za trajnu temu (navbar, landing, clock/kiosk).</div>
+            <div class="form-text">Kliknite paletu za odabir. Pregled se odmah vidi na traci i izborniku; spremite za trajnu temu (shell, clock/kiosk).</div>
         </div>
         <button type="submit" class="btn btn-success btn-sm btn-spremi">Spremi temu</button>
         <span id="temaPoruka" class="ms-2 small text-muted"></span>
     </form>
 
     <span class="fw-bold text-muted small d-block mb-2">LOGOTIP</span>
-    <p class="form-text mb-2">Bijeli okvir u navbaru i na landingu, kao u udruga-saasu.</p>
+    <p class="form-text mb-2">Bijeli okvir u lijevom izborniku i na gornjoj traci.</p>
     @if($organization->logoUrl())
         <img src="{{ $organization->logoUrl() }}" alt="" class="navbar-brand-logo mb-2">
     @endif

@@ -1,7 +1,4 @@
-<div class="d-flex justify-content-end mb-2">
-    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-poslovnica">Nova poslovnica</button>
-</div>
-<div class="table-responsive table-responsive-no-sticky">
+<div class="table-responsive table-responsive-no-sticky p-3">
     <table class="table table-sm align-middle mb-0">
         <thead>
             <tr>

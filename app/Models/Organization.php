@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\OrganizationStatus;
 use App\Enums\OrganizationType;
+use App\Services\FeatureService;
 use App\Support\OrganizationThemes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,6 +40,10 @@ class Organization extends Model
         'show_clock_bounds',
     ];
 
+    protected $attributes = [
+        'theme_key' => 'tirkizna',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -58,7 +63,7 @@ class Organization extends Model
 
     public function feature(string $key): bool
     {
-        return app(\App\Services\FeatureService::class)->enabled($this, $key);
+        return app(FeatureService::class)->enabled($this, $key);
     }
 
     public function navbarBrandPrefix(): string
