@@ -45,7 +45,13 @@
         <p class="text-muted small mt-3 mb-0">Autentifikacija ide preko Core platforme.</p>
     @endif
 
-    <p class="text-center mt-3 mb-0 small">
+    @if(!empty($passwordResetUrl))
+        <p class="text-center mt-3 mb-0 small">
+            <a href="{{ $passwordResetUrl }}">Zaboravili ste lozinku?</a>
+        </p>
+    @endif
+
+    <p class="text-center mt-2 mb-0 small">
         Nemate tvrtku? <a href="{{ route('register.organization') }}">Registrirajte novu</a>
     </p>
 </div>
