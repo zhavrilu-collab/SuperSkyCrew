@@ -68,7 +68,7 @@
         </div>
     </div>
 
-    @php $kadarOpen = request()->routeIs('organization.people.*', 'organization.expiries.*', 'organization.handovers.*', 'organization.contracts.index', 'organization.document-creator.*', 'organization.family.*') || (request()->routeIs('organization.settings.*') && request('tab') === 'kadar'); @endphp
+    @php $kadarOpen = request()->routeIs('organization.people.*', 'organization.expiries.*', 'organization.handovers.*', 'organization.contracts.index', 'organization.document-creator.*', 'organization.family.*'); @endphp
     <div class="app-sidebar-group @if($kadarOpen) is-open @endif">
         <div class="app-sidebar-group-head">
             <a class="app-sidebar-group-link @if($kadarOpen) active @endif"
@@ -84,13 +84,12 @@
             <a class="app-sidebar-link @if(request()->routeIs('organization.family.*')) active @endif" href="{{ route('organization.family.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'family'])Članovi obitelji</a>
             <a class="app-sidebar-link @if(request()->routeIs('organization.expiries.*')) active @endif" href="{{ route('organization.expiries.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'hourglass'])Isteci</a>
             <a class="app-sidebar-link @if(request()->routeIs('organization.handovers.*')) active @endif" href="{{ route('organization.handovers.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'swap'])Predaje</a>
-            <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'kadar') active @endif" href="{{ $settingsUrl('kadar') }}">@include('partials.nav-icon', ['name' => 'sliders'])Postavke</a>
         </div>
     </div>
     @endif
 
     @if($canTime && ! $isWorker)
-    @php $vrijemeOpen = request()->routeIs('organization.timesheet.*', 'organization.schedule.*', 'organization.exceptions.*', 'organization.grants.*') || (request()->routeIs('organization.settings.*') && request('tab') === 'vrijeme'); @endphp
+    @php $vrijemeOpen = request()->routeIs('organization.timesheet.*', 'organization.schedule.*', 'organization.exceptions.*', 'organization.grants.*'); @endphp
     <div class="app-sidebar-group @if($vrijemeOpen) is-open @endif">
         <div class="app-sidebar-group-head">
             <a class="app-sidebar-group-link @if($vrijemeOpen) active @endif"
@@ -113,7 +112,6 @@
             @if($organization->feature(\App\Support\OrganizationFeatures::GRANT_HOURS))
                 <a class="app-sidebar-link @if(request()->routeIs('organization.grants.*')) active @endif" href="{{ route('organization.grants.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'gift'])Grant sati</a>
             @endif
-            <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'vrijeme') active @endif" href="{{ $settingsUrl('vrijeme') }}">@include('partials.nav-icon', ['name' => 'list'])Postavke</a>
         </div>
     </div>
     @endif
@@ -140,7 +138,7 @@
     </div>
 
     @if($canApprove)
-    @php $odobrenjaOpen = request()->routeIs('organization.approvals.*') || (request()->routeIs('organization.settings.*') && request('tab') === 'odobrenja'); @endphp
+    @php $odobrenjaOpen = request()->routeIs('organization.approvals.*'); @endphp
     <div class="app-sidebar-group @if($odobrenjaOpen) is-open @endif">
         <div class="app-sidebar-group-head">
             <a class="app-sidebar-group-link @if($odobrenjaOpen) active @endif"
@@ -151,9 +149,6 @@
         </div>
         <div class="app-sidebar-submenu">
             <a class="app-sidebar-link @if(request()->routeIs('organization.approvals.*')) active @endif" href="{{ route('organization.approvals.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'inbox'])Inbox</a>
-            @if($canSettings)
-                <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'odobrenja') active @endif" href="{{ $settingsUrl('odobrenja') }}">@include('partials.nav-icon', ['name' => 'flow'])Postavke</a>
-            @endif
         </div>
     </div>
     @endif
@@ -163,35 +158,50 @@
         $postavkeOpen = request()->routeIs('organization.settings.*', 'organization.team.*')
             && request('section') !== 'ustroj'
             && request('section') !== 'osnovni-podaci';
+        $settingsNav = \App\Support\SettingsCatalog::sidebarGroups($isOwner, $canPeople, $canPeople || $canTime, $canTeam);
+        $settingsHome = $settingsNav[0]['items'][0] ?? null;
+        $settingsItemActive = function (string $tab, ?string $section) use ($isOwner): bool {
+            if (! request()->routeIs('organization.settings.*', 'organization.team.*')) {
+                return false;
+            }
+            if (request()->routeIs('organization.team.*')) {
+                return $tab === \App\Support\SettingsCatalog::TAB_PRISTUP && $section === 'korisnici';
+            }
+            $currentTab = (string) request('tab', $isOwner ? 'organizacija' : 'kadar');
+            if ($currentTab !== $tab) {
+                return false;
+            }
+            $currentSection = (string) request('section', '');
+            if ($currentSection === '') {
+                $currentSection = \App\Support\SettingsCatalog::defaultSection($tab, $isOwner);
+            }
+
+            return ($section ?? '') === $currentSection;
+        };
     @endphp
     <div class="app-sidebar-group @if($postavkeOpen) is-open @endif">
         <div class="app-sidebar-group-head">
             <a class="app-sidebar-group-link @if($postavkeOpen) active @endif"
-               href="{{ $settingsUrl() }}">@include('partials.nav-icon', ['name' => 'gear'])Postavke</a>
+               href="{{ $settingsHome ? $settingsUrl($settingsHome['tab'], $settingsHome['section']) : $settingsUrl() }}">@include('partials.nav-icon', ['name' => 'gear'])Postavke</a>
             <button type="button" class="app-sidebar-group-toggle" aria-expanded="{{ $postavkeOpen ? 'true' : 'false' }}">
                 <span class="app-sidebar-chevron"></span>
             </button>
         </div>
         <div class="app-sidebar-submenu">
-            @if($isOwner)
-                <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab', 'organizacija') === 'organizacija' && request('section') !== 'ustroj' && request('section') !== 'osnovni-podaci') active @endif" href="{{ $settingsUrl('organizacija') }}">@include('partials.nav-icon', ['name' => 'palette'])Organizacija</a>
-            @endif
-            @if($canPeople)
-                <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'kadar') active @endif" href="{{ $settingsUrl('kadar') }}">@include('partials.nav-icon', ['name' => 'folder'])Kadrovi</a>
-            @endif
-            @if($canTime)
-                <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'vrijeme') active @endif" href="{{ $settingsUrl('vrijeme') }}">@include('partials.nav-icon', ['name' => 'list'])Vrijeme</a>
-                <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'odobrenja') active @endif" href="{{ $settingsUrl('odobrenja') }}">@include('partials.nav-icon', ['name' => 'flow'])Odobrenja</a>
-            @endif
-            @if($canTeam)
-                <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'pristup') active @endif" href="{{ $settingsUrl('pristup') }}">@include('partials.nav-icon', ['name' => 'key'])Pristup</a>
-            @endif
-            @if($canPeople || $canTime)
-                <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'podaci') active @endif" href="{{ $settingsUrl('podaci') }}">@include('partials.nav-icon', ['name' => 'database'])Podaci</a>
-            @endif
-            @if($isOwner)
-                <a class="app-sidebar-link @if(request()->routeIs('organization.settings.*') && request('tab') === 'pretplata') active @endif" href="{{ $settingsUrl('pretplata') }}">@include('partials.nav-icon', ['name' => 'card'])Pretplata</a>
-            @endif
+            @foreach($settingsNav as $navGroup)
+                @if($navGroup['label'])
+                    <div class="app-sidebar-label">{{ $navGroup['label'] }}</div>
+                @endif
+                @foreach($navGroup['items'] as $item)
+                    <a class="app-sidebar-link @if($settingsItemActive($item['tab'], $item['section'])) active @endif @if(! $item['icon']) app-sidebar-link-plain @endif"
+                       href="{{ $settingsUrl($item['tab'], $item['section']) }}">
+                        @if($item['icon'])
+                            @include('partials.nav-icon', ['name' => $item['icon']])
+                        @endif
+                        {{ $item['label'] }}
+                    </a>
+                @endforeach
+            @endforeach
         </div>
     </div>
     @endif

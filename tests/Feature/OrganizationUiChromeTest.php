@@ -56,11 +56,6 @@ class OrganizationUiChromeTest extends TestCase
 
         preg_match_all('/href="#nav-([a-z0-9-]+)"/', $dashboard->getContent(), $iconMatches);
         foreach (array_count_values($iconMatches[1]) as $icon => $count) {
-            if (in_array($icon, ['list', 'flow'], true)) {
-                $this->assertSame(2, $count, $icon);
-
-                continue;
-            }
             $this->assertSame(1, $count, "Ikona {$icon} se ponavlja {$count} puta.");
         }
 
@@ -71,7 +66,20 @@ class OrganizationUiChromeTest extends TestCase
         $this->actingAs($owner)
             ->get(route('organization.settings.index', $organization->slug))
             ->assertOk()
-            ->assertSee('TEMA IZGLEDA');
+            ->assertSee('TEMA IZGLEDA')
+            ->assertDontSee('role="tablist"', false);
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'kadar',
+                'section' => 'vrste-dokumenata',
+            ]))
+            ->assertOk()
+            ->assertSee('Vrste dokumenata')
+            ->assertSee('Šifrarnik sati')
+            ->assertDontSee('role="tablist"', false)
+            ->assertDontSee('settings-subnav mb-4', false);
 
         $this->actingAs($owner)
             ->get(route('organization.settings.index', [

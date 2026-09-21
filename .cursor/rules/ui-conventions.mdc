@@ -18,7 +18,7 @@ Fledge layout na svim org stranicama osim clock/kiosk/print/guest:
 
 1. Lijevi `.app-sidebar` (~260px, bijelo tijelo): tamni brand (`--primarna-tamna`) s markom i **SuperSkyCrew**, ugniježđeno stablo s ikonama prema RBAC. Stavke su svijetle; zatamnjuje se samo odabrana grupa/stavka.
 
-   Redoslijed za kadar (nije radnik): **Nadzorna ploča**, **Profil tvrtke** (Osnovni podaci, Članice grupacije, Poslovnice, Mjesta troška), **Ustroj tvrtke** (Poslovni segmenti, Poslovni ustroj, Funkcionalni ustroj, Radna mjesta, Radne pozicije, Organizacijska shema), **Sistematizacija** (Opisi radnih mjesta, Plan radnih pozicija, Kompetencije, Interni akti), **Zaposlenici** (Dosjei zaposlenika, Ugovori o radu, Izrada dokumenata, Članovi obitelji, Isteci, Predaje, Postavke), zatim **Vrijeme**, **Moje**, **Odobrenja**, **Postavke**.
+   Redoslijed za kadar (nije radnik): **Nadzorna ploča**, **Profil tvrtke** (Osnovni podaci, Članice grupacije, Poslovnice, Mjesta troška), **Ustroj tvrtke** (Poslovni segmenti, Poslovni ustroj, Funkcionalni ustroj, Radna mjesta, Radne pozicije, Organizacijska shema), **Sistematizacija** (Opisi radnih mjesta, Plan radnih pozicija, Kompetencije, Interni akti), **Zaposlenici** (Dosjei zaposlenika, Ugovori o radu, Izrada dokumenata, Članovi obitelji, Isteci, Predaje), zatim **Vrijeme**, **Moje**, **Odobrenja**, **Postavke**. Postavke nisu u drugim grupama.
 
 2. Bijela `.app-topbar` (~52px): `NAZIV ORG — Modul`, user chip, Odjava, zlatni/tirkizni donji rub. **Nema** trake od 12 linkova.
 3. Hamburger (`#navModulesMenuBtn`) samo na uskom ekranu otvara overlay sidebar.
@@ -31,7 +31,7 @@ Radnik: Nadzorna ploča, Moje (prijava, tjedan, zahtjevi) — bez Profila/Ustroj
 
 ## Postavke `/{slug}/postavke?tab=&section=`
 
-Jedna `.kartica-kontejner`: gornji tabovi + pill sekcije. Na **Ustroju** i **Osnovnim podacima** tabovi se skrivaju; ustroj je platno `.org-platno`. Katalog: `SettingsCatalog`. Tab Organizacija (samo vlasnik) ima pill **Izgled**. Tim živi ovdje (GET `/tim` redirecta). Plan tjedna ostaje u Vrijeme; CRUD smjena/kalendara u Postavkama.
+Jedna `.kartica-kontejner` bez gornjih tabova i pillova — navigacija je samo lijevi izbornik (`SettingsCatalog::sidebarGroups`). Na **Ustroju** i **Osnovnim podacima** chrome Postavki se ne koristi; ustroj je platno `.org-platno`. Tim živi ovdje (GET `/tim` redirecta na Pristup). Plan tjedna ostaje u Vrijeme; CRUD smjena/kalendara u Postavkama.
 
 ## Operativni ekrani
 

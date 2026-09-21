@@ -149,9 +149,8 @@
         background: color-mix(in srgb, var(--primarna-zelena) 12%, #fff);
         font-weight: 600;
     }
-    .app-sidebar-submenu .app-sidebar-submenu .app-sidebar-link {
-        padding-left: 1.85rem;
-        font-size: 11.5px;
+    .app-sidebar-submenu .app-sidebar-link-plain {
+        padding-left: 2.35rem;
     }
     .app-sidebar-label {
         padding: .55rem .9rem .15rem 1.15rem;
