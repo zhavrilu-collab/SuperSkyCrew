@@ -41,10 +41,6 @@
         <button type="submit" class="btn btn-primary w-100">Prijavi se</button>
     </form>
 
-    @if($coreAuthEnabled)
-        <p class="text-muted small mt-3 mb-0">Autentifikacija ide preko Core platforme.</p>
-    @endif
-
     @if(!empty($passwordResetUrl))
         <p class="text-center mt-3 mb-0 small">
             <a href="{{ $passwordResetUrl }}">Zaboravili ste lozinku?</a>

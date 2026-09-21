@@ -23,7 +23,7 @@ C:\xampp\php\php.exe artisan serve --host=127.0.0.1 --port=8004
 - E-mail: `vlasnik@hr.test`
 - Lozinka: `password`
 
-U `.env` za lokalni login bez redirecta na konzolu: `IDENTITY_CORE_AUTH_ENABLED=false` i `IDENTITY_UNIFIED_LOGIN_ENABLED=false`.
+U `.env` za lokalni login bez Core-a: `IDENTITY_CORE_AUTH_ENABLED=false`. Prijava na `hr.superskytech.com` ostaje na toj domeni (ne preusmjerava na konzolu).
 
 ## Demo tenant (sve uloge)
 
