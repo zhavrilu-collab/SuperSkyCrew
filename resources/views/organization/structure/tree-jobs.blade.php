@@ -31,7 +31,7 @@
                             <a class="fw-semibold text-decoration-none" href="{{ $ustrojUrl('mjesta', $on->toDateString(), $q, $position->id) }}">{{ $position->name }}</a>
                         </td>
                         <td>{{ $position->department?->name ?: '—' }}</td>
-                        <td>{{ $position->rad1g ?: '—' }}</td>
+                        <td>{{ $position->rad1gLabel() ?: '—' }}</td>
                         <td>{{ $position->annual_leave_days ?? '—' }}</td>
                         <td class="text-end">
                             <button class="btn btn-outline-secondary btn-sm" type="button"
@@ -66,7 +66,7 @@
         @if($selectedPosition)
             <div class="forma-sekcija mt-0 pt-0 border-0">
                 <h2>{{ $selectedPosition->name }}</h2>
-                <p>{{ $selectedPosition->department?->name ?: 'Bez odjela' }}{{ $selectedPosition->rad1g ? ' · RAD1G '.$selectedPosition->rad1g : '' }}</p>
+                <p>{{ $selectedPosition->department?->name ?: 'Bez odjela' }}{{ $selectedPosition->rad1g ? ' · RAD1G '.$selectedPosition->rad1gLabel() : '' }}</p>
             </div>
             @if($selectedPosition->description)
                 <p class="small text-muted">{{ $selectedPosition->description }}</p>

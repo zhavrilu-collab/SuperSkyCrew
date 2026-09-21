@@ -90,7 +90,7 @@
                             @forelse($positions as $position)
                                 <tr>
                                     <td>{{ $position->name }}</td>
-                                    <td>{{ $position->rad1g ?: '—' }}</td>
+                                    <td>{{ $position->rad1gLabel() ?: '—' }}</td>
                                     <td>{{ $position->annual_leave_days ?? '—' }}</td>
                                     <td class="text-end">
                                         <form method="POST" action="{{ route('organization.structure.positions.destroy', [$organization->slug, $position]) }}" class="d-inline" onsubmit="return confirm('Obrisati radno mjesto?');">
@@ -194,9 +194,9 @@
                         <label class="form-label" for="pos_name">Naziv</label>
                         <input class="form-control" name="name" id="pos_name" required>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="pos_rad1g">RAD1G</label>
-                        <input class="form-control" name="rad1g" id="pos_rad1g">
+                    <div class="col-12">
+                        <label class="form-label" for="pos_rad1g_q">RAD1G (NKZ-10)</label>
+                        @include('partials.nkz-rad1g-select')
                     </div>
                     <div class="col-md-4">
                         <label class="form-label" for="pos_go">Fond GO</label>
@@ -296,3 +296,8 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script type="application/json" id="nkz-rad1g-podaci">@json($nkzRad1gOptions ?? [])</script>
+<script src="{{ asset('js/nkz-select.js') }}"></script>
+@endpush

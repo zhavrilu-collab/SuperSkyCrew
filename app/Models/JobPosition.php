@@ -57,6 +57,24 @@ class JobPosition extends OrganizationModel
             ->withTimestamps();
     }
 
+    public function nkzOccupation(): BelongsTo
+    {
+        return $this->belongsTo(NkzOccupation::class, 'rad1g', 'code');
+    }
+
+    public function rad1gLabel(): ?string
+    {
+        if (! $this->rad1g) {
+            return null;
+        }
+
+        $title = $this->relationLoaded('nkzOccupation')
+            ? $this->nkzOccupation?->title
+            : NkzOccupation::titleFor($this->rad1g);
+
+        return $title ? $this->rad1g.' — '.$title : $this->rad1g;
+    }
+
     public function isValidOn(Carbon $date): bool
     {
         $day = $date->toDateString();
@@ -76,7 +94,7 @@ class JobPosition extends OrganizationModel
     {
         $parts = [$this->name];
         if ($this->rad1g) {
-            $parts[] = 'RAD1G '.$this->rad1g;
+            $parts[] = 'RAD1G '.($this->rad1gLabel() ?: $this->rad1g);
         }
 
         return implode(' · ', $parts);

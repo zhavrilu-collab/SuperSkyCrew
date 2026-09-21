@@ -99,9 +99,9 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="pos_rad1g">RAD1G</label>
-                                <input class="form-control" name="rad1g" id="pos_rad1g">
+                            <div class="col-12">
+                                <label class="form-label" for="pos_rad1g_q">RAD1G (NKZ-10)</label>
+                                @include('partials.nkz-rad1g-select')
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label" for="pos_go">Fond GO</label>
@@ -398,6 +398,8 @@
 </div>
 
 @push('scripts')
+<script type="application/json" id="nkz-rad1g-podaci">@json($nkzRad1gOptions ?? [])</script>
+<script src="{{ asset('js/nkz-select.js') }}"></script>
 <script>
 (function () {
     var today = @json($on->toDateString());
@@ -429,7 +431,7 @@
         document.getElementById('modal-mjesto-naslov').textContent = 'Novo radno mjesto';
         document.getElementById('pos_name').value = '';
         document.getElementById('pos_department').value = (btn && btn.getAttribute('data-department')) || '';
-        document.getElementById('pos_rad1g').value = '';
+        window.nkzOdabirPostavi('pos_rad1g', '');
         document.getElementById('pos_go').value = '';
         document.getElementById('pos_description').value = '';
         document.getElementById('pos_pay').value = '';
@@ -515,7 +517,7 @@
         document.getElementById('modal-mjesto-naslov').textContent = 'Uredi radno mjesto';
         document.getElementById('pos_name').value = btn.getAttribute('data-name') || '';
         document.getElementById('pos_department').value = btn.getAttribute('data-department') || '';
-        document.getElementById('pos_rad1g').value = btn.getAttribute('data-rad1g') || '';
+        window.nkzOdabirPostavi('pos_rad1g', btn.getAttribute('data-rad1g') || '');
         document.getElementById('pos_go').value = btn.getAttribute('data-go') || '';
         document.getElementById('pos_description').value = btn.getAttribute('data-description') || '';
         document.getElementById('pos_pay').value = btn.getAttribute('data-pay') || '';

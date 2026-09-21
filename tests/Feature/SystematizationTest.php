@@ -21,7 +21,7 @@ class SystematizationTest extends TestCase
         JobPosition::factory()->create([
             'organization_id' => $organization->id,
             'name' => 'Voditelj pogona',
-            'rad1g' => '3120',
+            'rad1g' => '3122',
         ]);
 
         $this->actingAs($owner)
@@ -29,7 +29,8 @@ class SystematizationTest extends TestCase
             ->assertOk()
             ->assertSee('Opisi radnih mjesta')
             ->assertSee('Voditelj pogona')
-            ->assertSee('3120');
+            ->assertSee('3122')
+            ->assertSee('Nadzornici', false);
     }
 
     public function test_employee_cannot_open_systematization(): void

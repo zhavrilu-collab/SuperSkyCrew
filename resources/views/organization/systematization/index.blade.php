@@ -52,7 +52,7 @@
                         </td>
                         <td>{{ $position->department?->name ?: '—' }}</td>
                         <td>{{ $position->department?->enterpriseUnit?->name ?: '—' }}</td>
-                        <td>{{ $position->rad1g ?: '—' }}</td>
+                        <td>{{ $position->rad1gLabel() ?: '—' }}</td>
                         <td>{{ $position->annual_leave_days !== null ? $position->annual_leave_days : '—' }}</td>
                         <td>{{ $position->pay_grade ?: '—' }}</td>
                         <td>{{ (int) ($filled[$position->id] ?? 0) }}</td>

@@ -360,10 +360,10 @@
         background: #fff;
         max-width: 100%;
     }
-    .forma-modal .modal-content { border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); }
+    .forma-modal .modal-content { border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); overflow: visible; }
     .forma-modal .modal-header { border-bottom: 1px solid color-mix(in srgb, var(--primarna-zelena) 8%, transparent); padding: 1rem 1.15rem; }
     .forma-modal .modal-title { font-size: 1rem; font-weight: 700; color: var(--primarna-zelena); }
-    .forma-modal .modal-body { padding: 1.15rem; }
+    .forma-modal .modal-body { padding: 1.15rem; overflow: visible; }
     .forma-modal .modal-footer { border-top: 1px solid color-mix(in srgb, var(--primarna-zelena) 8%, transparent); background: #fff; border-radius: 0 0 16px 16px; }
 
     .ustroj-toolbar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: end; max-width: 100%; }
@@ -705,4 +705,41 @@
     .page-heading { margin-bottom: 1rem; }
     .page-heading h1 { font-size: 1.15rem; font-weight: 700; color: var(--primarna-zelena); margin-bottom: .2rem; }
     .page-heading p { color: #6a7a6a; margin-bottom: 0; }
+    .nkz-odabir { position: relative; }
+    .nkz-odabir__lista {
+        position: absolute;
+        z-index: 30;
+        left: 0;
+        right: 0;
+        top: calc(100% + 4px);
+        max-height: 220px;
+        overflow: auto;
+        margin: 0;
+        padding: .25rem 0;
+        list-style: none;
+        background: #fff;
+        border: 1px solid color-mix(in srgb, var(--primarna-zelena) 22%, transparent);
+        border-radius: 9px;
+        box-shadow: 0 8px 24px color-mix(in srgb, var(--primarna-tamna) 12%, transparent);
+    }
+    .nkz-odabir__stavka {
+        padding: .4rem .75rem;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--tekst-tamni);
+    }
+    .nkz-odabir__stavka.is-active,
+    .nkz-odabir__stavka:hover {
+        background: var(--svijetlo-zelena);
+    }
+    .nkz-odabir__sifra {
+        font-weight: 700;
+        color: var(--primarna-zelena);
+        margin-right: .4rem;
+    }
+    .nkz-odabir__prazno {
+        padding: .5rem .75rem;
+        color: #6a7a6a;
+        font-size: 12px;
+    }
 </style>

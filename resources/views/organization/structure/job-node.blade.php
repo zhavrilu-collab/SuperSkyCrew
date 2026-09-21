@@ -8,7 +8,7 @@
                 <div class="org-kutija-kapa">{{ $job->name }}</div>
                 <div class="org-kutija-tijelo">
                     <span>{{ $department->name }}</span>
-                    <strong>{{ $job->rad1g ?: 'bez šifre' }}</strong>
+                    <strong title="{{ $job->rad1gLabel() }}">{{ $job->rad1g ?: 'bez šifre' }}</strong>
                 </div>
                 <div class="org-kutija-akcije">
                     <button class="org-kutija-akcija" type="button" data-bs-toggle="modal" data-bs-target="#modal-mjesto" data-department="{{ $department->id }}" title="Novo RM">+</button>

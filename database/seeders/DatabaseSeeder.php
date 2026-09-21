@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(NkzOccupationSeeder::class);
+
         $owner = User::query()->updateOrCreate(
             ['email' => 'vlasnik@hr.test'],
             [
@@ -166,7 +168,7 @@ class DatabaseSeeder extends Seeder
             ['organization_id' => $activeOrg->id, 'name' => 'Direktorica'],
             [
                 'department_id' => $uprava->id,
-                'rad1g' => '1210',
+                'rad1g' => '1120',
                 'annual_leave_days' => 25,
                 'valid_from' => now()->subYears(3)->toDateString(),
                 'valid_to' => null,

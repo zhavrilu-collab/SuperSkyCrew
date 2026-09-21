@@ -142,7 +142,7 @@ class DepartmentScopeService
 
         return JobPosition::query()
             ->forOrganization($organization)
-            ->with('department')
+            ->with(['department', 'nkzOccupation'])
             ->where(function (Builder $query) use ($day) {
                 $query->whereNull('valid_from')->orWhereDate('valid_from', '<=', $day);
             })

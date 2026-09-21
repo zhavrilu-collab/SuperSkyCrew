@@ -31,6 +31,7 @@ class SystematizationController extends Controller
             $positions = $positions->filter(function ($position) use ($needle) {
                 return str_contains(mb_strtolower($position->name), $needle)
                     || str_contains(mb_strtolower((string) $position->rad1g), $needle)
+                    || str_contains(mb_strtolower((string) $position->rad1gLabel()), $needle)
                     || str_contains(mb_strtolower((string) $position->department?->name), $needle);
             })->values();
         }

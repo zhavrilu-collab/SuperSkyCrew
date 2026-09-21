@@ -71,6 +71,8 @@ class DemoTenantSeeder extends Seeder
 
     public function run(): void
     {
+        $this->call(NkzOccupationSeeder::class);
+
         Notification::fake();
 
         $users = [];
@@ -169,7 +171,7 @@ class DemoTenantSeeder extends Seeder
             ['organization_id' => $organization->id, 'name' => 'Direktorica'],
             [
                 'department_id' => $uprava->id,
-                'rad1g' => '1210',
+                'rad1g' => '1120',
                 'annual_leave_days' => 25,
                 'valid_from' => now()->subYears(3)->toDateString(),
             ],

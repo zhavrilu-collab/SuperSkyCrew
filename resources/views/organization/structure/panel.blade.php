@@ -40,7 +40,8 @@
             || str_contains(mb_strtolower((string) $department->code), $qLower);
     }));
     $filteredPositions = $q === '' ? $positions : $positions->filter(fn ($position) => str_contains(mb_strtolower($position->name), $qLower)
-        || str_contains(mb_strtolower((string) $position->rad1g), $qLower));
+        || str_contains(mb_strtolower((string) $position->rad1g), $qLower)
+        || str_contains(mb_strtolower((string) $position->rad1gLabel()), $qLower));
     $filteredCostCenters = $q === '' ? $costCenters : $costCenters->filter(fn ($costCenter) => str_contains(mb_strtolower($costCenter->name), $qLower)
         || str_contains(mb_strtolower($costCenter->code), $qLower));
     $filteredLegal = $q === '' ? $legalEntities : $legalEntities->filter(fn ($entity) => str_contains(mb_strtolower($entity->name), $qLower)

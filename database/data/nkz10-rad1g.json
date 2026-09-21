@@ -1,0 +1,2187 @@
+[
+    {
+        "code": "0110",
+        "title": "Časnici/časnice",
+        "level": 4
+    },
+    {
+        "code": "0210",
+        "title": "Dočasnici/dočasnice",
+        "level": 4
+    },
+    {
+        "code": "0310",
+        "title": "Vojna zanimanja, ostali činovi",
+        "level": 4
+    },
+    {
+        "code": "1111",
+        "title": "Zakonodavci/zakonodavke",
+        "level": 4
+    },
+    {
+        "code": "1112",
+        "title": "Dužnosnici/dužnosnice  tijela državne vlasti",
+        "level": 4
+    },
+    {
+        "code": "1113",
+        "title": "Plemenski i seoski poglavari/plemenske i seoske poglavarke",
+        "level": 4
+    },
+    {
+        "code": "1114",
+        "title": "Čelnici i dužnosnici interesnih organizacija/čelnice i dužnosnice interesnih organizacija",
+        "level": 4
+    },
+    {
+        "code": "1115",
+        "title": "Dužnosnici/dužnosnice izvršne vlasti",
+        "level": 4
+    },
+    {
+        "code": "1120",
+        "title": "Glavni i izvršni direktori/glavne i izvršne direktorice",
+        "level": 4
+    },
+    {
+        "code": "1211",
+        "title": "Financijski direktori/financijske direktorice",
+        "level": 4
+    },
+    {
+        "code": "1212",
+        "title": "Direktori/direktorice ljudskih potencijala",
+        "level": 4
+    },
+    {
+        "code": "1213",
+        "title": "Direktori/direktorice programske politike i planiranja",
+        "level": 4
+    },
+    {
+        "code": "1219",
+        "title": "Poslovni i administrativni direktori/direktorice d. n.",
+        "level": 4
+    },
+    {
+        "code": "1221",
+        "title": "Direktori/direktorice prodaje i marketinga",
+        "level": 4
+    },
+    {
+        "code": "1222",
+        "title": "Direktori/direktorice promidžbe i odnosa s javnošću",
+        "level": 4
+    },
+    {
+        "code": "1223",
+        "title": "Direktori/direktorice istraživanja i razvoja",
+        "level": 4
+    },
+    {
+        "code": "1311",
+        "title": "Direktori/direktorice proizvodnje u poljoprivredi i šumarstvu",
+        "level": 4
+    },
+    {
+        "code": "1312",
+        "title": "Direktori/direktorice proizvodnje u ribarstvu i ribogojstvu",
+        "level": 4
+    },
+    {
+        "code": "1321",
+        "title": "Direktori/direktorice proizvodnje u prerađivačkoj industriji",
+        "level": 4
+    },
+    {
+        "code": "1322",
+        "title": "Direktori/direktorice proizvodnje u rudarstvu",
+        "level": 4
+    },
+    {
+        "code": "1323",
+        "title": "Direktori/direktorice proizvodnje u građevinarstvu",
+        "level": 4
+    },
+    {
+        "code": "1324",
+        "title": "Direktori/direktorice za nabavu i distribuciju",
+        "level": 4
+    },
+    {
+        "code": "1330",
+        "title": "Direktori/direktorice u području informacijsko komunikacijskih tehnologija",
+        "level": 4
+    },
+    {
+        "code": "1341",
+        "title": "Ravnatelji/ravnateljice u području predškolskog odgoja",
+        "level": 4
+    },
+    {
+        "code": "1342",
+        "title": "Ravnatelji/ravnateljice zdravstvenih ustanova",
+        "level": 4
+    },
+    {
+        "code": "1343",
+        "title": "Ravnatelji/ravnateljice ustanova za pružanje usluga njege starijim osobama",
+        "level": 4
+    },
+    {
+        "code": "1344",
+        "title": "Ravnatelji/ravnateljice ustanova za socijalnu skrb",
+        "level": 4
+    },
+    {
+        "code": "1345",
+        "title": "Ravnatelji/ravnateljice osnovnih škola i srednjoškolskih ustanova te dekani/dekanice i rektori/rektorice visokih učilišta",
+        "level": 4
+    },
+    {
+        "code": "1346",
+        "title": "Direktori/direktorice financijskih institucija i osiguravajućih društava",
+        "level": 4
+    },
+    {
+        "code": "1349",
+        "title": "Ravnatelji/ravnateljice ustanova za pružanje stručnih usluga d. n.",
+        "level": 4
+    },
+    {
+        "code": "1411",
+        "title": "Direktori/direktorice hotela i kampova",
+        "level": 4
+    },
+    {
+        "code": "1412",
+        "title": "Direktori/direktorice restorana i srodnih ugostiteljskih objekata",
+        "level": 4
+    },
+    {
+        "code": "1420",
+        "title": "Direktori/direktorice u trgovini na malo i veliko",
+        "level": 4
+    },
+    {
+        "code": "1431",
+        "title": "Direktori/direktorice športskih, rekreacijskih i kulturnih centara",
+        "level": 4
+    },
+    {
+        "code": "1439",
+        "title": "Direktori/direktorice uslužnih djelatnosti d. n.",
+        "level": 4
+    },
+    {
+        "code": "2111",
+        "title": "Fizičari/fizičarke i astronomi/astronomke",
+        "level": 4
+    },
+    {
+        "code": "2112",
+        "title": "Meteorolozi/meteorologinje",
+        "level": 4
+    },
+    {
+        "code": "2113",
+        "title": "Kemičari/kemičarke",
+        "level": 4
+    },
+    {
+        "code": "2114",
+        "title": "Geolozi/geologinje i geofizičari/geofizičarke",
+        "level": 4
+    },
+    {
+        "code": "2120",
+        "title": "Matematičari/matematičarke, aktuari/aktuarke i statističari/statističarke",
+        "level": 4
+    },
+    {
+        "code": "2131",
+        "title": "Biolozi/biologinje, botaničari/botaničarke, zoolozi/zoologinje i srodni stručnjaci/stručnjakinje",
+        "level": 4
+    },
+    {
+        "code": "2132",
+        "title": "Savjetnici/savjetnice u poljoprivredi, šumarstvu i ribarstvu",
+        "level": 4
+    },
+    {
+        "code": "2133",
+        "title": "Stručnjaci/stručnjakinje za zaštitu okoliša",
+        "level": 4
+    },
+    {
+        "code": "2141",
+        "title": "Inženjeri/inženjerke industrijskog inženjerstva i proizvodnje",
+        "level": 4
+    },
+    {
+        "code": "2142",
+        "title": "Inženjeri/inženjerke građevinarstva",
+        "level": 4
+    },
+    {
+        "code": "2143",
+        "title": "Inženjeri/inženjerke za okoliš",
+        "level": 4
+    },
+    {
+        "code": "2144",
+        "title": "Inženjeri/inženjerke strojarstva",
+        "level": 4
+    },
+    {
+        "code": "2145",
+        "title": "Inženjeri/inženjerke kemijske tehnologije",
+        "level": 4
+    },
+    {
+        "code": "2146",
+        "title": "Inženjeri/inženjerke rudarstva, metalurgije i srodni stručnjaci/stručnjakinje",
+        "level": 4
+    },
+    {
+        "code": "2149",
+        "title": "Stručnjaci/stručnjakinje tehničko-tehnoloških znanosti (osim elektrotehnike) d. n.",
+        "level": 4
+    },
+    {
+        "code": "2151",
+        "title": "Inženjeri/inženjerke elektroenergetike",
+        "level": 4
+    },
+    {
+        "code": "2152",
+        "title": "Inženjeri/inženjerke elektronike",
+        "level": 4
+    },
+    {
+        "code": "2153",
+        "title": "Inženjeri/inženjerke telekomunikacija",
+        "level": 4
+    },
+    {
+        "code": "2161",
+        "title": "Arhitekti/arhitektice",
+        "level": 4
+    },
+    {
+        "code": "2162",
+        "title": "Krajobrazni arhitekti/krajobrazne arhitektice",
+        "level": 4
+    },
+    {
+        "code": "2163",
+        "title": "Industrijski i modni dizajneri/industrijske i modne dizajnerice",
+        "level": 4
+    },
+    {
+        "code": "2164",
+        "title": "Inženjeri/inženjerke urbanizma i prometa",
+        "level": 4
+    },
+    {
+        "code": "2165",
+        "title": "Kartografi/kartografkinje i geodeti/geodetkinje",
+        "level": 4
+    },
+    {
+        "code": "2166",
+        "title": "Grafički dizajneri/grafičke dizajnerice i dizajneri/dizajnerice multimedijskih sadržaja",
+        "level": 4
+    },
+    {
+        "code": "2211",
+        "title": "Liječnici/liječnice opće prakse",
+        "level": 4
+    },
+    {
+        "code": "2212",
+        "title": "Liječnici specijalisti/liječnice specijalistice",
+        "level": 4
+    },
+    {
+        "code": "2221",
+        "title": "Glavni medicinski tehničari/glavne medicinske sestre opće njege",
+        "level": 4
+    },
+    {
+        "code": "2222",
+        "title": "Glavne primalje",
+        "level": 4
+    },
+    {
+        "code": "2230",
+        "title": "Stručnjaci/stručnjakinje za tradicionalnu i komplementarnu medicinu",
+        "level": 4
+    },
+    {
+        "code": "2240",
+        "title": "Paramedicinsko osoblje",
+        "level": 4
+    },
+    {
+        "code": "2250",
+        "title": "Veterinari/veterinarke",
+        "level": 4
+    },
+    {
+        "code": "2261",
+        "title": "Doktori/doktorice dentalne medicine",
+        "level": 4
+    },
+    {
+        "code": "2262",
+        "title": "Farmaceuti/farmaceutkinje",
+        "level": 4
+    },
+    {
+        "code": "2263",
+        "title": "Stručnjaci/stručnjakinje zaštite okoliša i zdravlja na radu",
+        "level": 4
+    },
+    {
+        "code": "2264",
+        "title": "Fizioterapeuti/fizioterapeutkinje",
+        "level": 4
+    },
+    {
+        "code": "2265",
+        "title": "Dijetetičari/dijetetičarke i nutricionisti/nutricionistice",
+        "level": 4
+    },
+    {
+        "code": "2266",
+        "title": "Audiolozi/audiologinje i logopedi/logopedinje",
+        "level": 4
+    },
+    {
+        "code": "2267",
+        "title": "Optometristi/optometristice i očni optičari/očne optičarke",
+        "level": 4
+    },
+    {
+        "code": "2269",
+        "title": "Zdravstveni stručnjaci/zdravstvene stručnjakinje d. n.",
+        "level": 4
+    },
+    {
+        "code": "2310",
+        "title": "Sveučilišni i visokoškolski nastavnici/ sveučilišne i visokoškolske nastavnice",
+        "level": 4
+    },
+    {
+        "code": "2320",
+        "title": "Strukovni  nastavnici/strukovne nastavnice",
+        "level": 4
+    },
+    {
+        "code": "2330",
+        "title": "Nastavnici/nastavnice u srednjim školama",
+        "level": 4
+    },
+    {
+        "code": "2341",
+        "title": "Učitelji/učiteljice razredne/predmetne nastave u osnovnim školama",
+        "level": 4
+    },
+    {
+        "code": "2342",
+        "title": "Predškolski odgajatelji/predškolske odgajateljice",
+        "level": 4
+    },
+    {
+        "code": "2351",
+        "title": "Stručnjaci/stručnjakinje za obrazovne metode",
+        "level": 4
+    },
+    {
+        "code": "2352",
+        "title": "Stručnjaci/stručnjakinje edukacijsko-rehabilitacijskog profila",
+        "level": 4
+    },
+    {
+        "code": "2353",
+        "title": "Nastavnici/nastavnice izvanškolskoga jezičnog obrazovanja",
+        "level": 4
+    },
+    {
+        "code": "2354",
+        "title": "Nastavnici/nastavnice izvanškolskoga glazbenog obrazovanja",
+        "level": 4
+    },
+    {
+        "code": "2355",
+        "title": "Nastavnici/nastavnice izvanškolskoga umjetničkog obrazovanja",
+        "level": 4
+    },
+    {
+        "code": "2356",
+        "title": "Nastavnici/nastavnice izvanškolskoga informatičkog obrazovanja",
+        "level": 4
+    },
+    {
+        "code": "2359",
+        "title": "Stručnjaci/stručnjakinje za odgoj i obrazovanje, d. n.",
+        "level": 4
+    },
+    {
+        "code": "2411",
+        "title": "Računovodstveni stručnjaci/računovodstvene stručnjakinje",
+        "level": 4
+    },
+    {
+        "code": "2412",
+        "title": "Financijski i investicijski savjetnici/financijske i investicijske savjetnice",
+        "level": 4
+    },
+    {
+        "code": "2413",
+        "title": "Financijski analitičari/financijske analitičarke",
+        "level": 4
+    },
+    {
+        "code": "2421",
+        "title": "Poslovni i organizacijski analitičari/poslovne i organizacijske analitičarke",
+        "level": 4
+    },
+    {
+        "code": "2422",
+        "title": "Stručnjaci/stručnjakinje za strateško planiranje",
+        "level": 4
+    },
+    {
+        "code": "2423",
+        "title": "Stručnjaci/stručnjakinje za ljudske potencijale i upravljanje karijerom",
+        "level": 4
+    },
+    {
+        "code": "2424",
+        "title": "Stručnjaci/stručnjakinje za osposobljavanje i razvoj zaposlenika",
+        "level": 4
+    },
+    {
+        "code": "2431",
+        "title": "Stručnjaci/stručnjakinje za promidžbu i marketing",
+        "level": 4
+    },
+    {
+        "code": "2432",
+        "title": "Stručnjaci/stručnjakinje za odnose s javnošću",
+        "level": 4
+    },
+    {
+        "code": "2433",
+        "title": "Stručnjaci/stručnjakinje za prodaju tehničke i medicinske opreme (osim opreme informacijske i komunikacijske tehnologije)",
+        "level": 4
+    },
+    {
+        "code": "2434",
+        "title": "Stručnjaci/stručnjakinje za prodaju informacijsko-komunikacijske tehnologije",
+        "level": 4
+    },
+    {
+        "code": "2511",
+        "title": "Analitičari/analitičarke sustava",
+        "level": 4
+    },
+    {
+        "code": "2512",
+        "title": "Razvojni inženjeri/razvojne inženjerke za programsku podršku",
+        "level": 4
+    },
+    {
+        "code": "2513",
+        "title": "Razvojni inženjeri/razvojne inženjerke internetskih i multimedijskih aplikacija",
+        "level": 4
+    },
+    {
+        "code": "2514",
+        "title": "Programeri/programerke za razvoj aplikacija",
+        "level": 4
+    },
+    {
+        "code": "2519",
+        "title": "Razvojni inženjeri i analitičari/razvojne inženjerke i analitičarke za razvoj programske podrške d. n.",
+        "level": 4
+    },
+    {
+        "code": "2521",
+        "title": "Stručnjaci/stručnjakinje za razvoj baza podataka",
+        "level": 4
+    },
+    {
+        "code": "2522",
+        "title": "Administratori sustava/administratorice sustava",
+        "level": 4
+    },
+    {
+        "code": "2523",
+        "title": "Stručnjaci/stručnjakinje za razvoj računalnih mreža",
+        "level": 4
+    },
+    {
+        "code": "2529",
+        "title": "Stručnjaci/stručnjakinje za baze podataka i računalne mreže, d. n.",
+        "level": 4
+    },
+    {
+        "code": "2611",
+        "title": "Pravni zastupnici/pravne zastupnice",
+        "level": 4
+    },
+    {
+        "code": "2612",
+        "title": "Suci/sutkinje",
+        "level": 4
+    },
+    {
+        "code": "2619",
+        "title": "Pravni stručnjaci/pravne stručnjakinje d. n.",
+        "level": 4
+    },
+    {
+        "code": "2621",
+        "title": "Arhivisti/arhivistice i stručno muzejsko osoblje",
+        "level": 4
+    },
+    {
+        "code": "2622",
+        "title": "Knjižničari/knjižničarke i informacijski stručnjaci/informacijske stručnjakinje",
+        "level": 4
+    },
+    {
+        "code": "2631",
+        "title": "Ekonomski stručnjaci/ekonomske stručnjakinje",
+        "level": 4
+    },
+    {
+        "code": "2632",
+        "title": "Sociolozi/sociologinje, antropolozi/antropologinje i srodni stručnjaci/srodne stručnjakinje",
+        "level": 4
+    },
+    {
+        "code": "2633",
+        "title": "Filozofi/filozofkinje, povjesničari/povjesničarke i politolozi/politologinje",
+        "level": 4
+    },
+    {
+        "code": "2634",
+        "title": "Psiholozi/psihologinje",
+        "level": 4
+    },
+    {
+        "code": "2635",
+        "title": "Stručnjaci/stručnjakinje za socijalni rad i savjetovanje",
+        "level": 4
+    },
+    {
+        "code": "2636",
+        "title": "Vjerski stručnjaci/vjerske stručnjakinje",
+        "level": 4
+    },
+    {
+        "code": "2641",
+        "title": "Književnici/književnice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "2642",
+        "title": "Novinari/novinarke",
+        "level": 4
+    },
+    {
+        "code": "2643",
+        "title": "Prevoditelji/prevoditeljice, tumači/tumačiteljice i drugi jezikoslovci/druge jezikoslovke",
+        "level": 4
+    },
+    {
+        "code": "2651",
+        "title": "Likovni umjetnici/likovne umjetnice",
+        "level": 4
+    },
+    {
+        "code": "2652",
+        "title": "Glazbeni umjetnici/glazbene umjetnice, pjevači/pjevačice i skladatelji/skladateljice",
+        "level": 4
+    },
+    {
+        "code": "2653",
+        "title": "Plesači/plesačice i koreografi/koreografkinje",
+        "level": 4
+    },
+    {
+        "code": "2654",
+        "title": "Filmski i kazališni redatelji i producenti/filmske i kazališne redateljice i producentice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "2655",
+        "title": "Dramski umjetnici/dramske umjetnice",
+        "level": 4
+    },
+    {
+        "code": "2656",
+        "title": "Spikeri/spikerice na radiju, televiziji i u drugim medijima",
+        "level": 4
+    },
+    {
+        "code": "2659",
+        "title": "Produktivni i reproduktivni umjetnici d. n.",
+        "level": 4
+    },
+    {
+        "code": "3111",
+        "title": "Tehničari/tehničarke za fiziku, kemiju i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3112",
+        "title": "Tehničari/tehničarke za arhitekturu, građevinarstvo, geodeziju i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3113",
+        "title": "Tehničari/tehničarke za elektrotehniku i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3114",
+        "title": "Tehničari/tehničarke za elektroniku",
+        "level": 4
+    },
+    {
+        "code": "3115",
+        "title": "Tehničari/tehničarke strojarstva, brodogradnje i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3116",
+        "title": "Tehničari/tehničarke za kemijsku i prehrambenu tehnologiju i biotehnologiju",
+        "level": 4
+    },
+    {
+        "code": "3117",
+        "title": "Tehničari/tehničarke za rudarstvo, metalurgiju i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3118",
+        "title": "Tehnički crtači/tehničke crtačice",
+        "level": 4
+    },
+    {
+        "code": "3119",
+        "title": "Tehničko-tehnološki tehničari/tehničko-tehnološke tehničarke d. n.",
+        "level": 4
+    },
+    {
+        "code": "3121",
+        "title": "Rudarski nadzornici/rudarske nadzornice",
+        "level": 4
+    },
+    {
+        "code": "3122",
+        "title": "Nadzornici/nadzornice u proizvodnim djelatnostima",
+        "level": 4
+    },
+    {
+        "code": "3123",
+        "title": "Građevinski nadzornici/građevinske nadzornice",
+        "level": 4
+    },
+    {
+        "code": "3131",
+        "title": "Rukovoditelji/rukovoditeljice energetskim i srodnim postrojenjima",
+        "level": 4
+    },
+    {
+        "code": "3132",
+        "title": "Rukovoditelji/rukovoditeljice spalionica, pogona za pročišćavanje vode i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3133",
+        "title": "Kemijsko-procesni tehničari/kemijsko-procesne tehničarke",
+        "level": 4
+    },
+    {
+        "code": "3134",
+        "title": "Rukovoditelji/rukovoditeljice postrojenjima u rafinerijama nafte i prirodnog plina",
+        "level": 4
+    },
+    {
+        "code": "3135",
+        "title": "Metalurški procesni tehničari/metalurške procesne tehničarke",
+        "level": 4
+    },
+    {
+        "code": "3139",
+        "title": "Procesni tehničari/procesne tehničarke d. n.",
+        "level": 4
+    },
+    {
+        "code": "3141",
+        "title": "Laboratorijski tehničari/laboratorijske tehničarke u biomedicini, biologiji, farmakologiji (osim medicinsko-laboratorijskih tehničara)",
+        "level": 4
+    },
+    {
+        "code": "3142",
+        "title": "Poljoprivredni tehničari/poljoprivredne tehničarke",
+        "level": 4
+    },
+    {
+        "code": "3143",
+        "title": "Šumarski tehničari/šumarske tehničarke",
+        "level": 4
+    },
+    {
+        "code": "3151",
+        "title": "Časnici stroja/časnice stroja i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3152",
+        "title": "Kapetani/kapetanice plovila i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3153",
+        "title": "Piloti/pilotkinje zrakoplova i srodni zrakoplovni stručnjaci/srodne zrakoplovne stručnjakinje",
+        "level": 4
+    },
+    {
+        "code": "3154",
+        "title": "Kontrolori/kontrolorke leta",
+        "level": 4
+    },
+    {
+        "code": "3155",
+        "title": "Tehničari/tehničarke za sigurnost zračnog prometa",
+        "level": 4
+    },
+    {
+        "code": "3211",
+        "title": "Tehničari/tehničarke medicinskih uređaja",
+        "level": 4
+    },
+    {
+        "code": "3212",
+        "title": "Zdravstveno laboratorijski i patološki tehničari/zdravstveno laboratorijske i patološke tehničarke",
+        "level": 4
+    },
+    {
+        "code": "3213",
+        "title": "Farmaceutski tehničari/farmaceutske tehničarke",
+        "level": 4
+    },
+    {
+        "code": "3214",
+        "title": "Dentalni i ortopedski tehničari/dentalne i ortopedske tehničarke",
+        "level": 4
+    },
+    {
+        "code": "3221",
+        "title": "Medicinske sestre/medicinski tehničari",
+        "level": 4
+    },
+    {
+        "code": "3222",
+        "title": "Medicinske sestre-primalje",
+        "level": 4
+    },
+    {
+        "code": "3230",
+        "title": "Zanimanja srodna stručnjacima za tradicionalnu i komplementarnu medicinu",
+        "level": 4
+    },
+    {
+        "code": "3240",
+        "title": "Veterinarski tehničari, asistenti/ veterinarske tehničarke, asistentice",
+        "level": 4
+    },
+    {
+        "code": "3251",
+        "title": "Dentalni asistenti i terapeuti/dentalne asistentice i terapeutkinje",
+        "level": 4
+    },
+    {
+        "code": "3252",
+        "title": "Tehničari/tehničarke za vođenje zdravstvenih kartoteka i informacija",
+        "level": 4
+    },
+    {
+        "code": "3253",
+        "title": "Patronažni zdravstveni djelatnici/patronažne zdravstvene djelatnice",
+        "level": 4
+    },
+    {
+        "code": "3254",
+        "title": "Optičari/optičarke",
+        "level": 4
+    },
+    {
+        "code": "3255",
+        "title": "Fizioterapeutski tehničari/fizioterapeutske tehničarke",
+        "level": 4
+    },
+    {
+        "code": "3256",
+        "title": "Asistenti/asistentice zdravstvene njege",
+        "level": 4
+    },
+    {
+        "code": "3257",
+        "title": "Inspektori/inspektorice za zaštitu okoliša, higijenu i medicinu rada i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3258",
+        "title": "Osoblje vozila hitne medicinske pomoći",
+        "level": 4
+    },
+    {
+        "code": "3259",
+        "title": "Zdravstveni radnici/zdravstvene radnice d. n.",
+        "level": 4
+    },
+    {
+        "code": "3311",
+        "title": "Burzovni posrednici/burzovne posrednice",
+        "level": 4
+    },
+    {
+        "code": "3312",
+        "title": "Stručni suradnici/stručne suradnice za kredite i zajmove",
+        "level": 4
+    },
+    {
+        "code": "3313",
+        "title": "Ekonomisti/ekonomistice i voditelji/voditeljice dijelova računovodstva",
+        "level": 4
+    },
+    {
+        "code": "3314",
+        "title": "Statističko-matematički stručnjaci/statističko-matematičke stručnjakinje i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3315",
+        "title": "Procjenitelji/procjeniteljice vrijednosti i štete",
+        "level": 4
+    },
+    {
+        "code": "3321",
+        "title": "Zastupnici osiguranja/zastupnice osiguranja",
+        "level": 4
+    },
+    {
+        "code": "3322",
+        "title": "Komercijalisti/komercijalistice u prodaji",
+        "level": 4
+    },
+    {
+        "code": "3323",
+        "title": "Referenti/referentice nabave",
+        "level": 4
+    },
+    {
+        "code": "3324",
+        "title": "Posrednici/posrednice za prijevoz, trgovinu i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3331",
+        "title": "Špediteri/špediterke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3332",
+        "title": "Organizatori/organizatorice konferencija i događaja",
+        "level": 4
+    },
+    {
+        "code": "3333",
+        "title": "Posrednici/posrednice pri zapošljavanju i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3334",
+        "title": "Agenti/agentice posredovanja u prometu nekretnina",
+        "level": 4
+    },
+    {
+        "code": "3339",
+        "title": "Poslovni posrednici/poslovne posrednice d. n.",
+        "level": 4
+    },
+    {
+        "code": "3341",
+        "title": "Voditelji/voditeljice ureda",
+        "level": 4
+    },
+    {
+        "code": "3342",
+        "title": "Pravni tajnici/pravne tajnice",
+        "level": 4
+    },
+    {
+        "code": "3343",
+        "title": "Poslovni tajnici/poslovne tajnice u upravi i poslovanju",
+        "level": 4
+    },
+    {
+        "code": "3344",
+        "title": "Poslovni tajnici/poslovne tajnice u zdravstvu",
+        "level": 4
+    },
+    {
+        "code": "3351",
+        "title": "Carinski inspektori/carinske inspektorice i granični inspektori/granične inspektorice",
+        "level": 4
+    },
+    {
+        "code": "3352",
+        "title": "Poreznici/poreznice",
+        "level": 4
+    },
+    {
+        "code": "3353",
+        "title": "Referenti/referentice za socijalnu skrb i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3354",
+        "title": "Referenti/referentice za koncesije, dozvole i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3355",
+        "title": "Kriminalisti/kriminalistkinje i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3359",
+        "title": "Stručni suradnici/stručne suradnice na poslovima državne regulative d. n.",
+        "level": 4
+    },
+    {
+        "code": "3411",
+        "title": "Pravni asistenti/pravne asistentice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3412",
+        "title": "Socijalni radnici/socijalne radnice",
+        "level": 4
+    },
+    {
+        "code": "3413",
+        "title": "Stručnjaci/stručnjakinje za vjerska pitanja",
+        "level": 4
+    },
+    {
+        "code": "3421",
+        "title": "Športaši/športašice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "3422",
+        "title": "Športski treneri/trenerice; športski instruktori/instruktorice",
+        "level": 4
+    },
+    {
+        "code": "3423",
+        "title": "Instruktori/instruktorice fitnesa i rekreacije i voditelji športskih programa",
+        "level": 4
+    },
+    {
+        "code": "3431",
+        "title": "Fotografi/fotografkinje",
+        "level": 4
+    },
+    {
+        "code": "3432",
+        "title": "Dizajneri, dekorateri i aranžeri/dizajnerice, dekoraterke i aranžerke",
+        "level": 4
+    },
+    {
+        "code": "3433",
+        "title": "Galerijski i muzejski tehničari i knjižničari/galerijske i muzejske tehničarke i knjižničarke",
+        "level": 4
+    },
+    {
+        "code": "3434",
+        "title": "Glavni kuhari/glavne kuharice",
+        "level": 4
+    },
+    {
+        "code": "3435",
+        "title": "Stručni suradnici/stručne suradnice za djelatnosti u umjetnosti i kulturi d. n.",
+        "level": 4
+    },
+    {
+        "code": "3511",
+        "title": "Tehničari/tehničarke informacijske i komunikacijske tehnologije za podršku radu",
+        "level": 4
+    },
+    {
+        "code": "3512",
+        "title": "Tehničari/tehničarke informacijske i komunikacijske tehnologije za podršku korisnicima",
+        "level": 4
+    },
+    {
+        "code": "3513",
+        "title": "Tehničari/tehničarke za razvoj računalnih mreža i sustava",
+        "level": 4
+    },
+    {
+        "code": "3514",
+        "title": "Tehničari/tehničarke za mrežne aplikacije",
+        "level": 4
+    },
+    {
+        "code": "3521",
+        "title": "Tehničari/tehničarke za emitiranje i audio-vizualne sustave",
+        "level": 4
+    },
+    {
+        "code": "3522",
+        "title": "Tehničari/tehničarke za telekomunikacije",
+        "level": 4
+    },
+    {
+        "code": "4110",
+        "title": "Uredski službenici/uredske službenice za opće poslove",
+        "level": 4
+    },
+    {
+        "code": "4120",
+        "title": "Tajnici/tajnice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "4131",
+        "title": "Daktilografi/daktilografkinje i operatori/operaterke za uređivanje teksta na računalu",
+        "level": 4
+    },
+    {
+        "code": "4132",
+        "title": "Službenici/službenice za unos podataka",
+        "level": 4
+    },
+    {
+        "code": "4211",
+        "title": "Bankarski službenici/bankarske službenice za šaltersko novčano poslovanje i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "4212",
+        "title": "Službenici/službenice u kladionici, kasinu i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "4213",
+        "title": "Šalterski službenici/šalterske službenice u zalagaonicama",
+        "level": 4
+    },
+    {
+        "code": "4214",
+        "title": "Sakupljači/sakupljačice dugova i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "4221",
+        "title": "Organizatori/organizatorice putovanja i službenici/službenice u turističkim agencijama",
+        "level": 4
+    },
+    {
+        "code": "4222",
+        "title": "Službenici/službenice za pružanje informacija u kontakt centru",
+        "level": 4
+    },
+    {
+        "code": "4223",
+        "title": "Operatori/operatorice na telefonskoj centrali",
+        "level": 4
+    },
+    {
+        "code": "4224",
+        "title": "Hotelski recepcionari/hotelske recepcionarke",
+        "level": 4
+    },
+    {
+        "code": "4225",
+        "title": "Službenici/službenice za pružanje informacija",
+        "level": 4
+    },
+    {
+        "code": "4226",
+        "title": "Recepcionari/recepcionarke (općenito)",
+        "level": 4
+    },
+    {
+        "code": "4227",
+        "title": "Anketari/anketarke za istraživanje tržišta",
+        "level": 4
+    },
+    {
+        "code": "4229",
+        "title": "Službenici/službenice za šalterske informacije d. n.",
+        "level": 4
+    },
+    {
+        "code": "4311",
+        "title": "Službenici/službenice u knjigovodstvu",
+        "level": 4
+    },
+    {
+        "code": "4312",
+        "title": "Službenici/službenice u statistici, financijama i osiguranju",
+        "level": 4
+    },
+    {
+        "code": "4313",
+        "title": "Službenici/službenice za obračun plaća",
+        "level": 4
+    },
+    {
+        "code": "4321",
+        "title": "Skladišni službenici/skladišne službenice",
+        "level": 4
+    },
+    {
+        "code": "4322",
+        "title": "Uredski službenici/uredske službenice u proizvodnji",
+        "level": 4
+    },
+    {
+        "code": "4323",
+        "title": "Prometni uredski službenici/prometne uredske službenice",
+        "level": 4
+    },
+    {
+        "code": "4411",
+        "title": "Službenici/službenice knjižnica i muzeja",
+        "level": 4
+    },
+    {
+        "code": "4412",
+        "title": "Poštari/poštarice",
+        "level": 4
+    },
+    {
+        "code": "4413",
+        "title": "Šifranti i korektori/šifrantice i korektorice",
+        "level": 4
+    },
+    {
+        "code": "4414",
+        "title": "Pisari/pisarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "4415",
+        "title": "Arhivski i kopirni službenici/arhivske i kopirne službenice",
+        "level": 4
+    },
+    {
+        "code": "4416",
+        "title": "Službenici/službenice za ljudske potencijale",
+        "level": 4
+    },
+    {
+        "code": "4419",
+        "title": "Administrativni službenici/administrativne službenice d. n.",
+        "level": 4
+    },
+    {
+        "code": "5111",
+        "title": "Članovi/članice kabinske posade",
+        "level": 4
+    },
+    {
+        "code": "5112",
+        "title": "Kondukteri/kondukterke",
+        "level": 4
+    },
+    {
+        "code": "5113",
+        "title": "Vodiči/vodičice",
+        "level": 4
+    },
+    {
+        "code": "5120",
+        "title": "Kuhari/kuharice",
+        "level": 4
+    },
+    {
+        "code": "5131",
+        "title": "Konobari/konobarice",
+        "level": 4
+    },
+    {
+        "code": "5132",
+        "title": "Barmeni/barmenice",
+        "level": 4
+    },
+    {
+        "code": "5141",
+        "title": "Frizeri/frizerke",
+        "level": 4
+    },
+    {
+        "code": "5142",
+        "title": "Kozmetičari/kozmetičarke, pedikeri/pedikerke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "5151",
+        "title": "Djelatnici/djelatnice za čišćenje i održavanje u uredima, hotelima i drugim objektima",
+        "level": 4
+    },
+    {
+        "code": "5152",
+        "title": "Domaćini/domaćice",
+        "level": 4
+    },
+    {
+        "code": "5153",
+        "title": "Kućepazitelji/kućepaziteljice",
+        "level": 4
+    },
+    {
+        "code": "5161",
+        "title": "Astrolozi/astrologinje i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "5162",
+        "title": "Pratitelj/pratiteljice i posluga",
+        "level": 4
+    },
+    {
+        "code": "5163",
+        "title": "Grobari/grobarke, pogrebnici/pogrebnice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "5164",
+        "title": "Njegovatelji/njegovateljice, radnici/radnice koje skrbe o životinjama",
+        "level": 4
+    },
+    {
+        "code": "5165",
+        "title": "Instruktori /instruktorice vožnje",
+        "level": 4
+    },
+    {
+        "code": "5169",
+        "title": "Uslužna zanimanja, d. n.",
+        "level": 4
+    },
+    {
+        "code": "5211",
+        "title": "Prodavači/prodavačice na štandovima",
+        "level": 4
+    },
+    {
+        "code": "5212",
+        "title": "Ulični prodavači/ulične prodavačice hrane",
+        "level": 4
+    },
+    {
+        "code": "5221",
+        "title": "Trgovci/trgovke u vlastitim trgovinama",
+        "level": 4
+    },
+    {
+        "code": "5222",
+        "title": "Poslovođe/poslovotkinje u trgovinama",
+        "level": 4
+    },
+    {
+        "code": "5223",
+        "title": "Prodavači/prodavačice u trgovinama",
+        "level": 4
+    },
+    {
+        "code": "5230",
+        "title": "Blagajnici/blagajnice, prodavači/prodavačice ulaznica i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "5241",
+        "title": "Manekeni/manekenke, modeli i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "5242",
+        "title": "Demonstratori/demonstratorice za prodaju",
+        "level": 4
+    },
+    {
+        "code": "5243",
+        "title": "Zastupnici/zastupnice direktne prodaje",
+        "level": 4
+    },
+    {
+        "code": "5244",
+        "title": "Prodavači/prodavačice u kontakt centru",
+        "level": 4
+    },
+    {
+        "code": "5245",
+        "title": "Prodavači/prodavačice na benzinskim postajama",
+        "level": 4
+    },
+    {
+        "code": "5246",
+        "title": "Prodavači/prodavačice brze hrane",
+        "level": 4
+    },
+    {
+        "code": "5249",
+        "title": "Prodavači/prodavačice, d. n.",
+        "level": 4
+    },
+    {
+        "code": "5311",
+        "title": "Njegovatelji/njegovateljice djece",
+        "level": 4
+    },
+    {
+        "code": "5312",
+        "title": "Pomoćnici učitelja/pomoćnice učitelja",
+        "level": 4
+    },
+    {
+        "code": "5321",
+        "title": "Djelatnici/djelatnice za zdravstvenu i socijalnu skrb u ustanovama",
+        "level": 4
+    },
+    {
+        "code": "5322",
+        "title": "Djelatnici/djelatnice za zdravstvenu i socijalnu skrb u kući",
+        "level": 4
+    },
+    {
+        "code": "5329",
+        "title": "Djelatnici/djelatnice za zdravstvenu i socijalnu skrb, d.n.",
+        "level": 4
+    },
+    {
+        "code": "5411",
+        "title": "Vatrogasci/vatrogaskinje",
+        "level": 4
+    },
+    {
+        "code": "5412",
+        "title": "Policajci/policajke",
+        "level": 4
+    },
+    {
+        "code": "5413",
+        "title": "Zatvorski policajci/zatvorske policajke",
+        "level": 4
+    },
+    {
+        "code": "5414",
+        "title": "Zaštitari/zaštitarke",
+        "level": 4
+    },
+    {
+        "code": "5419",
+        "title": "Djelatnici/djelatnice za zaštitu osoba i imovine, d. n.",
+        "level": 4
+    },
+    {
+        "code": "6111",
+        "title": "Ratari/ratarke i povrtlari/povrtlarke",
+        "level": 4
+    },
+    {
+        "code": "6112",
+        "title": "Voćari/voćarke, vinogradari/vinogradarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "6113",
+        "title": "Vrtlari/vrtlarke, hortikulturni djelatnici/hortikulturne djelatnice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "6114",
+        "title": "Ratari/ratarke mješovite biljne proizvodnje",
+        "level": 4
+    },
+    {
+        "code": "6121",
+        "title": "Stočari/stočarice",
+        "level": 4
+    },
+    {
+        "code": "6122",
+        "title": "Peradari/peradarice",
+        "level": 4
+    },
+    {
+        "code": "6123",
+        "title": "Pčelari/pčelarke i svilari/svilarke",
+        "level": 4
+    },
+    {
+        "code": "6129",
+        "title": "Uzgajivači/uzgajivačice životinja d. n.",
+        "level": 4
+    },
+    {
+        "code": "6130",
+        "title": "Poljoprivrednici/poljoprivrednice mješovite poljoprivredne proizvodnje (biljna i stočarska)",
+        "level": 4
+    },
+    {
+        "code": "6210",
+        "title": "Šumari/šumarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "6221",
+        "title": "Uzgajivači/uzgajivačice riba i školjki",
+        "level": 4
+    },
+    {
+        "code": "6222",
+        "title": "Obalni ribari/obalne ribarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "6223",
+        "title": "Ribari/ribarke na otvorenom moru",
+        "level": 4
+    },
+    {
+        "code": "6224",
+        "title": "Lovci/lovkinje, stupičari/stupičarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "6310",
+        "title": "Ratari/ratarke za osobne potrebe",
+        "level": 4
+    },
+    {
+        "code": "6320",
+        "title": "Stočari/stočarice za osobne potrebe",
+        "level": 4
+    },
+    {
+        "code": "6330",
+        "title": "Poljoprivrednici/poljoprivrednice proizvodnje (biljne i stočarske)",
+        "level": 4
+    },
+    {
+        "code": "6340",
+        "title": "Ribari/ribarke, lovci/lovkinje, stupičari/stupičarke, skupljači plodova/skupljačice plodova za osobne potrebe",
+        "level": 4
+    },
+    {
+        "code": "7111",
+        "title": "Graditelji/graditeljice kuća",
+        "level": 4
+    },
+    {
+        "code": "7112",
+        "title": "Zidari/zidarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7113",
+        "title": "Kamenoresci/kamenoreskinje, klesari/klesarice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7114",
+        "title": "Armirači i betonirci/armiračice i betonirke",
+        "level": 4
+    },
+    {
+        "code": "7115",
+        "title": "Tesari i građevinski stolari/tesarice i građevinske stolarice",
+        "level": 4
+    },
+    {
+        "code": "7119",
+        "title": "Zidari/zidarice i srodna građevinska zanimanja d.n.",
+        "level": 4
+    },
+    {
+        "code": "7121",
+        "title": "Krovopokrivači/krovopokrivačice",
+        "level": 4
+    },
+    {
+        "code": "7122",
+        "title": "Podopolagači/podopolagačice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7123",
+        "title": "Fasaderi i gipsari/fasaderke i gipsarice",
+        "level": 4
+    },
+    {
+        "code": "7124",
+        "title": "Izolateri/izolaterke",
+        "level": 4
+    },
+    {
+        "code": "7125",
+        "title": "Ostakljivači/ostakljivačice",
+        "level": 4
+    },
+    {
+        "code": "7126",
+        "title": "Instalateri/instalaterke i monteri/monterke cjevovoda",
+        "level": 4
+    },
+    {
+        "code": "7127",
+        "title": "Instalateri/instalaterke i serviseri/serviserke klimatizacijskih uređaja",
+        "level": 4
+    },
+    {
+        "code": "7131",
+        "title": "Soboslikari/soboslikarice, ličioci/ličiteljice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7132",
+        "title": "Lakireri/lakirerice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7133",
+        "title": "Dimnjačari/dimnjačarke, perači/peračice fasada",
+        "level": 4
+    },
+    {
+        "code": "7211",
+        "title": "Ljevači/ljevačice metala i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7212",
+        "title": "Zavarivači/zavarivačice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7213",
+        "title": "Limari/limarice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7214",
+        "title": "Monteri/monterke metalnih konstrukcija i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7215",
+        "title": "Monteri/monterke čelične užadi i žica",
+        "level": 4
+    },
+    {
+        "code": "7221",
+        "title": "Kovači/kovačice",
+        "level": 4
+    },
+    {
+        "code": "7222",
+        "title": "Alatničari/alatničarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7223",
+        "title": "Kovinoglodači/kovinoglodačice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7224",
+        "title": "Polirači/poliračice, brusači/brusačice, oštrači/oštračice",
+        "level": 4
+    },
+    {
+        "code": "7231",
+        "title": "Mehaničari/mehaničarke i monteri/monterke motornih vozila",
+        "level": 4
+    },
+    {
+        "code": "7232",
+        "title": "Mehaničari/mehaničarke i monteri/monterke zrakoplova",
+        "level": 4
+    },
+    {
+        "code": "7233",
+        "title": "Mehaničari/mehaničarke i monteri/monterke industrijskih i ostalih strojeva i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7234",
+        "title": "Mehaničari/mehaničarke bicikala",
+        "level": 4
+    },
+    {
+        "code": "7311",
+        "title": "Precizni mehaničari/precizne mehaničarke",
+        "level": 4
+    },
+    {
+        "code": "7312",
+        "title": "Glazbalari/glazbalarke i ugađači/ugađačice glazbala",
+        "level": 4
+    },
+    {
+        "code": "7313",
+        "title": "Zlatari/zlatarice, draguljari/draguljarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7314",
+        "title": "Keramičari/keramičarke, lončari/lončarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7315",
+        "title": "Staklari/staklarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7316",
+        "title": "Izrađivači/izrađivačice tiskarskih formi i klišeja, dekorateri/dekoraterke, graveri/graverke, jetkači/jetkačice stakla, keramike i ostalih materijala",
+        "level": 4
+    },
+    {
+        "code": "7317",
+        "title": "Izrađivači/izrađivačice tradicijskih proizvoda od drva i srodnih materijala, pletači/pletačice košara",
+        "level": 4
+    },
+    {
+        "code": "7318",
+        "title": "Izrađivači/izrađivačice tradicijskih proizvoda od tekstila, kože i srodnih materijala",
+        "level": 4
+    },
+    {
+        "code": "7319",
+        "title": "Zanatski radnici/zanatske radnice, d. n.",
+        "level": 4
+    },
+    {
+        "code": "7321",
+        "title": "Slagari/slagarke",
+        "level": 4
+    },
+    {
+        "code": "7322",
+        "title": "Tiskari/tiskarice",
+        "level": 4
+    },
+    {
+        "code": "7323",
+        "title": "Rukovatelji/rukovateljice tiskarskim, knjigoveškim i sličnim strojevima",
+        "level": 4
+    },
+    {
+        "code": "7411",
+        "title": "Elektroinstalateri/elektroinstalaterke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7412",
+        "title": "Elektromehaničari/elektromehaničarke",
+        "level": 4
+    },
+    {
+        "code": "7413",
+        "title": "Monteri/monterke električnih vodova",
+        "level": 4
+    },
+    {
+        "code": "7421",
+        "title": "Mehaničari/mehaničarke i serviseri/serviserke elektronike",
+        "level": 4
+    },
+    {
+        "code": "7422",
+        "title": "Monteri/monterke, serviseri/serviserke informacijsko-komunikacijskih uređaja",
+        "level": 4
+    },
+    {
+        "code": "7511",
+        "title": "Mesari/mesarice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7512",
+        "title": "Pekari/pekarice, slastičari/slastičarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7513",
+        "title": "Prerađivači/prerađivačice mlijeka",
+        "level": 4
+    },
+    {
+        "code": "7514",
+        "title": "Prerađivači/prerađivačice voća, povrća i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7515",
+        "title": "Kušači i ocjenjivači/kušateljice i ocjenjivačice namirnica",
+        "level": 4
+    },
+    {
+        "code": "7516",
+        "title": "Prerađivači/prerađivačice duhana i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7521",
+        "title": "Prerađivači/prerađivačice drva",
+        "level": 4
+    },
+    {
+        "code": "7522",
+        "title": "Stolari/stolarice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7523",
+        "title": "Rukovatelji/rukovateljice strojevima za preradu drva i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7531",
+        "title": "Krojači/krojačice, krznari/krznarice i klobučari/klobučarke",
+        "level": 4
+    },
+    {
+        "code": "7532",
+        "title": "Krojitelji/kroljiteljice tekstila i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7533",
+        "title": "Šivači/šivačice, vezilje i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7534",
+        "title": "Tapetari/tapetarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7535",
+        "title": "Kožari/kožarice",
+        "level": 4
+    },
+    {
+        "code": "7536",
+        "title": "Obućari/obućarke, kožni galanteristi/kožne galanteristice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7541",
+        "title": "Ronioci/roniteljice",
+        "level": 4
+    },
+    {
+        "code": "7542",
+        "title": "Mineri/minerice, pirotehničar/pirotehničarke i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7543",
+        "title": "Ocjenjivači/ocjenjivačice proizvoda (osim namirnica)",
+        "level": 4
+    },
+    {
+        "code": "7544",
+        "title": "Raskužitelji/raskužiteljice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "7549",
+        "title": "Zanimanja u obrtu i srodna zanimanja, d. n.",
+        "level": 4
+    },
+    {
+        "code": "8111",
+        "title": "Rudari/rudarke, kamenolomci/kamenolomke",
+        "level": 4
+    },
+    {
+        "code": "8112",
+        "title": "Rukovatelji/rukovateljice postrojenjima i strojevima za obradu rude i kamena",
+        "level": 4
+    },
+    {
+        "code": "8113",
+        "title": "Bušači/bušačice bušotina i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "8114",
+        "title": "Rukovatelji/rukovateljice strojevima za proizvodnju cementnih, mineralnih proizvoda i ostalih proizvoda od kamena",
+        "level": 4
+    },
+    {
+        "code": "8121",
+        "title": "Rukovatelji/rukovateljice postrojenjima za proizvodnju metala",
+        "level": 4
+    },
+    {
+        "code": "8122",
+        "title": "Rukovatelji/rukovateljice postrojenjima za proizvodnju legura",
+        "level": 4
+    },
+    {
+        "code": "8131",
+        "title": "Rukovatelji/rukovateljice postrojenjima i strojevima za kemijsku preradu i proizvodnju kemijskih proizvoda",
+        "level": 4
+    },
+    {
+        "code": "8132",
+        "title": "Rukovatelji/rukovateljice strojevima za izradu fotografskih proizvoda",
+        "level": 4
+    },
+    {
+        "code": "8141",
+        "title": "Rukovatelji/rukovateljice strojevima za proizvodnju gumenih proizvoda",
+        "level": 4
+    },
+    {
+        "code": "8142",
+        "title": "Rukovatelji/rukovateljice strojevima za proizvodnju plastičnih proizvoda",
+        "level": 4
+    },
+    {
+        "code": "8143",
+        "title": "Rukovatelji/rukovateljice strojevima za proizvodnju papirnatih proizvoda",
+        "level": 4
+    },
+    {
+        "code": "8151",
+        "title": "Rukovatelji/rukovateljice strojevima za predenje, sukanje i premotavanje",
+        "level": 4
+    },
+    {
+        "code": "8152",
+        "title": "Rukovatelji/rukovateljice tkalačkim, pletačkim i sličnim strojevima",
+        "level": 4
+    },
+    {
+        "code": "8153",
+        "title": "Rukovatelji/rukovateljice šivaćim strojevima",
+        "level": 4
+    },
+    {
+        "code": "8154",
+        "title": "Rukovatelji/rukovateljice strojevima za bijeljenje, bojenje, čišćenje tekstila, kože i krzna",
+        "level": 4
+    },
+    {
+        "code": "8155",
+        "title": "Rukovatelji/rukovateljice strojevima za preradu krzna i kože",
+        "level": 4
+    },
+    {
+        "code": "8156",
+        "title": "Rukovatelji/rukovateljice obućarskim i sličnim strojevima",
+        "level": 4
+    },
+    {
+        "code": "8157",
+        "title": "Rukovatelji/rukovateljice strojevima za pranje",
+        "level": 4
+    },
+    {
+        "code": "8159",
+        "title": "Rukovatelji/rukovateljice strojevima za proizvodnju tekstilnih, krznenih i kožnih proizvoda, d. n.",
+        "level": 4
+    },
+    {
+        "code": "8160",
+        "title": "Rukovatelji/rukovateljice strojevima za proizvodnju prehrambenih i sličnih proizvoda",
+        "level": 4
+    },
+    {
+        "code": "8171",
+        "title": "Rukovatelji/rukovateljice postrojenjima za pripremu papirne mase i proizvodnju papira",
+        "level": 4
+    },
+    {
+        "code": "8172",
+        "title": "Rukovatelji/rukovateljice postrojenjima i strojevima za preradu drva",
+        "level": 4
+    },
+    {
+        "code": "8181",
+        "title": "Rukovatelji/rukovateljice staklarskim i keramičarskim strojevima i uređajima",
+        "level": 4
+    },
+    {
+        "code": "8182",
+        "title": "Strojari/strojarke kotlovnica i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "8183",
+        "title": "Rukovatelji/rukovateljice strojevima za pakiranje, obilježavanje i sličnim strojevima",
+        "level": 4
+    },
+    {
+        "code": "8189",
+        "title": "Rukovatelji/rukovateljice strojevima i uređajima, d. n.",
+        "level": 4
+    },
+    {
+        "code": "8211",
+        "title": "Sastavljači/sastavljačice strojeva i uređaja",
+        "level": 4
+    },
+    {
+        "code": "8212",
+        "title": "Sastavljači/sastavljačice električne i elektroničke opreme",
+        "level": 4
+    },
+    {
+        "code": "8219",
+        "title": "Sastavljači/sastavljačice strojeva, uređaja i opreme, d. n.",
+        "level": 4
+    },
+    {
+        "code": "8311",
+        "title": "Strojovođe/strojovotkinje",
+        "level": 4
+    },
+    {
+        "code": "8312",
+        "title": "Željeznička prometno-prijevozna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "8321",
+        "title": "Vozači/vozačice motocikala",
+        "level": 4
+    },
+    {
+        "code": "8322",
+        "title": "Vozači/vozačice osobnih vozila, taksija i lakih dostavnih vozila",
+        "level": 4
+    },
+    {
+        "code": "8331",
+        "title": "Vozači/vozačice autobusa i tramvaja",
+        "level": 4
+    },
+    {
+        "code": "8332",
+        "title": "Vozači/vozačice teretnih vozila i kamiona",
+        "level": 4
+    },
+    {
+        "code": "8341",
+        "title": "Rukovatelji/rukovateljice pokretnim poljoprivrednim i šumarskim strojevima",
+        "level": 4
+    },
+    {
+        "code": "8342",
+        "title": "Rukovatelji/rukovateljice građevinskim i sličnim strojevima",
+        "level": 4
+    },
+    {
+        "code": "8343",
+        "title": "Rukovatelji/rukovateljice dizalicama i sličnim uređajima",
+        "level": 4
+    },
+    {
+        "code": "8344",
+        "title": "Rukovatelji/rukovateljice teškim kamionima s dizalicom",
+        "level": 4
+    },
+    {
+        "code": "8350",
+        "title": "Kormilari/kormilarice, brodske strojovođe/brodske strojovotkinje i mornari/mornarke",
+        "level": 4
+    },
+    {
+        "code": "9111",
+        "title": "Čistači/čistačice i kućne pomoćnice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "9112",
+        "title": "Domaćinska zanimanja u uredima, hotelima i ostalim objektima",
+        "level": 4
+    },
+    {
+        "code": "9121",
+        "title": "Pralje i glačarice",
+        "level": 4
+    },
+    {
+        "code": "9122",
+        "title": "Ručni perači/ručne peračice automobila",
+        "level": 4
+    },
+    {
+        "code": "9123",
+        "title": "Ručni perači/ručne peračice prozora",
+        "level": 4
+    },
+    {
+        "code": "9129",
+        "title": "Ostali čistači/ostale čistačice",
+        "level": 4
+    },
+    {
+        "code": "9211",
+        "title": "Radnici/radnice na ratarskoj farmi",
+        "level": 4
+    },
+    {
+        "code": "9212",
+        "title": "Radnici/radnice na stočarskoj farmi",
+        "level": 4
+    },
+    {
+        "code": "9213",
+        "title": "Radnici/radnice na poljoprivrednom gospodarstvu mješovite proizvodnje (biljne i stočarske)",
+        "level": 4
+    },
+    {
+        "code": "9214",
+        "title": "Radnici/radnice za jednostavne vrtlarske i hortikulturne radove",
+        "level": 4
+    },
+    {
+        "code": "9215",
+        "title": "Radnici/radnice za jednostavne šumarske radove",
+        "level": 4
+    },
+    {
+        "code": "9216",
+        "title": "Radnici/radnice u ribarstvu i akvakulturi",
+        "level": 4
+    },
+    {
+        "code": "9311",
+        "title": "Radnici/radnice u rudnicima i kamenolomima",
+        "level": 4
+    },
+    {
+        "code": "9312",
+        "title": "Radnici/radnice u niskogradnji",
+        "level": 4
+    },
+    {
+        "code": "9313",
+        "title": "Radnici/radnice u visokogradnji",
+        "level": 4
+    },
+    {
+        "code": "9321",
+        "title": "Ručni pakiratelji/ručne pakirateljice",
+        "level": 4
+    },
+    {
+        "code": "9329",
+        "title": "Jednostavna zanimanja u prerađivačkoj industriji, d. n.",
+        "level": 4
+    },
+    {
+        "code": "9331",
+        "title": "Rukovatelji/rukovateljice ručnih vozila i vozila na pedale",
+        "level": 4
+    },
+    {
+        "code": "9332",
+        "title": "Vozači/vozačice zaprežnih vozila i strojeva",
+        "level": 4
+    },
+    {
+        "code": "9333",
+        "title": "Rukovatelji/rukovateljice teretom",
+        "level": 4
+    },
+    {
+        "code": "9334",
+        "title": "Punjači/punjačice polica",
+        "level": 4
+    },
+    {
+        "code": "9411",
+        "title": "Priprematelji/pripremateljice brze hrane",
+        "level": 4
+    },
+    {
+        "code": "9412",
+        "title": "Kuhinjski pomoćnik/kuhinjske pomoćnice",
+        "level": 4
+    },
+    {
+        "code": "9510",
+        "title": "Ulični prodavači/ulične prodavačice i srodna uslužna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "9520",
+        "title": "Ulični prodavači/ulične prodavačice (osim hrane)",
+        "level": 4
+    },
+    {
+        "code": "9611",
+        "title": "Radnici/radnice na odvoženju otpada",
+        "level": 4
+    },
+    {
+        "code": "9612",
+        "title": "Radnici/radnice na razvrstavanju otpada",
+        "level": 4
+    },
+    {
+        "code": "9613",
+        "title": "Čistači/čistačice ulica i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "9621",
+        "title": "Dostavljači, nosači/dostavljačice, nosačice i srodna zanimanja",
+        "level": 4
+    },
+    {
+        "code": "9622",
+        "title": "Radnici/radnice za jednostavne poslove",
+        "level": 4
+    },
+    {
+        "code": "9623",
+        "title": "Praznitelji/prazniteljice prodajnih automata, parkirališnih satova i sl.",
+        "level": 4
+    },
+    {
+        "code": "9624",
+        "title": "Sakupljači/sakupljačice vode i drva za ogrjev",
+        "level": 4
+    },
+    {
+        "code": "9629",
+        "title": "Djelatnici/djelatnice jednostavnih zanimanja, d. n.",
+        "level": 4
+    }
+]

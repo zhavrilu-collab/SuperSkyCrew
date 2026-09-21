@@ -352,13 +352,23 @@ class StructureController extends Controller
     private function validatedPosition(Request $request, ?JobPosition $position = null): array
     {
         $organization = app('currentOrganization');
+        $raw = $request->input('rad1g');
+        if (is_string($raw)) {
+            $raw = trim($raw);
+            if ($raw === '') {
+                $request->merge(['rad1g' => null]);
+            } elseif (preg_match('/^(\d{4})\b/u', $raw, $match)) {
+                $request->merge(['rad1g' => $match[1]]);
+            }
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'department_id' => [
                 'nullable',
                 Rule::exists('departments', 'id')->where('organization_id', $organization->id),
             ],
-            'rad1g' => ['nullable', 'string', 'max:16'],
+            'rad1g' => ['nullable', 'regex:/^\d{4}$/', Rule::exists('nkz_occupations', 'code')],
             'annual_leave_days' => ['nullable', 'integer', 'min:0', 'max:50'],
             'description' => ['nullable', 'string', 'max:2000'],
             'duties' => ['nullable', 'string', 'max:4000'],
@@ -366,6 +376,9 @@ class StructureController extends Controller
             'pay_grade' => ['nullable', 'string', 'max:32'],
             'valid_from' => ['nullable', 'date'],
             'valid_to' => ['nullable', 'date', 'after_or_equal:valid_from'],
+        ], [
+            'rad1g.regex' => 'RAD1G mora biti četveroznamenkasta skupina iz NKZ-10.',
+            'rad1g.exists' => 'Odaberite skupinu zanimanja iz službenog šifrarnika NKZ-10.',
         ]);
 
         foreach (['department_id', 'rad1g', 'annual_leave_days', 'description', 'duties', 'requirements', 'pay_grade', 'valid_from', 'valid_to'] as $empty) {

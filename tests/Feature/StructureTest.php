@@ -85,7 +85,9 @@ class StructureTest extends TestCase
             ->get($this->ustrojUrl($organization, '2026-09-18', 'mjesta'))
             ->assertOk()
             ->assertSee('Referent')
-            ->assertSee('4110');
+            ->assertSee('4110')
+            ->assertSee('Uredski službenici', false)
+            ->assertSee('NKZ-10');
 
         $position = JobPosition::query()->where('organization_id', $organization->id)->where('name', 'Referent')->first();
         Person::factory()->create([
@@ -101,6 +103,46 @@ class StructureTest extends TestCase
             ->assertOk()
             ->assertSee('Osobe na ovom mjestu')
             ->assertSee('Maja NaMjestu');
+    }
+
+    public function test_job_position_rejects_unknown_rad1g_code(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+
+        $this->actingAs($owner)
+            ->from($this->ustrojUrl($organization, '2026-09-18', 'mjesta'))
+            ->post(route('organization.structure.positions.store', $organization->slug), [
+                'name' => 'Direktorica',
+                'rad1g' => '1210',
+                'valid_from' => '2026-01-01',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasErrors('rad1g');
+
+        $this->assertDatabaseMissing('job_positions', [
+            'organization_id' => $organization->id,
+            'name' => 'Direktorica',
+        ]);
+    }
+
+    public function test_job_position_stores_nkz_code_from_labeled_value(): void
+    {
+        [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
+
+        $this->actingAs($owner)
+            ->post(route('organization.structure.positions.store', $organization->slug), [
+                'name' => 'Knjigovođa',
+                'rad1g' => '3313 — Ekonomisti/ekonomistice',
+                'valid_from' => '2026-01-01',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('job_positions', [
+            'organization_id' => $organization->id,
+            'name' => 'Knjigovođa',
+            'rad1g' => '3313',
+        ]);
     }
 
     public function test_owner_can_create_cost_center_and_assign_it_on_person_card(): void
