@@ -28,9 +28,9 @@ use Illuminate\View\View;
 
 class OrganizationRegistrationController extends Controller
 {
-    public function create(CourtRegisterLookupService $courtRegister): View
+    public function create(Request $request, CourtRegisterLookupService $courtRegister): View
     {
-        $selectedPlan = old('plan', 'standard');
+        $selectedPlan = old('plan', $request->query('plan', 'standard'));
         if (! in_array($selectedPlan, OrganizationFeatures::planSlugs(), true)) {
             $selectedPlan = 'standard';
         }

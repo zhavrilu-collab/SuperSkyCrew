@@ -18,6 +18,7 @@ use App\Http\Controllers\ExceptionQueueController;
 use App\Http\Controllers\ExpiryController;
 use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\GrantHoursController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InternalActController;
 use App\Http\Controllers\KioskController;
 use App\Http\Controllers\MyDocumentsController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\PeopleRegisterController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\PersonDocumentController;
 use App\Http\Controllers\PersonPrintController;
+use App\Http\Controllers\PricingController;
 use App\Http\Controllers\QualificationController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SelectionController;
@@ -42,9 +44,8 @@ use App\Http\Controllers\TimesheetController;
 use App\Http\Controllers\TimesheetReportController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', HomeController::class)->name('home');
+Route::get('/cijene', PricingController::class)->name('pricing');
 
 Route::middleware('guest')->group(function () {
     Route::get('/prijava', [LoginController::class, 'create'])->name('login');
