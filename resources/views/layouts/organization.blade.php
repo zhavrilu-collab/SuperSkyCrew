@@ -103,6 +103,7 @@
                 </form>
             </div>
         </header>
+        @include('partials.trial-notice')
 
         <main class="pt-3 pb-5">
             <div class="container-fluid px-4">

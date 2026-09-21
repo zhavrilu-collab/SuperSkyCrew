@@ -35,7 +35,11 @@ class OrganizationRegistrationTest extends TestCase
             ->assertSee('Osnovni')
             ->assertSee('Standardni')
             ->assertSee('Premium')
-            ->assertSee('Vlasnički račun');
+            ->assertSee('Vlasnički račun')
+            ->assertSee('Sudski registar')
+            ->assertSee('Obrt')
+            ->assertSee('Otvori službeni pretraživač obrta')
+            ->assertSee('14 dana');
     }
 
     public function test_guest_can_register_pending_organization(): void
@@ -169,5 +173,57 @@ class OrganizationRegistrationTest extends TestCase
         ])->assertRedirect(route('registration.pending'));
 
         Queue::assertPushed(NotifyAdminConsoleJob::class);
+    }
+
+    public function test_guest_can_register_craft_with_owner_oib(): void
+    {
+        $this->post(route('register.organization'), [
+            'name' => 'Obrt Cvijeće',
+            'oib' => '12345678903',
+            'organization_email' => 'cvijece@obrt.hr',
+            'city' => 'Split',
+            'street' => 'Riva 1',
+            'mbs' => 'ST-12/2024',
+            'plan' => 'standard',
+            'organization_type' => OrganizationType::Craft->value,
+            'admin_name' => 'Ivo Obrtnik',
+            'admin_email' => 'ivo@obrt.hr',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertRedirect(route('registration.pending'));
+
+        $this->assertDatabaseHas('organizations', [
+            'name' => 'Obrt Cvijeće',
+            'organization_type' => OrganizationType::Craft->value,
+            'oib' => '12345678903',
+            'mbs' => 'ST-12/2024',
+            'street' => 'Riva 1',
+            'volunteer_module' => 0,
+        ]);
+    }
+
+    public function test_two_crafts_may_share_owner_oib(): void
+    {
+        $this->post(route('register.organization'), [
+            'name' => 'Prvi obrt',
+            'oib' => '12345678903',
+            'organization_email' => 'prvi@obrt.hr',
+            'organization_type' => OrganizationType::Craft->value,
+            'plan' => 'basic',
+            'admin_name' => 'Ivo Obrtnik',
+            'admin_email' => 'ivo-prvi@obrt.hr',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertRedirect(route('registration.pending'));
+
+        $this->post(route('register.organization'), [
+            'name' => 'Drugi obrt',
+            'oib' => '12345678903',
+            'organization_email' => 'drugi@obrt.hr',
+            'organization_type' => OrganizationType::Craft->value,
+            'plan' => 'basic',
+        ])->assertRedirect(route('registration.pending'));
+
+        $this->assertSame(2, Organization::query()->where('oib', '12345678903')->where('organization_type', OrganizationType::Craft->value)->count());
     }
 }

@@ -6,6 +6,7 @@ use App\Services\PeriodLockService;
 use App\Services\ReminderService;
 use App\Services\RetentionService;
 use App\Services\TimeCloseService;
+use App\Services\OrganizationTrialService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
@@ -38,3 +39,8 @@ Artisan::command('hr:close-time', function (TimeCloseService $closer, PeriodLock
     });
     $this->info('Zatvoreno dana: '.$closed.'; zaključano razdoblja: '.$locked);
 })->purpose('Zatvori jučerašnje slogove (missing out) i automatski zaključaj prethodni mjesec')->daily();
+
+Artisan::command('hr:expire-trials', function (OrganizationTrialService $trials) {
+    $count = $trials->expireAllDue();
+    $this->info('Isteklo trial paketa: '.$count);
+})->purpose('Nakon isteka probnog perioda spusti plan na Osnovni (bez Stripe pretplate)')->daily();

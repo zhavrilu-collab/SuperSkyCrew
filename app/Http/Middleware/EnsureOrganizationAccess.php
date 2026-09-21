@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Enums\OrganizationStatus;
 use App\Models\Organization;
 use App\Models\OrganizationUser;
+use App\Services\OrganizationTrialService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,6 +43,9 @@ class EnsureOrganizationAccess
         if ($organization->status === OrganizationStatus::Pending) {
             return redirect()->route('registration.pending');
         }
+
+        app(OrganizationTrialService::class)->expireIfNeeded($organization);
+        $organization->refresh();
 
         $request->attributes->set('currentOrganization', $organization);
         $request->attributes->set('currentOrganizationUser', $membership);

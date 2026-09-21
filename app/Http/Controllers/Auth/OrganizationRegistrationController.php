@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Rules\ValidOib;
 use App\Services\AdminConsoleWebhookService;
 use App\Services\CoreAuthService;
+use App\Services\CourtRegisterLookupService;
 use App\Services\HrSetupService;
 use App\Services\OrganizationOnboardingService;
 use App\Support\OrganizationFeatures;
@@ -27,12 +28,14 @@ use Illuminate\View\View;
 
 class OrganizationRegistrationController extends Controller
 {
-    public function create(): View
+    public function create(CourtRegisterLookupService $courtRegister): View
     {
         $selectedPlan = old('plan', 'standard');
         if (! in_array($selectedPlan, OrganizationFeatures::planSlugs(), true)) {
             $selectedPlan = 'standard';
         }
+
+        $trialPlan = (string) config('subscription_plans.trial_plan', 'standard');
 
         return view('auth.register-organization', [
             'isLoggedIn' => Auth::check(),
@@ -40,9 +43,29 @@ class OrganizationRegistrationController extends Controller
                 'slug' => $slug,
                 'name' => OrganizationFeatures::planLabel($slug),
                 'summary' => OrganizationFeatures::planSummary($slug),
-                'recommended' => $slug === 'standard',
+                'recommended' => $slug === $trialPlan,
             ]),
             'selectedPlan' => $selectedPlan,
+            'trialDays' => (int) config('subscription_plans.trial_days', 14),
+            'trialPlan' => $trialPlan,
+            'trialPlanLabel' => OrganizationFeatures::planLabel($trialPlan),
+            'courtRegisterConfigured' => $courtRegister->isConfigured(),
+            'courtRegisterLookupUrl' => route('register.organization.court-register'),
+            'craftsRegisterSearchUrl' => OrganizationType::CRAFTS_REGISTER_SEARCH_URL,
+        ]);
+    }
+
+    public function courtRegisterLookup(Request $request, CourtRegisterLookupService $courtRegister): JsonResponse
+    {
+        $data = $request->validate([
+            'q' => ['required', 'string', 'min:2', 'max:120'],
+        ]);
+
+        return response()->json([
+            'results' => $courtRegister->search($data['q'], 8),
+            'meta' => [
+                'configured' => $courtRegister->isConfigured(),
+            ],
         ]);
     }
 
@@ -87,12 +110,25 @@ class OrganizationRegistrationController extends Controller
         AdminConsoleWebhookService $webhook,
         CoreAuthService $coreAuth,
     ): RedirectResponse {
+        $type = OrganizationType::tryFrom((string) $request->input('organization_type', OrganizationType::Company->value))
+            ?? OrganizationType::Company;
+
+        $oibRules = ['required', 'string', new ValidOib];
+        if (! $type->usesCraftsRegister()) {
+            $oibRules[] = Rule::unique('organizations', 'oib')->where(
+                fn ($query) => $query->where('organization_type', '!=', OrganizationType::Craft->value),
+            );
+        }
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'oib' => ['required', 'string', new ValidOib, Rule::unique('organizations', 'oib')],
+            'oib' => $oibRules,
             'organization_email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'city' => ['nullable', 'string', 'max:100'],
+            'street' => ['nullable', 'string', 'max:255'],
+            'mbs' => ['nullable', 'string', 'max:32'],
+            'nkd' => ['nullable', 'string', 'max:16'],
             'organization_type' => ['nullable', Rule::enum(OrganizationType::class)],
             'plan' => ['nullable', Rule::in(OrganizationFeatures::planSlugs())],
         ];
@@ -151,6 +187,9 @@ class OrganizationRegistrationController extends Controller
                 'oib' => preg_replace('/\s+/', '', $data['oib']),
                 'phone' => $data['phone'] ?? null,
                 'city' => $data['city'] ?? null,
+                'street' => $data['street'] ?? null,
+                'mbs' => $data['mbs'] ?? null,
+                'nkd' => $data['nkd'] ?? null,
                 'organization_type' => $type,
                 'volunteer_module' => $type === OrganizationType::Nonprofit,
             ]);

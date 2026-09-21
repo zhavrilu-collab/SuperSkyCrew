@@ -14,6 +14,7 @@
             <div class="col-md-4">
                 <label class="form-label" for="oib">OIB</label>
                 <input class="form-control" name="oib" id="oib" value="{{ old('oib', $organization->oib) }}" required>
+                <div class="form-text">{{ ($organization->organization_type ?? \App\Enums\OrganizationType::Company)->oibHint() }}</div>
             </div>
             <div class="col-md-4">
                 <label class="form-label" for="organization_email">E-mail</label>
@@ -32,8 +33,9 @@
                 <input class="form-control" name="street" id="street" value="{{ old('street', $organization->street) }}">
             </div>
             <div class="col-md-4">
-                <label class="form-label" for="mbs">MBS</label>
+                <label class="form-label" for="mbs">{{ ($organization->organization_type ?? \App\Enums\OrganizationType::Company)->registryNumberLabel() }}</label>
                 <input class="form-control" name="mbs" id="mbs" value="{{ old('mbs', $organization->mbs) }}">
+                <div class="form-text">{{ ($organization->organization_type ?? \App\Enums\OrganizationType::Company)->registryNumberHint() }}</div>
             </div>
             <div class="col-md-4">
                 <label class="form-label" for="nkd">NKD</label>
@@ -983,22 +985,31 @@
         </table>
     </div>
 @elseif($tab === 'pretplata')
+    @php
+        $features = app(\App\Services\FeatureService::class);
+        $limit = $features->employeeLimit($organization);
+        $used = $features->countedHeadcount($organization);
+    @endphp
     <dl class="row mb-0">
         <dt class="col-sm-3">Plan</dt>
-        <dd class="col-sm-9">{{ $organization->plan }}</dd>
+        <dd class="col-sm-9">{{ \App\Support\OrganizationFeatures::planLabel($organization->plan) }}</dd>
         <dt class="col-sm-3">Status</dt>
         <dd class="col-sm-9">{{ $organization->status->label() }}</dd>
+        <dt class="col-sm-3">Probni period</dt>
+        <dd class="col-sm-9">
+            @if($organization->onTrial())
+                još {{ $organization->trialDaysRemaining() }} {{ $organization->trialDaysRemaining() === 1 ? 'dan' : 'dana' }}
+                (do {{ $organization->trial_ends_at->timezone(config('app.timezone'))->format('d.m.Y.') }})
+            @elseif($organization->trialExpired())
+                istekao {{ $organization->trial_ends_at?->timezone(config('app.timezone'))->format('d.m.Y.') }}
+            @else
+                nije aktivan
+            @endif
+        </dd>
         <dt class="col-sm-3">Stripe</dt>
         <dd class="col-sm-9">{{ $organization->stripe_subscription_id ?: 'nije povezano' }}</dd>
         <dt class="col-sm-3">Limit osoba</dt>
-        <dd class="col-sm-9">
-            @php
-                $features = app(\App\Services\FeatureService::class);
-                $limit = $features->employeeLimit($organization);
-                $used = $features->countedHeadcount($organization);
-            @endphp
-            {{ $limit ? $used.' / '.$limit : $used.' (bez limita)' }}
-        </dd>
+        <dd class="col-sm-9">{{ $limit ? $used.' / '.$limit : $used.' (bez limita)' }}</dd>
     </dl>
     <p class="text-muted small mt-3">Značajke paketa (Core konzola):</p>
     <ul class="small mb-0">
@@ -1006,5 +1017,5 @@
             <li>{{ \App\Support\OrganizationFeatures::label($key) }}: {{ $on ? 'uključeno' : 'isključeno' }}</li>
         @endforeach
     </ul>
-    <p class="text-muted small mt-3 mb-0">Naplata i limiti uređuju se u Core konzoli.</p>
+    <p class="text-muted small mt-3 mb-0">Naplata, limiti i produljenje probnog perioda uređuju se u Core konzoli.</p>
 @endif

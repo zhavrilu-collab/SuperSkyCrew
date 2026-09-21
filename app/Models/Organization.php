@@ -33,6 +33,7 @@ class Organization extends Model
         'nkd',
         'stripe_customer_id',
         'stripe_subscription_id',
+        'trial_ends_at',
         'organization_type',
         'theme_key',
         'logo_path',
@@ -53,6 +54,7 @@ class Organization extends Model
         return [
             'status' => OrganizationStatus::class,
             'status_changed_at' => 'datetime',
+            'trial_ends_at' => 'datetime',
             'organization_type' => OrganizationType::class,
             'volunteer_module' => 'boolean',
             'expiry_warning_days' => 'integer',
@@ -87,6 +89,34 @@ class Organization extends Model
     public function isNonprofit(): bool
     {
         return $this->organization_type === OrganizationType::Nonprofit;
+    }
+
+    public function isCraft(): bool
+    {
+        return $this->organization_type === OrganizationType::Craft;
+    }
+
+    public function onTrial(): bool
+    {
+        return $this->trial_ends_at !== null
+            && $this->trial_ends_at->isFuture()
+            && ! filled($this->stripe_subscription_id);
+    }
+
+    public function trialExpired(): bool
+    {
+        return $this->trial_ends_at !== null
+            && $this->trial_ends_at->isPast()
+            && ! filled($this->stripe_subscription_id);
+    }
+
+    public function trialDaysRemaining(): int
+    {
+        if (! $this->onTrial()) {
+            return 0;
+        }
+
+        return max(0, (int) now()->startOfDay()->diffInDays($this->trial_ends_at->copy()->startOfDay(), false));
     }
 
     public function themePalette(): array

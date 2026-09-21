@@ -57,6 +57,9 @@ Route::middleware('guest')->group(function () {
 Route::get('/registracija', [OrganizationRegistrationController::class, 'create'])->name('register.organization');
 Route::post('/registracija', [OrganizationRegistrationController::class, 'store'])
     ->middleware('throttle:6,1');
+Route::get('/registracija/sudski-registar', [OrganizationRegistrationController::class, 'courtRegisterLookup'])
+    ->middleware('throttle:20,1')
+    ->name('register.organization.court-register');
 
 Route::middleware('auth')->group(function () {
     Route::post('/odjava', [LoginController::class, 'destroy'])->name('logout');

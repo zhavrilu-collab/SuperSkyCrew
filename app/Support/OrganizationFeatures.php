@@ -126,6 +126,16 @@ class OrganizationFeatures
             : 'neograničeno';
     }
 
+    public static function planSortOrder(?string $plan): int
+    {
+        return match ($plan) {
+            'basic' => 1,
+            'standard' => 2,
+            'premium' => 3,
+            default => 0,
+        };
+    }
+
     public static function label(string $key): string
     {
         return match ($key) {
