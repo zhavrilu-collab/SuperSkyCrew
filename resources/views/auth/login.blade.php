@@ -8,6 +8,9 @@
     <h1 class="h4 text-tema mb-3">Prijava</h1>
     <p class="text-muted small">Prijava u SuperSkyCrew — platformu za upravljanje ljudskim resursima.</p>
 
+    @if(session('status'))
+        <div class="alert alert-success small">{{ session('status') }}</div>
+    @endif
     @if ($errors->any())
         <div class="alert alert-danger small">{{ $errors->first() }}</div>
     @endif

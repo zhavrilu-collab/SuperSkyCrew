@@ -14,6 +14,7 @@
     @stack('styles')
 </head>
 <body>
+@include('partials.impersonation-banner')
 @php
     $organization = app('currentOrganization');
     $membership = app()->bound('currentOrganizationUser') ? app('currentOrganizationUser') : null;

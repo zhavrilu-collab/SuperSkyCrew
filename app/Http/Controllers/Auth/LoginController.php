@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Exceptions\PlatformTwoFactorRequiredException;
 use App\Http\Controllers\Controller;
 use App\Services\CoreAuthService;
+use App\Services\CoreImpersonationService;
+use App\Support\ImpersonationSession;
 use App\Support\UserOrganizationNavigation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,6 +65,14 @@ class LoginController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        if (ImpersonationSession::isActive()) {
+            $token = ImpersonationSession::token();
+            if (is_string($token) && $token !== '') {
+                app(CoreImpersonationService::class)->endSession($token);
+            }
+            ImpersonationSession::clear();
+        }
+
         if ($this->coreAuth->isEnabled()) {
             $this->coreAuth->logoutToken($this->coreAuth->sessionToken());
             $this->coreAuth->forgetSessionToken();

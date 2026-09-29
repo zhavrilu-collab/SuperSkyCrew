@@ -24,6 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SecurityHeaders::class,
         ]);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureActiveImpersonationSession::class,
+        ]);
+
         $trustedProxies = env('TRUSTED_PROXIES');
 
         if (is_string($trustedProxies) && $trustedProxies !== '') {

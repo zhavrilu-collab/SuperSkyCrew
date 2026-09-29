@@ -3,6 +3,7 @@
 use App\Http\Controllers\AbsenceCalendarController;
 use App\Http\Controllers\ApprovalInboxController;
 use App\Http\Controllers\Auth\CoreOAuthCallbackController;
+use App\Http\Controllers\Auth\ImpersonationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OrganizationRegistrationController;
 use App\Http\Controllers\Auth\StaffInviteAcceptController;
@@ -47,6 +48,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 Route::get('/cijene', PricingController::class)->name('pricing');
 
+Route::get('/impersonacija/{token}', [ImpersonationController::class, 'enter'])
+    ->name('impersonation.enter')
+    ->where('token', '[A-Za-z0-9\-]+');
+
 Route::middleware('guest')->group(function () {
     Route::get('/prijava', [LoginController::class, 'create'])->name('login');
     Route::post('/prijava', [LoginController::class, 'store']);
@@ -64,6 +69,7 @@ Route::get('/registracija/sudski-registar', [OrganizationRegistrationController:
 
 Route::middleware('auth')->group(function () {
     Route::post('/odjava', [LoginController::class, 'destroy'])->name('logout');
+    Route::post('/impersonacija/izlaz', [ImpersonationController::class, 'exit'])->name('impersonation.exit');
     Route::get('/registracija-ceka', [OrganizationRegistrationController::class, 'pending'])->name('registration.pending');
     Route::get('/registracija-ceka/stanje', [OrganizationRegistrationController::class, 'status'])->name('registration.pending.status');
     Route::get('/odabir-tvrtke', [OrganizationPickerController::class, 'index'])->name('organization.pick');
