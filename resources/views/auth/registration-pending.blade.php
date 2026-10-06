@@ -1,12 +1,11 @@
-@extends('layouts.guest')
+@extends('layouts.guest-login')
 
 @section('title', 'Čekanje odobrenja — SuperSkyCrew')
-@section('guest-width', 'col-lg-6')
+@section('tagline', 'Platforma za upravljanje ljudskim resursima.')
+@section('shell-width', 'col-lg-6')
 
 @section('content')
-<div class="kartica-kontejner">
-    <img src="{{ \App\Support\OrganizationThemes::productLogoUrl() }}" alt="SuperSkyCrew" class="app-guest-lockup">
-    <h1 class="h4 text-tema mb-3">Registracija na čekanju</h1>
+    <h1 class="h4 mb-3">Registracija na čekanju</h1>
     <p class="text-muted">Super-administrator mora odobriti tvrtku prije pristupa SuperSkyCrewu.</p>
 
     @if(session('status'))
@@ -23,7 +22,6 @@
     </ul>
 
     <p class="small text-muted mb-0">Stranica se automatski osvježava svakih 15 sekundi.</p>
-</div>
 <script>
 setInterval(() => {
     fetch('{{ route('registration.pending.status') }}')

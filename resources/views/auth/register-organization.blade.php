@@ -1,12 +1,32 @@
-@extends('layouts.guest')
+@extends('layouts.guest-login')
 
 @section('title', 'Registracija tvrtke — SuperSkyCrew')
-@section('guest-width', 'col-lg-8')
+@section('tagline', 'Platforma za upravljanje ljudskim resursima.')
+@section('shell-width', 'col-lg-8')
+
+@push('styles')
+<style>
+    .plan-kartica {
+        border: 1px solid #dee2e6;
+        border-radius: .375rem;
+        padding: 1rem;
+        cursor: pointer;
+        height: 100%;
+        display: block;
+        background: #fff;
+        position: relative;
+    }
+    .plan-kartica .plan-kartica-radio { position: absolute; top: .75rem; right: .75rem; }
+    .plan-kartica.aktivna {
+        border-color: #0d6efd;
+        background: #f8f9fa;
+        box-shadow: 0 0 0 1px #0d6efd;
+    }
+</style>
+@endpush
 
 @section('content')
-<div class="kartica-kontejner">
-    <img src="{{ \App\Support\OrganizationThemes::productLogoUrl() }}" alt="SuperSkyCrew" class="app-guest-lockup">
-    <h1 class="h4 text-tema mb-2">Registracija tvrtke</h1>
+    <h1 class="h4 mb-2">Registracija tvrtke</h1>
     <p class="text-muted small mb-4">Otvorite SuperSkyCrew račun za tvrtku, obrt ili udrugu. Nakon odobrenja slijedi {{ $trialDays }} dana paketa {{ $trialPlanLabel }}.</p>
 
     @if(!empty($isLoggedIn))
@@ -67,7 +87,7 @@
             <a class="btn btn-outline-secondary btn-sm" href="{{ $craftsRegisterSearchUrl ?? \App\Enums\OrganizationType::CRAFTS_REGISTER_SEARCH_URL }}" target="_blank" rel="noopener">Otvori službeni pretraživač obrta</a>
         </div>
 
-        <h2 class="h6 text-tema" id="orgFieldsHeading">Podaci organizacije</h2>
+        <h2 class="h6" id="orgFieldsHeading">Podaci organizacije</h2>
         <div class="mb-3">
             <label class="form-label" for="name" id="nameLabel">{{ $selectedType->nameLabel() }}</label>
             <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required maxlength="255" autocomplete="organization">
@@ -119,7 +139,7 @@
             </div>
         </div>
 
-        <h2 class="h6 text-tema mt-2">Paket</h2>
+        <h2 class="h6 mt-2">Paket</h2>
         <p class="text-muted small">
             Nakon odobrenja: <strong>{{ $trialDays }} dana</strong> probnog perioda paketa
             <strong>{{ $trialPlanLabel }}</strong>
@@ -131,7 +151,7 @@
                 <div class="col-md-4">
                     <label class="plan-kartica {{ $checked ? 'aktivna' : '' }}">
                         <input type="radio" name="plan" value="{{ $plan['slug'] }}" class="form-check-input plan-kartica-radio" @checked($checked) required>
-                        <div class="fw-semibold text-tema">{{ $plan['name'] }}</div>
+                        <div class="fw-semibold">{{ $plan['name'] }}</div>
                         <div class="small text-muted">{{ $plan['summary'] }}</div>
                         @if($plan['recommended'])
                             <span class="badge text-bg-light border mt-2">Preporučeno / trial</span>
@@ -144,7 +164,7 @@
 
         @unless($isLoggedIn)
             <hr>
-            <h2 class="h6 text-tema">Vlasnički račun</h2>
+            <h2 class="h6">Vlasnički račun</h2>
             <div class="mb-3">
                 <label class="form-label" for="admin_name">Ime i prezime</label>
                 <input type="text" name="admin_name" id="admin_name" class="form-control @error('admin_name') is-invalid @enderror" value="{{ old('admin_name') }}" required maxlength="255" autocomplete="name">
@@ -169,11 +189,10 @@
         @endunless
 
         <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-            <a href="{{ route('login') }}" class="btn btn-outline-secondary">Natrag na prijavu</a>
-            <button type="submit" class="btn btn-primary">Registriraj tvrtku</button>
+            <a href="{{ route('login') }}">Natrag na prijavu</a>
+            <button type="submit" class="btn btn-login">Registriraj tvrtku</button>
         </div>
     </form>
-</div>
 @endsection
 
 @push('scripts')
