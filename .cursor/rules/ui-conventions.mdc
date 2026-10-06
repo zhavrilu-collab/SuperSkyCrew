@@ -16,7 +16,7 @@ Stack: **Blade + Bootstrap 5.3 CDN**. Bez Alpine/Tailwind za UI.
 
 Fledge layout na svim org stranicama osim clock/kiosk/print/guest:
 
-1. Lijevi `.app-sidebar` (~260px, bijelo tijelo): tamni brand (`--primarna-tamna`) s markom i **SuperSkyCrew**, ugniježđeno stablo s ikonama prema RBAC. Stavke su svijetle; zatamnjuje se samo odabrana grupa/stavka.
+1. Lijevi `.app-sidebar` (~260px, bijelo tijelo): službeni horizontalni logotip SuperSkyCrew boje `theme_key` (`brand/product/{boja}-horizontal.png`, prozirna podloga), ugniježđeno stablo s ikonama prema RBAC. Stavke su svijetle; zatamnjuje se samo odabrana grupa/stavka.
 
    Redoslijed za kadar (nije radnik): **Nadzorna ploča**, **Profil tvrtke** (Osnovni podaci, Članice grupacije, Poslovnice, Mjesta troška), **Ustroj tvrtke** (Poslovni segmenti, Poslovni ustroj, Funkcionalni ustroj, Radna mjesta, Radne pozicije, Organizacijska shema), **Sistematizacija** (Opisi radnih mjesta, Plan radnih pozicija, Kompetencije, Interni akti), **Zaposlenici** (Dosjei zaposlenika, Ugovori o radu, Izrada dokumenata, Članovi obitelji, Isteci, Predaje), zatim **Vrijeme**, **Moje**, **Odobrenja**, **Postavke**. Postavke nisu u drugim grupama.
 

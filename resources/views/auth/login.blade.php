@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="kartica-kontejner">
-    <img src="{{ asset('brand/superskycrew-lockup.png') }}" alt="SuperSkyCrew" class="app-guest-lockup">
+    <img src="{{ \App\Support\OrganizationThemes::productLogoUrl() }}" alt="SuperSkyCrew" class="app-guest-lockup">
     <h1 class="h4 text-tema mb-3">Prijava</h1>
     <p class="text-muted small">Prijava u SuperSkyCrew — platformu za upravljanje ljudskim resursima.</p>
 

@@ -6,7 +6,7 @@ use App\Models\Organization;
 
 class OrganizationThemes
 {
-    public const DEFAULT = 'tirkizna';
+    public const DEFAULT = 'zelena';
 
     /**
      * @return array<string, array{label: string, primary: string, dark: string, gold: string, light: string, text: string, accent: string}>
@@ -32,67 +32,22 @@ class OrganizationThemes
                 'text' => '#1e2d3d',
                 'accent' => '#8b1414',
             ],
-            'bordo' => [
-                'label' => 'Bordo',
-                'primary' => '#6b1414',
-                'dark' => '#3d0b0b',
-                'gold' => '#d4af37',
-                'light' => '#f8f0f0',
+            'crvena' => [
+                'label' => 'Crvena',
+                'primary' => '#8b1a1a',
+                'dark' => '#5c1010',
+                'gold' => '#e8a317',
+                'light' => '#fdf2f2',
                 'text' => '#3a2020',
-                'accent' => '#4a0e0e',
+                'accent' => '#6b0f0f',
             ],
-            'antracit' => [
-                'label' => 'Antracit siva',
-                'primary' => '#37424a',
-                'dark' => '#1f262b',
-                'gold' => '#c9ced2',
-                'light' => '#f3f4f5',
-                'text' => '#2a3138',
-                'accent' => '#8b1414',
-            ],
-            'tirkizna' => [
-                'label' => 'Tirkizna (zadano)',
-                'primary' => '#0f6b64',
-                'dark' => '#08403c',
-                'gold' => '#7fd8ce',
-                'light' => '#eef8f7',
-                'text' => '#1a3d3a',
-                'accent' => '#8b1414',
-            ],
-            'mornarska' => [
-                'label' => 'Mornarska plava',
-                'primary' => '#142850',
-                'dark' => '#0a1530',
-                'gold' => '#8fa8d4',
-                'light' => '#eef2f8',
-                'text' => '#1a2840',
-                'accent' => '#8b1414',
-            ],
-            'smedja' => [
-                'label' => 'Smeđa',
-                'primary' => '#5c4326',
-                'dark' => '#3a2a18',
-                'gold' => '#cbb17e',
-                'light' => '#f8f4ee',
-                'text' => '#3d3020',
-                'accent' => '#8b1414',
-            ],
-            'maslinasta' => [
-                'label' => 'Maslinasta',
-                'primary' => '#4a5a28',
-                'dark' => '#2f3a18',
-                'gold' => '#b8c96e',
-                'light' => '#f4f6ee',
-                'text' => '#2a3020',
-                'accent' => '#8b1414',
-            ],
-            'ljubicasta' => [
-                'label' => 'Ljubičasta',
-                'primary' => '#3d1b5c',
-                'dark' => '#210d33',
-                'gold' => '#c9a4e0',
-                'light' => '#f6f0fa',
-                'text' => '#2d1f3a',
+            'zuta' => [
+                'label' => 'Žuta',
+                'primary' => '#c9a400',
+                'dark' => '#7a6400',
+                'gold' => '#ffe14a',
+                'light' => '#fffbe8',
+                'text' => '#3d3410',
                 'accent' => '#8b1414',
             ],
             'narancasta' => [
@@ -104,61 +59,20 @@ class OrganizationThemes
                 'text' => '#4a3018',
                 'accent' => '#8b1414',
             ],
-            'roza' => [
-                'label' => 'Roza',
-                'primary' => '#a13d63',
-                'dark' => '#6b2540',
-                'gold' => '#e8a6c3',
-                'light' => '#fdf0f5',
-                'text' => '#4a2435',
-                'accent' => '#8b1414',
-            ],
-            'crvena' => [
-                'label' => 'Crvena',
-                'primary' => '#8b1a1a',
-                'dark' => '#5c1010',
-                'gold' => '#e8a317',
-                'light' => '#fdf2f2',
-                'text' => '#3a2020',
-                'accent' => '#6b0f0f',
-            ],
-            'indigo' => [
-                'label' => 'Indigo',
-                'primary' => '#2c3478',
-                'dark' => '#1a2048',
-                'gold' => '#9aa8e8',
-                'light' => '#f0f2fa',
-                'text' => '#1e2240',
-                'accent' => '#8b1414',
-            ],
-            'jantarna' => [
-                'label' => 'Jantarna',
-                'primary' => '#9a6b08',
-                'dark' => '#6b4a05',
-                'gold' => '#f0c040',
-                'light' => '#fdf8ec',
-                'text' => '#4a3818',
-                'accent' => '#8b1414',
-            ],
-            'grafit' => [
-                'label' => 'Grafit',
-                'primary' => '#2d3438',
-                'dark' => '#181c1f',
-                'gold' => '#a8b0b5',
-                'light' => '#f2f3f4',
-                'text' => '#252a2e',
-                'accent' => '#8b1414',
-            ],
-            'vinska' => [
-                'label' => 'Vinska',
-                'primary' => '#5c1a3a',
-                'dark' => '#3a1024',
-                'gold' => '#d4a0b8',
-                'light' => '#faf0f4',
-                'text' => '#3a2430',
-                'accent' => '#8b1414',
-            ],
         ];
+    }
+
+    public static function productLogoPath(?string $key = null, bool $horizontal = false): string
+    {
+        $resolved = self::resolve($key);
+        $suffix = $horizontal ? '-horizontal.png' : '.png';
+
+        return 'brand/product/'.$resolved.$suffix;
+    }
+
+    public static function productLogoUrl(?string $key = null, bool $horizontal = false): string
+    {
+        return asset(self::productLogoPath($key, $horizontal));
     }
 
     /** @return list<string> */
@@ -190,7 +104,7 @@ class OrganizationThemes
     }
 
     /**
-     * @return array<string, array{label: string, primary: string, dark: string, gold: string, light: string, text: string, accent: string, focusShadow: string, tableBorder: string}>
+     * @return array<string, array{label: string, primary: string, dark: string, gold: string, light: string, text: string, accent: string, focusShadow: string, tableBorder: string, horizontalLogo: string}>
      */
     public static function previewPayload(?Organization $organization = null): array
     {
@@ -207,6 +121,7 @@ class OrganizationThemes
                 'accent' => $palette['accent'],
                 'focusShadow' => self::cssRgba($palette['primary'], 0.15),
                 'tableBorder' => self::cssRgba($palette['primary'], 0.18),
+                'horizontalLogo' => self::productLogoUrl($key, true),
             ];
         }
 

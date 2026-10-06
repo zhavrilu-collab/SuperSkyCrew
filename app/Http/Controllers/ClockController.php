@@ -89,8 +89,8 @@ class ClockController extends Controller
             'start_url' => route('organization.clock', $organization->slug, false),
             'scope' => '/'.$organization->slug.'/',
             'display' => 'standalone',
-            'background_color' => $palette['dark'] ?? '#08403c',
-            'theme_color' => $palette['primary'] ?? '#0f6b64',
+            'background_color' => $palette['dark'] ?? '#112b12',
+            'theme_color' => $palette['primary'] ?? '#1b431c',
             'lang' => 'hr',
         ], 200, [
             'Content-Type' => 'application/manifest+json',

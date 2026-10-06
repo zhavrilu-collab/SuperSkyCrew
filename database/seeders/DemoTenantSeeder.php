@@ -98,7 +98,7 @@ class DemoTenantSeeder extends Seeder
                 'phone' => '+385 1 555 0100',
                 'city' => 'Zagreb',
                 'organization_type' => OrganizationType::Company,
-                'theme_key' => 'tirkizna',
+                'theme_key' => 'zelena',
                 'volunteer_module' => true,
                 'annual_leave_base_days' => 20,
                 'annual_leave_days_per_child' => 2,

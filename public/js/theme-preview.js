@@ -59,8 +59,20 @@
         }
 
         applyPalette(palette);
+        applyBrandLogo(themeKey);
         setPreviewMessage(themeKey);
     };
+
+    function applyBrandLogo(themeKey) {
+        var palette = cfg.palettes[themeKey];
+        if (!palette || !palette.horizontalLogo) {
+            return;
+        }
+
+        document.querySelectorAll('[data-product-logo="horizontal"]').forEach(function (img) {
+            img.setAttribute('src', palette.horizontalLogo);
+        });
+    }
 
     document.querySelectorAll('#temaBojaIzbor .tema-svatch').forEach(function (btn) {
         btn.addEventListener('click', function () {

@@ -19,8 +19,8 @@ class OrganizationUiChromeTest extends TestCase
     {
         [$owner, $organization] = $this->seedMember(OrganizationRole::Owner);
 
-        $this->assertSame('tirkizna', $organization->theme_key);
-        $this->assertSame('tirkizna', OrganizationThemes::DEFAULT);
+        $this->assertSame('zelena', $organization->theme_key);
+        $this->assertSame('zelena', OrganizationThemes::DEFAULT);
 
         $this->actingAs($owner)
             ->get(route('organization.landing', $organization->slug))
@@ -32,7 +32,8 @@ class OrganizationUiChromeTest extends TestCase
             ->assertSee('app-sidebar', false)
             ->assertSee('app-topbar', false)
             ->assertSee('SuperSkyCrew')
-            ->assertSee('app-sidebar-mark', false)
+            ->assertSee('app-sidebar-lockup', false)
+            ->assertSee('brand/product/zelena-horizontal.png', false)
             ->assertSee('nav-home', false)
             ->assertSee('nav-clipboard', false)
             ->assertSee('nav-buildings', false)
@@ -60,7 +61,7 @@ class OrganizationUiChromeTest extends TestCase
         }
 
         $dashboard
-            ->assertSee('#0f6b64', false)
+            ->assertSee('#1b431c', false)
             ->assertDontSee('odaberite modul');
 
         $this->actingAs($owner)

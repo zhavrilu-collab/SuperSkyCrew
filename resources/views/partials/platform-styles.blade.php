@@ -1,15 +1,15 @@
 <style>
     :root {
-        --primarna-zelena: #0f6b64;
-        --primarna-tamna: #08403c;
-        --svijetlo-zelena: #eef8f7;
+        --primarna-zelena: #1b431c;
+        --primarna-tamna: #112b12;
+        --svijetlo-zelena: #f4f8f4;
         --bordo-crvena: #8b1414;
-        --zlatna-tradicija: #7fd8ce;
-        --tekst-tamni: #1a3d3a;
+        --zlatna-tradicija: #d4af37;
+        --tekst-tamni: #2b3a2b;
         --tema: var(--primarna-zelena);
         --tema-svijetla: var(--svijetlo-zelena);
-        --tema-sjena-fokus: rgba(15, 107, 100, 0.15);
-        --tema-rub-tablica: rgba(15, 107, 100, 0.18);
+        --tema-sjena-fokus: rgba(27, 67, 28, 0.15);
+        --tema-rub-tablica: rgba(27, 67, 28, 0.18);
         --tema-greska-svijetla: #fff5f5;
         --org-sloj-poslovna: #0f6b64;
         --org-sloj-funkcijska: #1a4a6b;
@@ -39,33 +39,20 @@
     .app-sidebar-brand {
         display: flex;
         align-items: center;
-        gap: .65rem;
         padding: .7rem .9rem;
-        background: var(--primarna-tamna);
+        background: #fff;
         text-decoration: none;
-        color: #fff;
-        min-height: 56px;
+        min-height: 64px;
         flex-shrink: 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--primarna-zelena) 14%, #d7e4e2);
     }
-    .app-sidebar-brand:hover { color: #fff; }
-    .app-sidebar-mark {
-        width: 34px;
-        height: 34px;
-        object-fit: contain;
-        flex-shrink: 0;
+    .app-sidebar-lockup {
         display: block;
+        width: 100%;
+        max-height: 48px;
+        object-fit: contain;
+        object-position: left center;
     }
-    .app-sidebar-brand-name {
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: .01em;
-        line-height: 1.15;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-transform: none;
-    }
-    .app-sidebar-brand-crew { color: #97bb4c; }
     .app-sidebar-nav {
         flex: 1;
         overflow-y: auto;
@@ -614,6 +601,8 @@
         cursor: pointer;
     }
     .tema-svatch.aktivna { box-shadow: 0 0 0 3px var(--zlatna-tradicija); }
+    .tema-logo-pregled { display: flex; align-items: center; min-height: 56px; }
+    .tema-logo-pregled-img { display: block; height: 48px; width: auto; max-width: 100%; }
 
     .guest-shell { min-height: 100vh; display: flex; align-items: center; }
     .app-guest-lockup { display: block; max-width: 210px; width: 100%; height: auto; margin: 0 auto 1.15rem; }

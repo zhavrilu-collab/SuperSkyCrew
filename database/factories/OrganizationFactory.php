@@ -25,7 +25,7 @@ class OrganizationFactory extends Factory
             'status' => OrganizationStatus::Active,
             'plan' => 'standard',
             'organization_type' => OrganizationType::Company,
-            'theme_key' => 'tirkizna',
+            'theme_key' => 'zelena',
             'email' => fake()->unique()->companyEmail(),
             'oib' => '12345678903',
             'city' => 'Zagreb',

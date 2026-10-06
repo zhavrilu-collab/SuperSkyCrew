@@ -20,7 +20,13 @@
                             aria-label="{{ $theme['label'] }}"></button>
                 @endforeach
             </div>
-            <div class="form-text">Kliknite paletu za odabir. Pregled se odmah vidi na traci i izborniku; spremite za trajnu temu (shell, clock/kiosk).</div>
+            <div class="tema-logo-pregled mb-2" id="temaLogoPregled">
+                <img src="{{ \App\Support\OrganizationThemes::productLogoUrl($activeTheme, true) }}"
+                     alt="Pregled logotipa SuperSkyCrew"
+                     class="tema-logo-pregled-img"
+                     data-product-logo="horizontal">
+            </div>
+            <div class="form-text">Kliknite boju. Horizontalni logotip u izborniku i pregledu mijenja se odmah; Spremi temu trajno pamti odabir.</div>
         </div>
         <button type="submit" class="btn btn-success btn-sm btn-spremi">Spremi temu</button>
         <span id="temaPoruka" class="ms-2 small text-muted"></span>

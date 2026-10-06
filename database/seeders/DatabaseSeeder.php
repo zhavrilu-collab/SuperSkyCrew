@@ -84,7 +84,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'info@demo-tvrtka.hr',
                 'oib' => '12345678903',
                 'annual_leave_days_per_child' => 2,
-                'theme_key' => 'tirkizna',
+                'theme_key' => 'zelena',
             ],
             [
                 'name' => 'Demo udruga Split',
@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
                 'plan' => 'basic',
                 'email' => 'ured@demo-udruga.hr',
                 'oib' => '10987654326',
-                'theme_key' => 'tirkizna',
+                'theme_key' => 'zelena',
             ],
         ];
 

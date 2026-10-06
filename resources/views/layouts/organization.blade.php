@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="{{ app()->bound('currentOrganization') ? app('currentOrganization')->themePalette()['primary'] : '#0f6b64' }}">
+    <meta name="theme-color" content="{{ app()->bound('currentOrganization') ? app('currentOrganization')->themePalette()['primary'] : \App\Support\OrganizationThemes::palette(\App\Support\OrganizationThemes::DEFAULT)['primary'] }}">
     <title>@yield('title', 'SuperSkyCrew')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     @include('partials.platform-styles')
@@ -66,8 +66,10 @@
     <div class="app-sidebar-backdrop" id="appSidebarBackdrop"></div>
     <aside class="app-sidebar" id="appSidebar">
         <a class="app-sidebar-brand" href="{{ route('organization.dashboard', $organization->slug) }}">
-            <img src="{{ asset('brand/supersky-mark.png') }}" class="app-sidebar-mark" alt="">
-            <span class="app-sidebar-brand-name">SuperSky<span class="app-sidebar-brand-crew">Crew</span></span>
+            <img src="{{ \App\Support\OrganizationThemes::productLogoUrl($organization->theme_key, true) }}"
+                 class="app-sidebar-lockup"
+                 data-product-logo="horizontal"
+                 alt="SuperSkyCrew">
         </a>
         @include('partials.organization-sidebar')
     </aside>

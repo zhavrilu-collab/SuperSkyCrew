@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="text-center mb-4">
-    <img src="{{ asset('brand/superskycrew-lockup.png') }}" alt="SuperSkyCrew" class="app-guest-lockup">
+    <img src="{{ \App\Support\OrganizationThemes::productLogoUrl() }}" alt="SuperSkyCrew" class="app-guest-lockup">
     <h1 class="h3 text-tema">Paketi SuperSkyCrew</h1>
     <p class="text-muted mb-0">
         Isti HR sustav u svim paketima — birate veličinu kadra.

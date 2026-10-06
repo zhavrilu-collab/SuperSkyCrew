@@ -46,7 +46,7 @@ class Organization extends Model
     ];
 
     protected $attributes = [
-        'theme_key' => 'tirkizna',
+        'theme_key' => 'zelena',
     ];
 
     protected function casts(): array
