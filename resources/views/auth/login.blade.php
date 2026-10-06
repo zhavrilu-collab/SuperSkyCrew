@@ -50,7 +50,7 @@
         @endif
     </p>
     <p class="text-center small">
-        Nemate tvrtku? <a href="{{ route('register.organization') }}">Registrirajte novu</a>
+        Nemate račun? <a href="{{ route('register.organization') }}">Registrirajte se</a>
     </p>
 </div>
 

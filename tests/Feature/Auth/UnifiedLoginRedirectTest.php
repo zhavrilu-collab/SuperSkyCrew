@@ -18,7 +18,7 @@ class UnifiedLoginRedirectTest extends TestCase
         $this->get(route('login'))
             ->assertOk()
             ->assertSee('Prijava — SuperSkyCrew', false)
-            ->assertSee('Nemate tvrtku?')
+            ->assertSee('Nemate račun?')
             ->assertDontSee('Jedinstvena prijava');
     }
 
@@ -33,7 +33,7 @@ class UnifiedLoginRedirectTest extends TestCase
         $this->get(route('login'))
             ->assertOk()
             ->assertSee('Prijava')
-            ->assertSee('Nemate tvrtku?')
+            ->assertSee('Nemate račun?')
             ->assertSee('http://127.0.0.1:8001/zaboravljena-lozinka', false)
             ->assertSee('Zaboravili ste lozinku?');
     }
