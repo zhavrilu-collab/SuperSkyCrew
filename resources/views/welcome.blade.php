@@ -21,7 +21,6 @@
 <body>
 <div class="hero text-center">
     <img src="{{ \App\Support\OrganizationThemes::productLogoUrl() }}" alt="SuperSkyCrew" class="app-guest-lockup">
-    <h1 class="display-6 text-tema fw-bold">SuperSkyCrew</h1>
     <p class="lead text-muted">Platforma za upravljanje ljudskim resursima — kadar, evidencija radnog vremena i ustroj tvrtke.</p>
     <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
         <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Prijava</a>
