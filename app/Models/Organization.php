@@ -36,6 +36,7 @@ class Organization extends Model
         'trial_ends_at',
         'organization_type',
         'theme_key',
+        'theme_style',
         'logo_path',
         'volunteer_module',
         'expiry_warning_days',

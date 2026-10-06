@@ -87,20 +87,21 @@
         background: var(--svijetlo-zelena);
     }
     .app-sidebar-link.active {
-        color: #fff;
-        background: var(--primarna-tamna);
+        color: var(--odabir-tekst, #fff);
+        background: var(--odabir-pozadina, var(--primarna-tamna));
+        box-shadow: inset 3px 0 0 var(--odabir-crta, transparent);
     }
     .app-sidebar-group-head { display: flex; align-items: stretch; }
     .app-sidebar-group-head .app-sidebar-group-link { flex: 1; min-width: 0; }
     .app-sidebar-group-head:has(.active) {
-        background: var(--primarna-tamna);
-        color: #fff;
+        background: var(--odabir-pozadina, var(--primarna-tamna));
+        color: var(--odabir-tekst, #fff);
     }
     .app-sidebar-group-head:has(.active) .app-sidebar-group-link,
     .app-sidebar-group-head:has(.active) .app-sidebar-group-link:hover,
     .app-sidebar-group-head:has(.active) .app-sidebar-group-toggle,
     .app-sidebar-group-head:has(.active) .app-sidebar-group-toggle:hover {
-        color: #fff;
+        color: var(--odabir-tekst, #fff);
         background: transparent;
     }
     .app-sidebar-group-toggle {
@@ -133,8 +134,9 @@
     }
     .app-sidebar-submenu .app-sidebar-link.active,
     .app-sidebar-submenu .app-sidebar-link.active:hover {
-        color: var(--primarna-tamna);
-        background: color-mix(in srgb, var(--primarna-zelena) 12%, #fff);
+        color: var(--odabir-tekst, var(--primarna-tamna));
+        background: var(--odabir-pozadina, color-mix(in srgb, var(--primarna-zelena) 12%, #fff));
+        box-shadow: inset 3px 0 0 var(--odabir-crta, transparent);
         font-weight: 600;
     }
     .app-sidebar-submenu .app-sidebar-link-plain {
@@ -289,19 +291,20 @@
     .nav-tabs .nav-link { color: #555; font-size: 12px; font-weight: 500; padding: 8px 14px; }
     .nav-tabs .nav-link.active { color: var(--primarna-zelena); font-weight: 700; border-bottom-color: var(--primarna-zelena); }
     .settings-subnav .nav-link { font-size: 12px; padding: 6px 12px; border-radius: 20px; color: #555; }
-    .settings-subnav .nav-link.active { background: var(--primarna-zelena); color: var(--tekst-na-primarnoj); }
+    .settings-subnav .nav-link.active { background: var(--postavke-odabir-pozadina, var(--primarna-zelena)); color: var(--postavke-odabir-tekst, var(--tekst-na-primarnoj)); box-shadow: inset 3px 0 0 var(--postavke-odabir-crta, transparent); }
 
     .btn { font-size: 13px; font-weight: 500; border-radius: 9px; }
     .btn-sm:not(.btn-akcija-tablica) { padding: 4px 10px !important; font-size: 12px !important; border-radius: 9px !important; }
     .btn-success, .btn-primary {
-        background-color: var(--primarna-zelena) !important;
-        border-color: var(--primarna-zelena) !important;
-        color: var(--tekst-na-primarnoj) !important;
+        background-color: var(--gumb-pozadina, var(--primarna-zelena)) !important;
+        border-color: var(--gumb-rub, var(--primarna-zelena)) !important;
+        border-width: var(--gumb-debljina, 1px) !important;
+        color: var(--gumb-tekst, var(--tekst-na-primarnoj)) !important;
     }
     .btn-success:hover, .btn-primary:hover, .btn-primary:focus {
-        background-color: var(--primarna-tamna) !important;
-        border-color: var(--primarna-tamna) !important;
-        color: #fff !important;
+        background-color: var(--gumb-hover-pozadina, var(--primarna-tamna)) !important;
+        border-color: var(--gumb-hover-pozadina, var(--primarna-tamna)) !important;
+        color: var(--gumb-hover-tekst, #fff) !important;
     }
     .btn-outline-primary, .btn-outline-success {
         color: var(--primarna-zelena) !important;
@@ -602,6 +605,24 @@
         cursor: pointer;
     }
     .tema-svatch.aktivna { box-shadow: 0 0 0 3px var(--zlatna-tradicija); }
+    .tema-smjerovi { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tema-kartica {
+        width: 148px;
+        border: 1px solid rgba(0,0,0,.12);
+        border-radius: 10px;
+        background: #fff;
+        padding: 6px 6px 8px;
+        text-align: left;
+        cursor: pointer;
+    }
+    .tema-kartica.aktivna { box-shadow: 0 0 0 2px var(--zlatna-tradicija); }
+    .tema-kartica-naziv { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #1c1c1a; }
+    .tema-kartica-okvir { display: grid; grid-template-columns: 46px 1fr; height: 72px; border: 1px solid rgba(0,0,0,.08); overflow: hidden; border-radius: 6px; }
+    .tema-kartica-strana { background: #fff; border-right: 1px solid rgba(0,0,0,.06); padding: 4px; }
+    .tema-kartica-kugla { display: block; width: 16px; height: 16px; border-radius: 50%; margin: 0 auto 4px; border: 1px solid #3a3a3a; }
+    .tema-kartica-stavka { display: block; font-size: 8px; line-height: 1.2; padding: 2px 3px; border-radius: 3px; border-left: 2px solid transparent; }
+    .tema-kartica-sadrzaj { padding: 4px; display: flex; align-items: flex-end; }
+    .tema-kartica-gumb { display: inline-block; font-size: 8px; font-weight: 700; border-radius: 4px; padding: 2px 5px; border: 1px solid transparent; }
     .tema-logo-pregled { display: flex; align-items: center; min-height: 56px; }
     .tema-logo-pregled-img { display: block; height: 48px; width: auto; max-width: 100%; }
 

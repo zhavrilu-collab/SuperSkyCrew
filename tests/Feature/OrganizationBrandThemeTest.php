@@ -101,6 +101,53 @@ class OrganizationBrandThemeTest extends TestCase
             ->assertSee('brand/product/crvena-horizontal.png', false);
     }
 
+    public function test_theme_style_is_saved_and_unknown_style_is_rejected(): void
+    {
+        [$owner, $organization] = $this->seedOwner();
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'izgled',
+            ]))
+            ->assertOk()
+            ->assertSee('data-stil="tiha"', false)
+            ->assertSee('data-stil="pruga"', false)
+            ->assertDontSee('data-stil="obrnuto"', false);
+
+        $this->actingAs($owner)
+            ->put(route('organization.settings.theme', $organization->slug), [
+                'theme_key' => 'zelena',
+                'theme_style' => 'tiha',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('tiha', $organization->fresh()->theme_style);
+
+        $this->actingAs($owner)
+            ->get(route('organization.dashboard', $organization->slug))
+            ->assertOk()
+            ->assertSee('#5d6241', false)
+            ->assertSee('brand/product/zelena-horizontal.png', false);
+
+        $this->actingAs($owner)
+            ->from(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'izgled',
+            ]))
+            ->put(route('organization.settings.theme', $organization->slug), [
+                'theme_key' => 'zelena',
+                'theme_style' => 'obrnuto',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasErrors('theme_style');
+
+        $this->assertSame('tiha', $organization->fresh()->theme_style);
+    }
+
     /**
      * @return array{0: User, 1: Organization}
      */

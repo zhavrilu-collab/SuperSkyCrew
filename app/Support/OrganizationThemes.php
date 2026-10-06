@@ -86,6 +86,12 @@ class OrganizationThemes
         return array_keys(self::builtinAll());
     }
 
+    /** @return list<string> */
+    public static function styleKeys(): array
+    {
+        return ThemeRecipes::styleKeys();
+    }
+
     public static function resolve(?string $key): string
     {
         $key = $key ?: self::DEFAULT;
@@ -94,18 +100,17 @@ class OrganizationThemes
     }
 
     /** @return array{label: string, primary: string, dark: string, gold: string, light: string, text: string, accent: string} */
-    public static function palette(?string $key): array
+    public static function palette(?string $key, ?string $style = null): array
     {
-        $catalog = self::builtinAll();
         $resolved = self::resolve($key);
 
-        return $catalog[$resolved];
+        return ThemeRecipes::apply(self::builtinAll()[$resolved], $resolved, $style);
     }
 
     /** @return array{label: string, primary: string, dark: string, gold: string, light: string, text: string, accent: string} */
     public static function paletteFor(?Organization $organization): array
     {
-        return self::palette($organization?->theme_key);
+        return self::palette($organization?->theme_key, $organization?->theme_style);
     }
 
     /**
@@ -116,22 +121,68 @@ class OrganizationThemes
         $payload = [];
 
         foreach (self::builtinAll() as $key => $palette) {
-            $payload[$key] = [
-                'label' => $palette['label'],
-                'primary' => $palette['primary'],
-                'dark' => $palette['dark'],
-                'gold' => $palette['gold'],
-                'light' => $palette['light'],
-                'text' => $palette['text'],
-                'accent' => $palette['accent'],
-                'onPrimary' => $palette['onPrimary'],
-                'focusShadow' => self::cssRgba($palette['primary'], 0.15),
-                'tableBorder' => self::cssRgba($palette['primary'], 0.18),
-                'horizontalLogo' => self::productLogoUrl($key, true),
-            ];
+            $payload[$key] = self::decoratePreview($palette, $key);
         }
 
         return $payload;
+    }
+
+    /** @return array<string, mixed> */
+    public static function clientPreview(?Organization $organization = null): array
+    {
+        return [
+            'savedColor' => self::resolve($organization?->theme_key),
+            'savedStyle' => ThemeRecipes::resolveStyle($organization?->theme_style),
+            'palettes' => self::previewPayload(),
+            'styles' => ThemeRecipes::styles(),
+            'combinations' => self::combinationPayload(),
+        ];
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    public static function combinationPayload(): array
+    {
+        $payload = [];
+
+        foreach (self::keys() as $color) {
+            foreach (ThemeRecipes::styleKeys() as $style) {
+                $payload[$color.'|'.$style] = self::decoratePreview(
+                    self::palette($color, $style),
+                    $color,
+                );
+            }
+        }
+
+        return $payload;
+    }
+
+    /** @param  array<string, mixed>  $palette */
+    private static function decoratePreview(array $palette, string $colorKey): array
+    {
+        return [
+            'label' => $palette['label'],
+            'styleLabel' => $palette['styleLabel'] ?? null,
+            'styled' => (bool) ($palette['styled'] ?? false),
+            'primary' => $palette['primary'],
+            'dark' => $palette['dark'],
+            'gold' => $palette['gold'],
+            'light' => $palette['light'],
+            'text' => $palette['text'],
+            'accent' => $palette['accent'],
+            'onPrimary' => $palette['onPrimary'],
+            'focusShadow' => self::cssRgba($palette['primary'], 0.15),
+            'tableBorder' => self::cssRgba($palette['primary'], 0.18),
+            'horizontalLogo' => self::productLogoUrl($colorKey, true),
+            'logoMark' => $palette['logoMark'] ?? null,
+            'navBg' => $palette['navBg'] ?? null,
+            'navFg' => $palette['navFg'] ?? null,
+            'navBar' => $palette['navBar'] ?? null,
+            'btnBg' => $palette['btnBg'] ?? null,
+            'btnFg' => $palette['btnFg'] ?? null,
+            'btnBorder' => $palette['btnBorder'] ?? null,
+            'btnHoverBg' => $palette['btnHoverBg'] ?? null,
+            'btnHoverFg' => $palette['btnHoverFg'] ?? null,
+        ];
     }
 
     public static function cssRgba(string $hex, float $alpha): string

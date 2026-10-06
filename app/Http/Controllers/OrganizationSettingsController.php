@@ -145,9 +145,19 @@ class OrganizationSettingsController extends Controller
 
         $data = $request->validate([
             'theme_key' => ['required', Rule::in(OrganizationThemes::keys())],
+            'theme_style' => ['nullable', 'string', Rule::in(OrganizationThemes::styleKeys())],
+        ], [
+            'theme_key.required' => 'Odaberite boju teme.',
+            'theme_key.in' => 'Boja teme mora biti jedna od službenih: zelena, plava, crvena, žuta ili narančasta.',
+            'theme_style.in' => 'Odaberite jednu od ponuđenih tema.',
         ]);
 
-        $organization->update(['theme_key' => $data['theme_key']]);
+        $update = ['theme_key' => $data['theme_key']];
+        if ($request->exists('theme_style')) {
+            $update['theme_style'] = $data['theme_style'] ?? null;
+        }
+
+        $organization->update($update);
 
         return back()->with('status', 'Izgled je spremljen.');
     }
