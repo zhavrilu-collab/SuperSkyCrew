@@ -1,57 +1,66 @@
-@extends('layouts.guest')
+@extends('layouts.guest-login')
 
 @section('title', 'Prijava — SuperSkyCrew')
 
+@section('tagline', 'Prijava u SuperSkyCrew - platformu za upravljanje ljudskim resursima.')
+
 @section('content')
-<div class="kartica-kontejner">
-    <img src="{{ \App\Support\OrganizationThemes::productLogoUrl() }}" alt="SuperSkyCrew" class="app-guest-lockup">
-    <h1 class="h4 text-tema mb-3">Prijava</h1>
-    <p class="text-muted small">Prijava u SuperSkyCrew — platformu za upravljanje ljudskim resursima.</p>
+@if (session('status') || session('success'))
+    <div class="alert alert-success small">{{ session('status') ?: session('success') }}</div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger small">{{ session('error') }}</div>
+@endif
 
-    @if(session('status'))
-        <div class="alert alert-success small">{{ session('status') }}</div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger small">{{ $errors->first() }}</div>
-    @endif
+<form method="POST" action="{{ route('login') }}">
+    @csrf
 
-    @if($googleLoginUrl || $microsoftLoginUrl)
-        <div class="d-grid gap-2 mb-3">
-            @if($googleLoginUrl)
-                <a href="{{ $googleLoginUrl }}" class="btn btn-outline-secondary btn-sm">Prijava s Googleom</a>
-            @endif
-            @if($microsoftLoginUrl)
-                <a href="{{ $microsoftLoginUrl }}" class="btn btn-outline-secondary btn-sm">Prijava s Microsoftom</a>
-            @endif
-        </div>
-        <div class="text-center text-muted small mb-3">ili</div>
-    @endif
+    <div class="mb-3">
+        <label for="email" class="form-label">E-mail</label>
+        <input id="email" type="email" name="email" value="{{ old('email') }}"
+               class="form-control @error('email') is-invalid @enderror" required autofocus autocomplete="username">
+        @error('email')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
-        <div class="mb-3">
-            <label class="form-label" for="email">E-mail</label>
-            <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}" required autofocus>
-        </div>
-        <div class="mb-3">
-            <label class="form-label" for="password">Lozinka</label>
-            <input type="password" name="password" id="password" class="form-control" required>
-        </div>
-        <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" name="remember" id="remember">
-            <label class="form-check-label" for="remember">Zapamti me</label>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Prijavi se</button>
-    </form>
+    <div class="mb-3">
+        <label for="password" class="form-label">Lozinka</label>
+        <input id="password" type="password" name="password"
+               class="form-control @error('password') is-invalid @enderror" required autocomplete="current-password">
+        @error('password')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="remember_me" name="remember">
+        <label class="form-check-label" for="remember_me">Zapamti me</label>
+    </div>
+
+    <div class="d-grid">
+        <button type="submit" class="btn btn-login">Prijavi se</button>
+    </div>
 
     @if(!empty($passwordResetUrl))
         <p class="text-center mt-3 mb-0 small">
             <a href="{{ $passwordResetUrl }}">Zaboravili ste lozinku?</a>
         </p>
     @endif
+</form>
 
-    <p class="text-center mt-2 mb-0 small">
-        Nemate tvrtku? <a href="{{ route('register.organization') }}">Registrirajte novu</a>
-    </p>
-</div>
+<p class="text-center mt-2 mb-0 small">
+    Nemate tvrtku? <a href="{{ route('register.organization') }}">Registrirajte novu</a>
+</p>
+
+@if(!empty($googleLoginUrl) || !empty($microsoftLoginUrl))
+    <div class="d-grid gap-2 mt-3">
+        @if(!empty($googleLoginUrl))
+            <a href="{{ $googleLoginUrl }}" class="btn btn-outline-secondary">Prijava s Googleom</a>
+        @endif
+        @if(!empty($microsoftLoginUrl))
+            <a href="{{ $microsoftLoginUrl }}" class="btn btn-outline-secondary">Prijava s Microsoftom</a>
+        @endif
+    </div>
+@endif
 @endsection
