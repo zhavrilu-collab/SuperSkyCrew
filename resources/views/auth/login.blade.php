@@ -2,7 +2,7 @@
 
 @section('title', 'Prijava — SuperSkyCrew')
 
-@section('tagline', 'Prijava u SuperSkyCrew - platformu za upravljanje ljudskim resursima.')
+@section('tagline', 'Platforma za upravljanje ljudskim resursima.')
 
 @section('content')
 @if (session('status') || session('success'))
