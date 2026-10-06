@@ -3,17 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#1b431c">
+    <meta name="theme-color" content="#b0cb1f">
     <title>SuperSkyCrew</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { min-height: 100vh; display: flex; align-items: center; background: linear-gradient(160deg, #f4f8f4, #fff); font-family: 'Segoe UI', -apple-system, sans-serif; color: #2b3a2b; }
         .hero { max-width: 720px; margin: auto; padding: 2rem; }
-        .text-tema { color: #1b431c; }
-        .btn-primary { background: #1b431c; border-color: #1b431c; border-radius: 9px; }
-        .btn-primary:hover { background: #112b12; border-color: #112b12; }
-        .btn-outline-success { color: #1b431c; border-color: #1b431c; border-radius: 9px; }
-        .btn-outline-success:hover { background: #1b431c; border-color: #1b431c; color: #fff; }
+        .text-tema { color: #434d0c; }
+        .btn-primary { background: #b0cb1f; border-color: #b0cb1f; color: #1a1a1a; border-radius: 9px; }
+        .btn-primary:hover { background: #434d0c; border-color: #434d0c; color: #fff; }
+        .btn-outline-success { color: #434d0c; border-color: #b0cb1f; border-radius: 9px; }
+        .btn-outline-success:hover { background: #b0cb1f; border-color: #b0cb1f; color: #1a1a1a; }
         .btn-outline-dark { border-radius: 9px; }
         .app-guest-lockup { display: block; max-width: 210px; width: 100%; height: auto; margin: 0 auto 1.15rem; }
     </style>

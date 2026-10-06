@@ -19,6 +19,7 @@
             '--bordo-crvena': palette.accent,
             '--zlatna-tradicija': palette.gold,
             '--tekst-tamni': palette.text,
+            '--tekst-na-primarnoj': palette.onPrimary,
             '--tema': palette.primary,
             '--tema-svijetla': palette.light,
             '--tema-sjena-fokus': palette.focusShadow,

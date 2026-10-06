@@ -11,6 +11,7 @@
         --bordo-crvena: {{ $palette['accent'] }};
         --zlatna-tradicija: {{ $palette['gold'] }};
         --tekst-tamni: {{ $palette['text'] }};
+        --tekst-na-primarnoj: {{ $palette['onPrimary'] }};
         --tema: var(--primarna-zelena);
         --tema-svijetla: var(--svijetlo-zelena);
         --tema-sjena-fokus: {{ OrganizationThemes::cssRgba($palette['primary'], 0.15) }};

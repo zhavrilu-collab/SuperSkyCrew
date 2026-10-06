@@ -61,13 +61,13 @@ class OrganizationUiChromeTest extends TestCase
         }
 
         $dashboard
-            ->assertSee('#1b431c', false)
+            ->assertSee('#b0cb1f', false)
             ->assertDontSee('odaberite modul');
 
         $this->actingAs($owner)
             ->get(route('organization.settings.index', $organization->slug))
             ->assertOk()
-            ->assertSee('TEMA IZGLEDA')
+            ->assertSee('BOJA TEME')
             ->assertDontSee('role="tablist"', false);
 
         $this->actingAs($owner)
@@ -90,7 +90,8 @@ class OrganizationUiChromeTest extends TestCase
             ]))
             ->assertOk()
             ->assertSee('Izgled')
-            ->assertSee('TEMA IZGLEDA')
+            ->assertSee('BOJA TEME')
+            ->assertSee('Službena boja')
             ->assertSee('theme-preview.js', false)
             ->assertSee('data-tema="plava"', false)
             ->assertSee('Spremi temu');
@@ -110,7 +111,7 @@ class OrganizationUiChromeTest extends TestCase
                 'section' => 'izgled',
             ]))
             ->assertOk()
-            ->assertSee('#1b3a5c');
+            ->assertSee('#50abde');
     }
 
     public function test_employee_does_not_see_staff_modules_in_shell(): void

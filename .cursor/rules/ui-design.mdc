@@ -11,12 +11,13 @@ HR je zaseban proizvod na Core platformi, **ista obitelj** kao udruga-saas (toke
 
 | Varijabla | Zadano (zelena) |
 |-----------|-----------------|
-| `--primarna-zelena` | `#1b431c` |
-| `--primarna-tamna` | `#112b12` |
-| `--svijetlo-zelena` | `#f4f8f4` |
-| `--zlatna-tradicija` | `#d4af37` |
-| `--bordo-crvena` | `#8b1414` |
-| `--tekst-tamni` | `#2b3a2b` |
+| `--primarna-zelena` | `#b0cb1f` |
+| `--primarna-tamna` | `#434d0c` |
+| `--svijetlo-zelena` | `#f7fae9` |
+| `--zlatna-tradicija` | `#ffd310` |
+| `--bordo-crvena` | `#e31e24` |
+| `--tekst-tamni` | `#272d07` |
+| `--tekst-na-primarnoj` | `#1a1a1a` |
 
 Pozadina `--svijetlo-zelena`, font Segoe UI / system, **13px**. Tenant paleta (`Organization.theme_key`, `OrganizationThemes`) overridea iste varijable — nemoj hardkodirati Bootstrap plavu `#0d6efd`. `OrganizationThemes::DEFAULT = zelena`. Druge teme, uključujući tirkiznu, migracijom idu na zelenu.
 

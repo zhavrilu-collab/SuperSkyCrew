@@ -90,7 +90,7 @@ class ClockController extends Controller
             'scope' => '/'.$organization->slug.'/',
             'display' => 'standalone',
             'background_color' => $palette['dark'] ?? '#112b12',
-            'theme_color' => $palette['primary'] ?? '#1b431c',
+            'theme_color' => $palette['primary'] ?? '#b0cb1f',
             'lang' => 'hr',
         ], 200, [
             'Content-Type' => 'application/manifest+json',

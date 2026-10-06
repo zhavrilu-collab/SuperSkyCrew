@@ -1,15 +1,16 @@
 <style>
     :root {
-        --primarna-zelena: #1b431c;
-        --primarna-tamna: #112b12;
-        --svijetlo-zelena: #f4f8f4;
-        --bordo-crvena: #8b1414;
-        --zlatna-tradicija: #d4af37;
-        --tekst-tamni: #2b3a2b;
+        --primarna-zelena: #b0cb1f;
+        --primarna-tamna: #434d0c;
+        --svijetlo-zelena: #f7fae9;
+        --bordo-crvena: #e31e24;
+        --zlatna-tradicija: #ffd310;
+        --tekst-tamni: #272d07;
+        --tekst-na-primarnoj: #1a1a1a;
         --tema: var(--primarna-zelena);
         --tema-svijetla: var(--svijetlo-zelena);
-        --tema-sjena-fokus: rgba(27, 67, 28, 0.15);
-        --tema-rub-tablica: rgba(27, 67, 28, 0.18);
+        --tema-sjena-fokus: rgba(176, 203, 31, 0.15);
+        --tema-rub-tablica: rgba(176, 203, 31, 0.18);
         --tema-greska-svijetla: #fff5f5;
         --org-sloj-poslovna: #0f6b64;
         --org-sloj-funkcijska: #1a4a6b;
@@ -288,14 +289,14 @@
     .nav-tabs .nav-link { color: #555; font-size: 12px; font-weight: 500; padding: 8px 14px; }
     .nav-tabs .nav-link.active { color: var(--primarna-zelena); font-weight: 700; border-bottom-color: var(--primarna-zelena); }
     .settings-subnav .nav-link { font-size: 12px; padding: 6px 12px; border-radius: 20px; color: #555; }
-    .settings-subnav .nav-link.active { background: var(--primarna-zelena); color: #fff; }
+    .settings-subnav .nav-link.active { background: var(--primarna-zelena); color: var(--tekst-na-primarnoj); }
 
     .btn { font-size: 13px; font-weight: 500; border-radius: 9px; }
     .btn-sm:not(.btn-akcija-tablica) { padding: 4px 10px !important; font-size: 12px !important; border-radius: 9px !important; }
     .btn-success, .btn-primary {
         background-color: var(--primarna-zelena) !important;
         border-color: var(--primarna-zelena) !important;
-        color: #fff !important;
+        color: var(--tekst-na-primarnoj) !important;
     }
     .btn-success:hover, .btn-primary:hover, .btn-primary:focus {
         background-color: var(--primarna-tamna) !important;
@@ -310,13 +311,13 @@
     .btn-outline-primary:hover, .btn-outline-success:hover {
         background-color: var(--primarna-zelena) !important;
         border-color: var(--primarna-zelena) !important;
-        color: #fff !important;
+        color: var(--tekst-na-primarnoj) !important;
     }
     .btn-link { color: var(--primarna-zelena) !important; }
-    .text-bg-primary, .text-bg-success { background-color: var(--primarna-zelena) !important; color: #fff !important; }
+    .text-bg-primary, .text-bg-success { background-color: var(--primarna-zelena) !important; color: var(--tekst-na-primarnoj) !important; }
     .text-tema { color: var(--primarna-zelena) !important; }
     .nedjelja, .table th.nedjelja { color: var(--bordo-crvena) !important; }
-    .clock-btn { background-color: var(--primarna-zelena) !important; border-color: var(--primarna-zelena) !important; color: #fff !important; }
+    .clock-btn { background-color: var(--primarna-zelena) !important; border-color: var(--primarna-zelena) !important; color: var(--tekst-na-primarnoj) !important; }
     .clock-btn.btn-light { background: #fff !important; color: var(--primarna-tamna) !important; border-color: #fff !important; }
     a { color: var(--primarna-zelena); }
     a:hover { color: var(--primarna-tamna); }

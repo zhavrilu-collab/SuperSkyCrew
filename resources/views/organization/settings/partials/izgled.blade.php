@@ -3,13 +3,18 @@
     $themes = \App\Support\OrganizationThemes::builtinAll();
 @endphp
 <div id="izgled">
-    <span class="fw-bold text-muted small d-block mb-2">TEMA IZGLEDA I PALETE BOJA</span>
+    <span class="fw-bold text-muted small d-block mb-2">BOJA TEME</span>
     <form method="POST" action="{{ route('organization.settings.theme', $organization->slug) }}" id="formTemaOrganizacije" class="mb-4">
         @csrf
         @method('PUT')
         <input type="hidden" name="theme_key" id="themeColorInput" value="{{ $activeTheme }}">
+        <img id="temaLogoPregled"
+             src="{{ \App\Support\OrganizationThemes::productLogoUrl($activeTheme, true) }}"
+             alt="SuperSkyCrew"
+             class="tema-logo-pregled-img mb-2"
+             data-product-logo="horizontal">
         <div class="mb-2">
-            <label class="form-label small fw-bold mb-2">Zadana tema</label>
+            <label class="form-label small fw-bold mb-2">Službena boja</label>
             <div class="d-flex gap-2 mb-2 flex-wrap align-items-center" id="temaBojaIzbor">
                 @foreach($themes as $key => $theme)
                     <button type="button"
@@ -20,13 +25,7 @@
                             aria-label="{{ $theme['label'] }}"></button>
                 @endforeach
             </div>
-            <div class="tema-logo-pregled mb-2" id="temaLogoPregled">
-                <img src="{{ \App\Support\OrganizationThemes::productLogoUrl($activeTheme, true) }}"
-                     alt="Pregled logotipa SuperSkyCrew"
-                     class="tema-logo-pregled-img"
-                     data-product-logo="horizontal">
-            </div>
-            <div class="form-text">Kliknite boju. Horizontalni logotip u izborniku i pregledu mijenja se odmah; Spremi temu trajno pamti odabir.</div>
+            <div class="form-text">Zelena je zadana. Odabirom boje odmah se vidi službeni prozirni logo.</div>
         </div>
         <button type="submit" class="btn btn-success btn-sm btn-spremi">Spremi temu</button>
         <span id="temaPoruka" class="ms-2 small text-muted"></span>
