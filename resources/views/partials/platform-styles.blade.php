@@ -25,8 +25,8 @@
     .app-sidebar {
         width: 260px;
         flex-shrink: 0;
-        background: #fff;
-        color: var(--tekst-tamni);
+        background: var(--izbornik-pozadina, #fff);
+        color: var(--izbornik-tekst, var(--tekst-tamni));
         display: flex;
         flex-direction: column;
         position: sticky;
@@ -41,7 +41,7 @@
         display: flex;
         align-items: center;
         padding: .7rem .9rem;
-        background: #fff;
+        background: var(--izbornik-pozadina, #fff);
         text-decoration: none;
         min-height: 64px;
         flex-shrink: 0;
@@ -58,7 +58,7 @@
         flex: 1;
         overflow-y: auto;
         padding: .35rem 0 .5rem;
-        background: #fff;
+        background: var(--izbornik-pozadina, #fff);
     }
     .app-sidebar-icon {
         width: 1.05rem;
@@ -72,7 +72,7 @@
         display: flex;
         align-items: flex-start;
         gap: .55rem;
-        color: var(--tekst-tamni);
+        color: var(--izbornik-tekst, var(--tekst-tamni));
         text-decoration: none;
         font-size: 13px;
         font-weight: 600;
@@ -90,6 +90,7 @@
         color: var(--odabir-tekst, #fff);
         background: var(--odabir-pozadina, var(--primarna-tamna));
         box-shadow: inset 3px 0 0 var(--odabir-crta, transparent);
+        font-weight: var(--odabir-tezina, 600);
     }
     .app-sidebar-group-head { display: flex; align-items: stretch; }
     .app-sidebar-group-head .app-sidebar-group-link { flex: 1; min-width: 0; }
@@ -124,13 +125,13 @@
         transform: rotate(-135deg);
         margin-top: 3px;
     }
-    .app-sidebar-submenu { display: none; padding: .1rem 0 .35rem; background: #fbfefe; }
+    .app-sidebar-submenu { display: none; padding: .1rem 0 .35rem; background: var(--izbornik-pozadina, #fbfefe); }
     .app-sidebar-group.is-open > .app-sidebar-submenu { display: block; }
     .app-sidebar-submenu .app-sidebar-link {
         font-size: 12px;
         font-weight: 500;
         padding: .38rem .9rem .38rem 1.15rem;
-        color: #3d5552;
+        color: var(--izbornik-tekst, #3d5552);
     }
     .app-sidebar-submenu .app-sidebar-link.active,
     .app-sidebar-submenu .app-sidebar-link.active:hover {
@@ -605,24 +606,29 @@
         cursor: pointer;
     }
     .tema-svatch.aktivna { box-shadow: 0 0 0 3px var(--zlatna-tradicija); }
-    .tema-smjerovi { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tema-smjerovi { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
     .tema-kartica {
-        width: 148px;
+        width: 248px;
         border: 1px solid rgba(0,0,0,.12);
         border-radius: 10px;
         background: #fff;
-        padding: 6px 6px 8px;
+        padding: 8px 8px 10px;
         text-align: left;
         cursor: pointer;
     }
     .tema-kartica.aktivna { box-shadow: 0 0 0 2px var(--zlatna-tradicija); }
-    .tema-kartica-naziv { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #1c1c1a; }
-    .tema-kartica-okvir { display: grid; grid-template-columns: 46px 1fr; height: 72px; border: 1px solid rgba(0,0,0,.08); overflow: hidden; border-radius: 6px; }
-    .tema-kartica-strana { background: #fff; border-right: 1px solid rgba(0,0,0,.06); padding: 4px; }
-    .tema-kartica-kugla { display: block; width: 16px; height: 16px; border-radius: 50%; margin: 0 auto 4px; border: 1px solid #3a3a3a; }
-    .tema-kartica-stavka { display: block; font-size: 8px; line-height: 1.2; padding: 2px 3px; border-radius: 3px; border-left: 2px solid transparent; }
-    .tema-kartica-sadrzaj { padding: 4px; display: flex; align-items: flex-end; }
-    .tema-kartica-gumb { display: inline-block; font-size: 8px; font-weight: 700; border-radius: 4px; padding: 2px 5px; border: 1px solid transparent; }
+    .tema-kartica-naziv { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #1c1c1a; }
+    .tema-kartica-okvir { display: grid; grid-template-columns: 112px 1fr; height: 168px; border: 1px solid rgba(0,0,0,.08); border-radius: 8px; overflow: hidden; }
+    .tema-kartica-strana { border-right: 1px solid rgba(0,0,0,.06); padding: 6px 5px; }
+    .tema-kartica-kugla { display: block; width: 14px; height: 14px; border-radius: 50%; margin: 0 0 6px 2px; border: 1px solid #3a3a3a; }
+    .tema-kartica-red,
+    .tema-kartica-stavka { display: block; font-size: 9px; line-height: 1.25; padding: 2px 4px; border-radius: 4px; color: inherit; }
+    .tema-kartica-pod { padding-left: 10px; }
+    .tema-kartica-stavka { border-left: 2px solid transparent; margin-left: 6px; }
+    .tema-kartica-sadrzaj { padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+    .tema-kartica-gumbi { display: flex; justify-content: flex-end; gap: 3px; flex-wrap: wrap; }
+    .tema-kartica-gumb { display: inline-block; font-size: 8px; font-weight: 700; border-radius: 5px; padding: 3px 5px; border: 1.5px solid transparent; }
+    .tema-kartica-lista { background: #fff; border-radius: 5px; padding: 4px 5px; color: #1c1c1a; font-size: 8px; line-height: 1.45; }
     .tema-logo-pregled { display: flex; align-items: center; min-height: 56px; }
     .tema-logo-pregled-img { display: block; height: 48px; width: auto; max-width: 100%; }
 
