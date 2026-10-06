@@ -34,7 +34,9 @@ class UnifiedLoginRedirectTest extends TestCase
             ->assertOk()
             ->assertSee('Prijava')
             ->assertSee('Nemate račun?')
-            ->assertSee('http://127.0.0.1:8001/zaboravljena-lozinka', false)
-            ->assertSee('Zaboravili ste lozinku?');
+            ->assertSee(route('password.request'), false)
+            ->assertDontSee('http://127.0.0.1:8001/zaboravljena-lozinka', false)
+            ->assertSee('Zaboravili ste lozinku?')
+            ->assertSee('SuperSkyCrew', false);
     }
 }

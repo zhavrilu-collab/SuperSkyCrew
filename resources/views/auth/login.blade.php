@@ -45,9 +45,7 @@
 
 <div class="login-links">
     <p class="text-center small">
-        @if(!empty($passwordResetUrl))
-            <a href="{{ $passwordResetUrl }}">Zaboravili ste lozinku?</a>
-        @endif
+        <a href="{{ route('password.request') }}">Zaboravili ste lozinku?</a>
     </p>
     <p class="text-center small">
         Nemate račun? <a href="{{ route('register.organization') }}">Registrirajte se</a>

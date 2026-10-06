@@ -214,15 +214,43 @@ class CoreAuthService
         ]);
     }
 
-    public function forgotPasswordUrl(): ?string
+    public function sendPasswordResetLink(string $email): string
     {
-        if (! $this->isEnabled()) {
-            return null;
+        $response = AdminConsoleHttp::client()
+            ->timeout(8)
+            ->post(CoreApiUrl::endpoint('/auth/forgot-password'), [
+                'email' => $email,
+                'application_slug' => config('identity.application_slug'),
+            ]);
+
+        return $this->passwordResetStatus($response);
+    }
+
+    public function resetPassword(string $email, string $token, string $password, string $passwordConfirmation): string
+    {
+        $response = AdminConsoleHttp::client()
+            ->timeout(8)
+            ->post(CoreApiUrl::endpoint('/auth/reset-password'), [
+                'email' => $email,
+                'token' => $token,
+                'password' => $password,
+                'password_confirmation' => $passwordConfirmation,
+            ]);
+
+        return $this->passwordResetStatus($response);
+    }
+
+    private function passwordResetStatus(\Illuminate\Http\Client\Response $response): string
+    {
+        $status = (string) $response->json('status', '');
+
+        if ($status !== '') {
+            return $status;
         }
 
-        $base = rtrim((string) config('identity.core_api_url'), '/');
-
-        return $base !== '' ? $base.'/zaboravljena-lozinka' : null;
+        throw ValidationException::withMessages([
+            'email' => ['Platforma za prijavu trenutačno nije dostupna. Pokušajte kasnije.'],
+        ]);
     }
 
     private function oauthRedirectUrl(string $provider): string
