@@ -41,17 +41,18 @@
     <div class="d-grid">
         <button type="submit" class="btn btn-login">Prijavi se</button>
     </div>
-
-    @if(!empty($passwordResetUrl))
-        <p class="text-center mt-3 mb-0 small">
-            <a href="{{ $passwordResetUrl }}">Zaboravili ste lozinku?</a>
-        </p>
-    @endif
 </form>
 
-<p class="text-center mt-2 mb-0 small">
-    Nemate tvrtku? <a href="{{ route('register.organization') }}">Registrirajte novu</a>
-</p>
+<div class="login-links">
+    <p class="text-center small">
+        @if(!empty($passwordResetUrl))
+            <a href="{{ $passwordResetUrl }}">Zaboravili ste lozinku?</a>
+        @endif
+    </p>
+    <p class="text-center small">
+        Nemate tvrtku? <a href="{{ route('register.organization') }}">Registrirajte novu</a>
+    </p>
+</div>
 
 @if(!empty($googleLoginUrl) || !empty($microsoftLoginUrl))
     <div class="d-grid gap-2 mt-3">
