@@ -86,91 +86,94 @@
     .app-sidebar-nav {
         flex: 1;
         overflow-y: auto;
-        padding: .35rem 0 .5rem;
+        padding: .45rem .45rem 1.25rem;
         background: var(--izbornik-pozadina, #fff);
     }
     .app-sidebar-icon {
         width: 1.05rem;
         height: 1.05rem;
-        margin-top: .12rem;
-        flex-shrink: 0;
+        flex: 0 0 1.05rem;
         display: block;
+        color: var(--izbornik-tekst, var(--primarna-zelena));
     }
     .app-sidebar-link,
     .app-sidebar-group-link {
         display: flex;
-        align-items: flex-start;
-        gap: .55rem;
+        align-items: center;
+        gap: .5rem;
+        min-width: 0;
+        padding: .38rem .5rem;
+        border-radius: 8px;
         color: var(--izbornik-tekst, var(--tekst-tamni));
         text-decoration: none;
         font-size: 13px;
-        font-weight: 600;
-        padding: .48rem .9rem;
-        line-height: 1.3;
+        font-weight: 400;
+        line-height: 1.25;
         border: 0;
         background: transparent;
+        outline: none;
     }
     .app-sidebar-link:hover,
     .app-sidebar-group-link:hover {
-        color: var(--primarna-tamna);
         background: var(--svijetlo-zelena);
+        color: var(--primarna-zelena);
     }
-    .app-sidebar-link.active {
-        color: var(--odabir-tekst, #fff);
-        background: var(--odabir-pozadina, var(--primarna-tamna));
-        box-shadow: inset 3px 0 0 var(--odabir-crta, transparent);
-        font-weight: var(--odabir-tezina, 600);
-    }
-    .app-sidebar-group-head { display: flex; align-items: stretch; }
-    .app-sidebar-group-head .app-sidebar-group-link { flex: 1; min-width: 0; }
-    .app-sidebar-group-head:has(.active) {
-        background: var(--odabir-pozadina, var(--primarna-tamna));
-        color: var(--odabir-tekst, #fff);
-    }
-    .app-sidebar-group-head:has(.active) .app-sidebar-group-link,
-    .app-sidebar-group-head:has(.active) .app-sidebar-group-link:hover,
-    .app-sidebar-group-head:has(.active) .app-sidebar-group-toggle,
-    .app-sidebar-group-head:has(.active) .app-sidebar-group-toggle:hover {
-        color: var(--odabir-tekst, #fff);
-        background: transparent;
-    }
-    .app-sidebar-group-toggle {
-        flex: 0 0 2rem;
-        border: 0;
-        background: transparent;
-        color: #7a8a88;
-    }
-    .app-sidebar-group-toggle:hover { color: var(--primarna-tamna); background: var(--svijetlo-zelena); }
-    .app-sidebar-chevron {
-        display: inline-block;
-        width: 0.42rem;
-        height: 0.42rem;
-        border-right: 2px solid currentColor;
-        border-bottom: 2px solid currentColor;
-        transform: rotate(45deg);
-        margin-top: -2px;
-    }
-    .app-sidebar-group.is-open > .app-sidebar-group-head .app-sidebar-chevron {
-        transform: rotate(-135deg);
-        margin-top: 3px;
-    }
-    .app-sidebar-submenu { display: none; padding: .1rem 0 .35rem; background: var(--izbornik-pozadina, #fbfefe); }
-    .app-sidebar-group.is-open > .app-sidebar-submenu { display: block; }
-    .app-sidebar-submenu .app-sidebar-link {
-        font-size: 12px;
-        font-weight: 500;
-        padding: .38rem .9rem .38rem 1.15rem;
-        color: var(--izbornik-tekst, #3d5552);
-    }
+    .app-sidebar-link.active,
+    .app-sidebar-group-link.active,
     .app-sidebar-submenu .app-sidebar-link.active,
     .app-sidebar-submenu .app-sidebar-link.active:hover {
-        color: var(--odabir-tekst, var(--primarna-tamna));
-        background: var(--odabir-pozadina, color-mix(in srgb, var(--primarna-zelena) 12%, #fff));
+        background: var(--odabir-pozadina, var(--svijetlo-zelena));
+        color: var(--odabir-tekst, var(--primarna-zelena));
+        font-weight: 400;
         box-shadow: inset 3px 0 0 var(--odabir-crta, transparent);
-        font-weight: 600;
     }
+    .app-sidebar-group-head {
+        display: flex;
+        align-items: center;
+        gap: .1rem;
+    }
+    .app-sidebar-group-link { flex: 1; min-width: 0; }
+    .app-sidebar-group-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.7rem;
+        height: 1.7rem;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        outline: none;
+        background: transparent;
+        color: #5d6e5d;
+        flex: 0 0 auto;
+    }
+    .app-sidebar-group-toggle:hover { background: var(--svijetlo-zelena); color: var(--primarna-zelena); }
+    .app-sidebar-link:focus,
+    .app-sidebar-link:focus-visible,
+    .app-sidebar-group-link:focus,
+    .app-sidebar-group-link:focus-visible,
+    .app-sidebar-group-toggle:focus,
+    .app-sidebar-group-toggle:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+    .app-sidebar-chevron {
+        display: block;
+        width: .38rem;
+        height: .38rem;
+        border-right: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        transform: rotate(-45deg);
+        margin-top: -.1rem;
+    }
+    .app-sidebar-group.is-open > .app-sidebar-group-head .app-sidebar-chevron {
+        transform: rotate(45deg);
+        margin-top: .1rem;
+    }
+    .app-sidebar-submenu { display: none; padding-left: .7rem; }
+    .app-sidebar-group.is-open > .app-sidebar-submenu { display: block; }
     .app-sidebar-submenu .app-sidebar-link-plain {
-        padding-left: 2.35rem;
+        padding-left: 1.9rem;
     }
     .app-sidebar-label {
         padding: .55rem .9rem .15rem 1.15rem;
@@ -316,9 +319,9 @@
         display: block;
     }
 
-    .nav-tabs .nav-link { color: #555; font-size: 12px; font-weight: 500; padding: 8px 14px; }
-    .nav-tabs .nav-link.active { color: var(--primarna-zelena); font-weight: 700; border-bottom-color: var(--primarna-zelena); }
-    .settings-subnav .nav-link { font-size: 12px; padding: 6px 12px; border-radius: 20px; color: #555; }
+    .nav-tabs .nav-link { color: #555; font-size: 13px; font-weight: 400; padding: 8px 14px; }
+    .nav-tabs .nav-link.active { color: var(--primarna-zelena); font-weight: 400; font-size: 13px; border-bottom-color: var(--primarna-zelena); }
+    .settings-subnav .nav-link { font-size: 13px; font-weight: 400; padding: 6px 12px; border-radius: 20px; color: #555; }
     .settings-subnav .nav-link.active { background: var(--postavke-odabir-pozadina, var(--primarna-zelena)); color: var(--postavke-odabir-tekst, var(--tekst-na-primarnoj)); box-shadow: inset 3px 0 0 var(--postavke-odabir-crta, transparent); }
 
     .btn { font-size: 13px; font-weight: 500; border-radius: 9px; }

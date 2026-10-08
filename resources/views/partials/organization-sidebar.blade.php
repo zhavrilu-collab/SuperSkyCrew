@@ -210,4 +210,3 @@
         <a class="app-sidebar-link" href="{{ route('organization.pick') }}">@include('partials.nav-icon', ['name' => 'switch'])Promijeni organizaciju</a>
     @endif
 </nav>
-<div class="app-sidebar-footer">{{ now()->year }} © SuperSkyCrew</div>
