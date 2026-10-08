@@ -17,6 +17,9 @@
         --tema-sjena-fokus: {{ OrganizationThemes::cssRgba($palette['primary'], 0.15) }};
         --tema-rub-tablica: {{ OrganizationThemes::cssRgba($palette['primary'], 0.18) }};
         --tema-greska-svijetla: #fff5f5;
+        --crta-zaglavlja: {{ $palette['logoMark'] ?? $palette['primary'] }};
+        --sustav-greska: #e31e24;
+        --sustav-greska-tinta: #560b0e;
         {!! \App\Support\ThemeRecipes::chromeDeclarations($palette) !!}
     }
 </style>

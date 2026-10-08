@@ -110,7 +110,11 @@ class OrganizationThemes
     /** @return array{label: string, primary: string, dark: string, gold: string, light: string, text: string, accent: string} */
     public static function paletteFor(?Organization $organization): array
     {
-        return self::palette($organization?->theme_key, $organization?->theme_style);
+        $style = $organization
+            ? ThemeRecipes::effectiveStyle($organization->theme_style)
+            : null;
+
+        return self::palette($organization?->theme_key, $style);
     }
 
     /**
@@ -132,7 +136,9 @@ class OrganizationThemes
     {
         return [
             'savedColor' => self::resolve($organization?->theme_key),
-            'savedStyle' => ThemeRecipes::resolveStyle($organization?->theme_style),
+            'savedStyle' => $organization
+                ? ThemeRecipes::effectiveStyle($organization->theme_style)
+                : ThemeRecipes::DEFAULT_STYLE,
             'palettes' => self::previewPayload(),
             'styles' => ThemeRecipes::styles(),
             'combinations' => self::combinationPayload(),

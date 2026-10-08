@@ -31,7 +31,7 @@ Ustroj kutije: `--org-sloj-poslovna` `#0f6b64`, `--org-sloj-funkcijska` `#1a4a6b
 - Kartice: `.kartica-kontejner` (bijela, 16px radius); Ustroj platno `.kartica-kontejner--platno` + `.org-platno`
 - Tablice: `.table-responsive` (sticky thead, 12px ćelije); nedjelja `.nedjelja`
 - Naglasci: `text-tema`, ne `.text-primary`
-- Alerti: success = tema, danger = bordo, warning = zlato
+- Alerti: uspjeh, upozorenje i info prate `--crta-zaglavlja`. Greška, brisanje i neispravno polje su bordo `#e31e24`. Prozor ima crtu teme na vrhu. Zaglavlje je 3.5rem, ista crta preko cijele širine. Znak u izborniku je izrez horizontalnog logotipa. Zadana tema je Pruga. Prijava ostaje crni gumb.
 
 ## Izgled
 

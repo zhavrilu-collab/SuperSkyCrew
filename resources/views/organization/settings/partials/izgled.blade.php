@@ -1,6 +1,6 @@
 @php
     $activeTheme = \App\Support\OrganizationThemes::resolve($organization->theme_key);
-    $activeStyle = \App\Support\ThemeRecipes::resolveStyle($organization->theme_style);
+    $activeStyle = \App\Support\ThemeRecipes::effectiveStyle($organization->theme_style);
     $themes = \App\Support\OrganizationThemes::builtinAll();
     $themeStyles = \App\Support\ThemeRecipes::styles();
     $themeCards = \App\Support\OrganizationThemes::combinationPayload();
@@ -103,4 +103,4 @@
 <script>
 window.THEME_PREVIEW = @json(\App\Support\OrganizationThemes::clientPreview($organization));
 </script>
-<script src="{{ asset('js/theme-preview.js') }}"></script>
+<script src="{{ asset('js/theme-preview.js') }}?v={{ filemtime(public_path('js/theme-preview.js')) }}"></script>

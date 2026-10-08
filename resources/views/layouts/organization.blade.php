@@ -31,25 +31,6 @@
     $workspaceCount = \App\Support\UserOrganizationNavigation::organizationUsers($userId)
         ->filter(fn ($entry) => $entry->organization?->status === \App\Enums\OrganizationStatus::Active)
         ->count();
-    $isUstroj = (request()->routeIs('organization.settings.*') && request('section') === 'ustroj')
-        || request()->routeIs('organization.structure.*');
-    $navModule = trim((string) $__env->yieldContent('nav-suffix'));
-    if ($isUstroj) {
-        $navModule = \App\Support\StructureCatalog::tabs()[\App\Support\StructureCatalog::resolve(request('katalog'))] ?? 'Ustroj tvrtke';
-    } elseif ($navModule === '') {
-        $navModule = match (true) {
-            request()->routeIs('organization.dashboard') => 'Nadzorna ploča',
-            request()->routeIs('organization.systematization.*') => 'Sistematizacija',
-            request()->routeIs('organization.segments.*', 'organization.positions.index') => 'Ustroj tvrtke',
-            request()->routeIs('organization.people.*', 'organization.expiries.*', 'organization.handovers.*', 'organization.contracts.index', 'organization.document-creator.*', 'organization.family.*') => 'Zaposlenici',
-            request()->routeIs('organization.timesheet.*', 'organization.schedule.*', 'organization.exceptions.*', 'organization.grants.*') => 'Vrijeme',
-            request()->routeIs('organization.clock', 'organization.requests.*', 'organization.absences.*', 'organization.entrance', 'organization.my-documents.*') => 'Moje',
-            request()->routeIs('organization.approvals.*') => 'Odobrenja',
-            request()->routeIs('organization.settings.*') && request('section') === 'osnovni-podaci' => 'Osnovni podaci',
-            request()->routeIs('organization.settings.*', 'organization.team.*') => 'Postavke',
-            default => null,
-        };
-    }
     $settingsUrl = fn (?string $tab = null, ?string $section = null) => route('organization.settings.index', array_filter([
         'slug' => $organization->slug,
         'tab' => $tab,
@@ -66,10 +47,12 @@
     <div class="app-sidebar-backdrop" id="appSidebarBackdrop"></div>
     <aside class="app-sidebar" id="appSidebar">
         <a class="app-sidebar-brand" href="{{ route('organization.dashboard', $organization->slug) }}">
-            <img src="{{ \App\Support\OrganizationThemes::productLogoUrl($organization->theme_key, true) }}"
-                 class="app-sidebar-lockup"
-                 data-product-logo="horizontal"
-                 alt="SuperSkyCrew">
+            <span class="app-sidebar-lockup" id="appSidebarBrandLogo"
+                  style="--lockup: url('{{ \App\Support\OrganizationThemes::productLogoUrl($organization->theme_key, true) }}')">
+                <span class="app-sidebar-mark" aria-hidden="true"></span>
+                <span class="app-sidebar-word" aria-hidden="true"></span>
+                <span class="visually-hidden">SuperSkyCrew</span>
+            </span>
         </a>
         @include('partials.organization-sidebar')
     </aside>
@@ -88,9 +71,6 @@
                 </button>
                 <p class="app-topbar-title">
                     <span class="app-topbar-title-prefix">{{ $organization->navbarBrandPrefix() }}</span>
-                    @if($navModule)
-                        <span> — {{ $navModule }}</span>
-                    @endif
                 </p>
             </div>
             <div class="app-topbar-user">
