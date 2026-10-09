@@ -3,9 +3,15 @@
 @php
     $isUstroj = $tab === 'organizacija' && $section === 'ustroj';
     $isOsnovni = $tab === 'organizacija' && $section === 'osnovni-podaci';
-    $settingsHeading = $isUstroj
-        ? (\App\Support\StructureCatalog::tabs()[\App\Support\StructureCatalog::resolve($katalog ?? null)] ?? 'Ustroj tvrtke')
-        : \App\Support\SettingsCatalog::sectionLabel($tab, (string) $section);
+    $resolvedKatalog = \App\Support\StructureCatalog::resolve($katalog ?? null);
+    $isProfil = $isOsnovni || ($isUstroj && \App\Support\StructureCatalog::isProfil($resolvedKatalog));
+    $settingsHeading = $isProfil
+        ? 'Profil tvrtke'
+        : ($isUstroj
+            ? (\App\Support\StructureCatalog::isUstrojTvrtke($resolvedKatalog)
+                ? 'Ustroj tvrtke'
+                : (\App\Support\StructureCatalog::tabs()[$resolvedKatalog] ?? 'Ustroj tvrtke'))
+            : \App\Support\SettingsCatalog::sectionLabel($tab, (string) $section));
 @endphp
 
 @section('title', $settingsHeading)
@@ -16,6 +22,7 @@
 <div class="page-heading">
     <h1>Osnovni podaci</h1>
     <p class="text-muted mb-0">Službeni naziv, OIB, adresa, e-mail i tip organizacije.</p>
+    @include('partials.profil-pilule', ['profilActive' => 'osnovni'])
 </div>
 @elseif(! $isUstroj)
 <div class="page-heading">

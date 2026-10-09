@@ -10,75 +10,31 @@
             || request()->routeIs('organization.structure.*');
         $isOsnovni = request()->routeIs('organization.settings.*') && request('section') === 'osnovni-podaci';
         $profilOpen = $isOsnovni || ($isUstrojSection && \App\Support\StructureCatalog::isProfil($ustrojKatalog));
-        $ustrojTvrtkeOpen = request()->routeIs('organization.segments.*', 'organization.positions.index')
-            || ($isUstrojSection && \App\Support\StructureCatalog::isUstrojTvrtke($ustrojKatalog));
+        $ustrojTvrtkeOpen = $isUstrojSection && \App\Support\StructureCatalog::isUstrojTvrtke($ustrojKatalog);
         $sistemaOpen = request()->routeIs('organization.systematization.*');
         $osnovniUrl = $settingsUrl('organizacija', 'osnovni-podaci');
         $profilHome = $isOwner ? $osnovniUrl : $ustrojUrl('pravne');
     @endphp
-    <div class="app-sidebar-group @if($profilOpen) is-open @endif">
-        <div class="app-sidebar-group-head">
-            <a class="app-sidebar-group-link @if($profilOpen) active @endif"
-               href="{{ $profilHome }}">@include('partials.nav-icon', ['name' => 'building'])Profil tvrtke</a>
-            <button type="button" class="app-sidebar-group-toggle" aria-expanded="{{ $profilOpen ? 'true' : 'false' }}">
-                <span class="app-sidebar-chevron"></span>
-            </button>
-        </div>
-        <div class="app-sidebar-submenu">
-            @if($isOwner)
-                <a class="app-sidebar-link @if($isOsnovni) active @endif" href="{{ $osnovniUrl }}">@include('partials.nav-icon', ['name' => 'clipboard'])Osnovni podaci</a>
-            @endif
-            <a class="app-sidebar-link @if($isUstrojSection && $ustrojKatalog === 'pravne') active @endif" href="{{ $ustrojUrl('pravne') }}">@include('partials.nav-icon', ['name' => 'buildings'])Članice grupacije</a>
-            <a class="app-sidebar-link @if($isUstrojSection && $ustrojKatalog === 'poslovnice') active @endif" href="{{ $ustrojUrl('poslovnice') }}">@include('partials.nav-icon', ['name' => 'shop'])Poslovnice</a>
-            <a class="app-sidebar-link @if($isUstrojSection && $ustrojKatalog === 'troskovi') active @endif" href="{{ $ustrojUrl('troskovi') }}">@include('partials.nav-icon', ['name' => 'coins'])Mjesta troška</a>
-        </div>
-    </div>
+    <a class="app-sidebar-link @if($profilOpen) active @endif"
+       href="{{ $profilHome }}">@include('partials.nav-icon', ['name' => 'building'])Profil tvrtke</a>
 
-    <div class="app-sidebar-group @if($ustrojTvrtkeOpen) is-open @endif">
-        <div class="app-sidebar-group-head">
-            <a class="app-sidebar-group-link @if($ustrojTvrtkeOpen) active @endif"
-               href="{{ $ustrojUrl('poslovna') }}">@include('partials.nav-icon', ['name' => 'diagram'])Ustroj tvrtke</a>
-            <button type="button" class="app-sidebar-group-toggle" aria-expanded="{{ $ustrojTvrtkeOpen ? 'true' : 'false' }}">
-                <span class="app-sidebar-chevron"></span>
-            </button>
-        </div>
-        <div class="app-sidebar-submenu">
-            <a class="app-sidebar-link @if(request()->routeIs('organization.segments.*')) active @endif" href="{{ route('organization.segments.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'layers'])Poslovni segmenti</a>
-            <a class="app-sidebar-link @if($isUstrojSection && $ustrojKatalog === 'poslovna') active @endif" href="{{ $ustrojUrl('poslovna') }}">@include('partials.nav-icon', ['name' => 'tree'])Poslovni ustroj</a>
-            <a class="app-sidebar-link @if($isUstrojSection && $ustrojKatalog === 'funkcijska') active @endif" href="{{ $ustrojUrl('funkcijska') }}">@include('partials.nav-icon', ['name' => 'sitemap'])Funkcionalni ustroj</a>
-            <a class="app-sidebar-link @if($isUstrojSection && $ustrojKatalog === 'mjesta') active @endif" href="{{ $ustrojUrl('mjesta') }}">@include('partials.nav-icon', ['name' => 'briefcase'])Radna mjesta</a>
-            <a class="app-sidebar-link @if(request()->routeIs('organization.positions.index')) active @endif" href="{{ route('organization.positions.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'chairs'])Radne pozicije</a>
-            <a class="app-sidebar-link @if($isUstrojSection && $ustrojKatalog === 'organigram') active @endif" href="{{ $ustrojUrl('organigram') }}">@include('partials.nav-icon', ['name' => 'share'])Organizacijska shema</a>
-        </div>
-    </div>
+    <a class="app-sidebar-link @if($ustrojTvrtkeOpen) active @endif"
+       href="{{ $ustrojUrl('poslovna') }}">@include('partials.nav-icon', ['name' => 'diagram'])Ustroj tvrtke</a>
 
-    <div class="app-sidebar-group @if($sistemaOpen) is-open @endif">
-        <div class="app-sidebar-group-head">
-            <a class="app-sidebar-group-link @if($sistemaOpen) active @endif"
-               href="{{ route('organization.systematization.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'book'])Sistematizacija</a>
-            <button type="button" class="app-sidebar-group-toggle" aria-expanded="{{ $sistemaOpen ? 'true' : 'false' }}">
-                <span class="app-sidebar-chevron"></span>
-            </button>
-        </div>
-        <div class="app-sidebar-submenu">
-            <a class="app-sidebar-link @if(request()->routeIs('organization.systematization.index')) active @endif" href="{{ route('organization.systematization.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'file-text'])Opisi radnih mjesta</a>
-            <a class="app-sidebar-link @if(request()->routeIs('organization.systematization.plan')) active @endif" href="{{ route('organization.systematization.plan', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'layout'])Plan radnih pozicija</a>
-            <a class="app-sidebar-link @if(request()->routeIs('organization.systematization.competencies')) active @endif" href="{{ route('organization.systematization.competencies', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'certificate'])Kompetencije</a>
-            <a class="app-sidebar-link @if(request()->routeIs('organization.systematization.acts')) active @endif" href="{{ route('organization.systematization.acts', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'stamp'])Interni akti</a>
-        </div>
-    </div>
+    <a class="app-sidebar-link @if($sistemaOpen) active @endif"
+       href="{{ route('organization.systematization.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'book'])Sistematizacija</a>
 
     @php $kadarOpen = request()->routeIs('organization.people.*', 'organization.expiries.*', 'organization.handovers.*', 'organization.contracts.index', 'organization.document-creator.*', 'organization.family.*'); @endphp
     <div class="app-sidebar-group @if($kadarOpen) is-open @endif">
         <div class="app-sidebar-group-head">
             <a class="app-sidebar-group-link @if($kadarOpen) active @endif"
-               href="{{ route('organization.people.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'people'])Zaposlenici</a>
+               href="{{ route('organization.people.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'people'])Djelatnici</a>
             <button type="button" class="app-sidebar-group-toggle" aria-expanded="{{ $kadarOpen ? 'true' : 'false' }}">
                 <span class="app-sidebar-chevron"></span>
             </button>
         </div>
         <div class="app-sidebar-submenu">
-            <a class="app-sidebar-link @if(request()->routeIs('organization.people.*')) active @endif" href="{{ route('organization.people.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'id-card'])Dosjei zaposlenika</a>
+            <a class="app-sidebar-link @if(request()->routeIs('organization.people.*')) active @endif" href="{{ route('organization.people.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'id-card'])Registar djelatnika</a>
             <a class="app-sidebar-link @if(request()->routeIs('organization.contracts.index')) active @endif" href="{{ route('organization.contracts.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'contract'])Ugovori o radu</a>
             <a class="app-sidebar-link @if(request()->routeIs('organization.document-creator.*')) active @endif" href="{{ route('organization.document-creator.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'pen'])Izrada dokumenata</a>
             <a class="app-sidebar-link @if(request()->routeIs('organization.family.*')) active @endif" href="{{ route('organization.family.index', $organization->slug) }}">@include('partials.nav-icon', ['name' => 'family'])Članovi obitelji</a>

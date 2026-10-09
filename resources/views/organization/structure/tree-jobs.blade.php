@@ -20,18 +20,31 @@
                     <th>Naziv</th>
                     <th>Odjel</th>
                     <th>RAD1G</th>
+                    <th>Stolice</th>
                     <th>GO</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($filteredPositions as $position)
+                    @php
+                        $seatRows = $position->orgPositions->filter(fn ($seat) => $seat->isValidOn($on));
+                        $filledSeats = $seatRows->filter(fn ($seat) => $seat->status === \App\Enums\OrgSeatStatus::Filled || $seat->person_id)->count();
+                        $openSeats = $seatRows->count() - $filledSeats;
+                    @endphp
                     <tr class="{{ $selectedPosition?->id === $position->id ? 'ustroj-red-aktivan' : '' }}">
                         <td>
                             <a class="fw-semibold text-decoration-none" href="{{ $ustrojUrl('mjesta', $on->toDateString(), $q, $position->id) }}">{{ $position->name }}</a>
                         </td>
                         <td>{{ $position->department?->name ?: '—' }}</td>
                         <td>{{ $position->rad1gLabel() ?: '—' }}</td>
+                        <td>
+                            @if($seatRows->isEmpty())
+                                —
+                            @else
+                                {{ $filledSeats }} popunjeno · {{ $openSeats }} otvoreno
+                            @endif
+                        </td>
                         <td>{{ $position->annual_leave_days ?? '—' }}</td>
                         <td class="text-end">
                             <button class="btn btn-outline-secondary btn-sm" type="button"
@@ -57,7 +70,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="text-muted">Nema radnih mjesta važećih na taj dan.</td></tr>
+                    <tr><td colspan="6" class="text-muted">Nema radnih mjesta važećih na taj dan.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -97,6 +110,62 @@
                     <li class="text-muted">Nema osoba na ovom mjestu na odabrani dan.</li>
                 @endforelse
             </ul>
+            @php
+                $jobSeats = $selectedPosition->orgPositions->filter(fn ($seat) => $seat->isValidOn($on))->values();
+            @endphp
+            <div class="forma-sekcija">
+                <h2>Stolice</h2>
+                <p>Radno mjesto je uloga; stolica je konkretno mjesto na koje sjeda osoba.</p>
+            </div>
+            <ul class="list-unstyled mb-2 small">
+                @forelse($jobSeats as $seat)
+                    <li class="ustroj-stolica">
+                        <span>
+                            <strong>#{{ $seat->seat_no }}</strong>
+                            · {{ $seat->status->label() }}
+                            @if($seat->person)
+                                · {{ $seat->person->fullName() }}
+                            @endif
+                        </span>
+                        <span class="d-inline-flex flex-wrap gap-1 justify-content-end">
+                            @if($seat->status !== \App\Enums\OrgSeatStatus::Hiring)
+                                <form method="POST" action="{{ route('organization.positions.update', [$organization->slug, $seat]) }}" class="d-inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="status" value="{{ \App\Enums\OrgSeatStatus::Hiring->value }}">
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit">Zapošljavanje</button>
+                                </form>
+                            @endif
+                            @if($seat->person_id)
+                                <form method="POST" action="{{ route('organization.positions.update', [$organization->slug, $seat]) }}" class="d-inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="release" value="1">
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit">Skini</button>
+                                </form>
+                            @else
+                                <form method="POST" action="{{ route('organization.positions.destroy', [$organization->slug, $seat]) }}" class="d-inline" onsubmit="return confirm('Ukloniti stolicu?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-outline-danger btn-sm" type="submit">Obriši</button>
+                                </form>
+                            @endif
+                        </span>
+                    </li>
+                @empty
+                    <li class="text-muted">Nema stolica na ovom mjestu. Otvorite stolicu za zapošljavanje.</li>
+                @endforelse
+            </ul>
+            <form method="POST" action="{{ route('organization.positions.store', $organization->slug) }}">
+                @csrf
+                <input type="hidden" name="job_position_id" value="{{ $selectedPosition->id }}">
+                <input type="hidden" name="status" value="{{ \App\Enums\OrgSeatStatus::Open->value }}">
+                <input type="hidden" name="valid_from" value="{{ $on->toDateString() }}">
+                @if($selectedPosition->department_id)
+                    <input type="hidden" name="department_id" value="{{ $selectedPosition->department_id }}">
+                @endif
+                <button class="btn btn-primary btn-sm" type="submit">Otvori stolicu</button>
+            </form>
         @else
             <p class="text-muted mb-0">Odaberite radno mjesto u šifrarniku.</p>
         @endif

@@ -98,9 +98,24 @@ class HrBacklogModulesTest extends TestCase
 
         $this->actingAs($owner)
             ->get(route('organization.systematization.plan', $organization->slug))
+            ->assertRedirect(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'ustroj',
+                'katalog' => 'mjesta',
+            ]));
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'ustroj',
+                'katalog' => 'mjesta',
+            ]))
             ->assertOk()
-            ->assertSee('Plan radnih pozicija')
-            ->assertSee('Analitičar');
+            ->assertSee('Radna mjesta')
+            ->assertSee('Analitičar')
+            ->assertSee('Otvori stolicu');
 
         $this->actingAs($owner)
             ->get(route('organization.my-documents.index', $organization->slug))

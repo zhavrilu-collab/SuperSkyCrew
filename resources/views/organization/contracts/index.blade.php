@@ -1,7 +1,7 @@
 @extends('layouts.organization')
 
 @section('title', 'Ugovori o radu')
-@section('nav-suffix', 'Zaposlenici')
+@section('nav-suffix', 'Djelatnici')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -9,7 +9,7 @@
         <h1>Ugovori o radu</h1>
         <p class="text-muted mb-0">Registar ugovora i aneksa. Novi slog dodaje se na kartici osobe.</p>
     </div>
-    <a href="{{ route('organization.people.index', $organization->slug) }}" class="btn btn-outline-secondary">Dosjei</a>
+    <a href="{{ route('organization.people.index', $organization->slug) }}" class="btn btn-outline-secondary">Registar djelatnika</a>
 </div>
 
 <div class="kartica-kontejner p-0 overflow-hidden">

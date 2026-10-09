@@ -35,8 +35,6 @@ class OrganizationUiChromeTest extends TestCase
             ->assertSee('app-sidebar-lockup', false)
             ->assertSee('brand/product/zelena-horizontal.png', false)
             ->assertSee('nav-home', false)
-            ->assertSee('nav-clipboard', false)
-            ->assertSee('nav-buildings', false)
             ->assertSee('nav-contract', false)
             ->assertSee('nav-timesheet', false)
             ->assertSee('nav-palette', false)
@@ -44,13 +42,21 @@ class OrganizationUiChromeTest extends TestCase
             ->assertSee('Profil tvrtke')
             ->assertSee('Ustroj tvrtke')
             ->assertSee('Sistematizacija')
-            ->assertSee('Zaposlenici')
-            ->assertSee('Članice grupacije')
-            ->assertSee('Poslovnice')
-            ->assertSee('Osnovni podaci')
-            ->assertSee('Dosjei zaposlenika')
-            ->assertSee('Opisi radnih mjesta')
-            ->assertSee('Poslovni segmenti')
+            ->assertSee('Djelatnici')
+            ->assertDontSee('Članice grupacije')
+            ->assertDontSee('Poslovnice')
+            ->assertDontSee('Osnovni podaci')
+            ->assertDontSee('Mjesta troška')
+            ->assertSee('Registar djelatnika')
+            ->assertDontSee('Opisi radnih mjesta')
+            ->assertDontSee('Plan radnih pozicija')
+            ->assertDontSee('Kompetencije')
+            ->assertDontSee('Interni akti')
+            ->assertDontSee('Poslovni segmenti')
+            ->assertDontSee('Radne pozicije')
+            ->assertDontSee('Poslovni ustroj')
+            ->assertDontSee('Funkcionalni ustroj')
+            ->assertDontSee('Organizacijska shema')
             ->assertSee('Ugovori o radu')
             ->assertSee('Postavke')
             ->assertSee('Prijavljeni korisnik');
@@ -135,8 +141,8 @@ class OrganizationUiChromeTest extends TestCase
             ->assertDontSee('Profil tvrtke')
             ->assertDontSee('Ustroj tvrtke')
             ->assertDontSee('Sistematizacija')
-            ->assertDontSee('Zaposlenici')
-            ->assertDontSee('Dosjei zaposlenika')
+            ->assertDontSee('Djelatnici')
+            ->assertDontSee('Registar djelatnika')
             ->assertDontSee('Evidencija');
 
         $this->actingAs($employee)
@@ -156,9 +162,27 @@ class OrganizationUiChromeTest extends TestCase
 
         $this->actingAs($owner)
             ->get(route('organization.segments.index', $organization->slug))
+            ->assertRedirect(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'ustroj',
+                'katalog' => 'poslovna',
+            ]));
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'ustroj',
+                'katalog' => 'poslovna',
+            ]))
             ->assertOk()
-            ->assertSee('Poslovni segmenti')
-            ->assertDontSee('Uskoro');
+            ->assertSee('Jedinice')
+            ->assertSee('Odjeli')
+            ->assertSee('Radna mjesta')
+            ->assertSee('Shema')
+            ->assertSee('ustroj-pilula', false)
+            ->assertDontSee('Poslovni segmenti');
 
         $this->actingAs($owner)
             ->get(route('organization.contracts.index', $organization->slug))
@@ -175,7 +199,23 @@ class OrganizationUiChromeTest extends TestCase
             ->assertOk()
             ->assertSee('Osnovni podaci')
             ->assertSee('Naziv organizacije')
-            ->assertSee('MBS');
+            ->assertSee('MBS')
+            ->assertSee('Članice')
+            ->assertSee('Poslovnice')
+            ->assertSee('Mjesta troška')
+            ->assertSee('ustroj-pilula', false);
+
+        $this->actingAs($owner)
+            ->get(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'ustroj',
+                'katalog' => 'pravne',
+            ]))
+            ->assertOk()
+            ->assertSee('Članice grupacije')
+            ->assertSee('Osnovni podaci')
+            ->assertSee('ustroj-pilula', false);
 
         $this->actingAs($employee)
             ->get(route('organization.segments.index', $organization->slug))

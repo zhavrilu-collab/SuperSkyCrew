@@ -27,7 +27,7 @@
                         data-from="{{ $job->valid_from?->toDateString() }}"
                         data-to="{{ $job->valid_to?->toDateString() }}"
                         title="Uredi">✎</button>
-                    <a class="org-kutija-akcija" href="{{ $ustrojUrl('organigram', $on->toDateString(), null, false, $department->enterprise_unit_id, $department->id) }}" title="Organizacijska shema">↗</a>
+                    <a class="org-kutija-akcija" href="{{ $ustrojUrl('organigram', $on->toDateString(), null, false, $department->enterprise_unit_id, $department->id) }}" title="Shema">↗</a>
                 </div>
             </div>
         @empty

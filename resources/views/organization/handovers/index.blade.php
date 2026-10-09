@@ -1,7 +1,7 @@
 @extends('layouts.organization')
 
 @section('title', 'Predaje dokumenata')
-@section('nav-suffix', 'Zaposlenici')
+@section('nav-suffix', 'Djelatnici')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">

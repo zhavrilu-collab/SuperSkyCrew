@@ -25,7 +25,7 @@ class PeopleDirectoryTest extends TestCase
         $this->actingAs($owner)
             ->get(route('organization.people.index', $organization->slug))
             ->assertOk()
-            ->assertSee('Dosjei zaposlenika')
+            ->assertSee('Registar djelatnika')
             ->assertSee('Nema unesenih osoba.');
 
         $response = $this->actingAs($owner)

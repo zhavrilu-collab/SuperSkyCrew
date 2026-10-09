@@ -8,11 +8,11 @@ use App\Models\OrgPosition;
 use App\Models\Person;
 use App\Services\OrganizationRbacService;
 use App\Services\OrgPositionService;
+use App\Support\StructureCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 class OrgPositionController extends Controller
 {
@@ -21,14 +21,14 @@ class OrgPositionController extends Controller
         private readonly OrgPositionService $seats,
     ) {}
 
-    public function index(): View
+    public function index(): RedirectResponse
     {
-        return $this->listing('Ustroj tvrtke');
+        return $this->toJobsCanvas();
     }
 
-    public function plan(): View
+    public function plan(): RedirectResponse
     {
-        return $this->listing('Sistematizacija');
+        return $this->toJobsCanvas();
     }
 
     public function store(Request $request): RedirectResponse
@@ -47,7 +47,7 @@ class OrgPositionController extends Controller
             'valid_to' => $data['valid_to'] ?? null,
         ]);
 
-        return back()->with('status', 'Radna pozicija je otvorena.');
+        return $this->toJobsCanvas($job->id)->with('status', 'Radna pozicija je otvorena.');
     }
 
     public function update(Request $request, string $slug, OrgPosition $position): RedirectResponse
@@ -71,7 +71,7 @@ class OrgPositionController extends Controller
             $this->seats->release($position);
         }
 
-        return back()->with('status', 'Radna pozicija je ažurirana.');
+        return $this->toJobsCanvas((int) $position->job_position_id)->with('status', 'Radna pozicija je ažurirana.');
     }
 
     public function destroy(string $slug, OrgPosition $position): RedirectResponse
@@ -82,29 +82,24 @@ class OrgPositionController extends Controller
         if ($position->person_id) {
             return back()->withErrors(['position' => 'Pozicija je popunjena. Prvo skinite osobu sa stolice.']);
         }
+        $jobId = (int) $position->job_position_id;
         $position->delete();
 
-        return back()->with('status', 'Radna pozicija je uklonjena.');
+        return $this->toJobsCanvas($jobId)->with('status', 'Radna pozicija je uklonjena.');
     }
 
-    private function listing(string $nav): View
+    private function toJobsCanvas(?int $mjesto = null): RedirectResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
-        return view('organization.positions.index', [
-            'organization' => $organization,
-            'nav' => $nav,
-            'seats' => OrgPosition::query()
-                ->forOrganization($organization)
-                ->with(['jobPosition', 'department', 'person'])
-                ->orderBy('job_position_id')
-                ->orderBy('seat_no')
-                ->get(),
-            'jobs' => JobPosition::query()->forOrganization($organization)->orderBy('name')->get(),
-            'people' => Person::query()->forOrganization($organization)->orderBy('last_name')->get(),
-            'statuses' => OrgSeatStatus::cases(),
-        ]);
+        return redirect()->route('organization.settings.index', array_filter([
+            'slug' => $organization->slug,
+            'tab' => 'organizacija',
+            'section' => 'ustroj',
+            'katalog' => StructureCatalog::MJESTA,
+            'mjesto' => $mjesto,
+        ]));
     }
 
     /**

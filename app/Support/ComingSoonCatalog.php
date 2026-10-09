@@ -53,17 +53,17 @@ class ComingSoonCatalog
             ],
             self::CONTRACTS => [
                 'title' => 'Ugovori o radu',
-                'nav' => 'Zaposlenici',
+                'nav' => 'Djelatnici',
                 'lead' => 'Evidencija svih ugovora i dodataka ugovorima (aneksa). Prati povijest ugovornih odnosa, ugovoreno radno vrijeme, trajanje probnog rada, bruto plaću, dane godišnjeg odmora i otkazne rokove.',
             ],
             self::DOCUMENT_CREATOR => [
                 'title' => 'Izrada dokumenata',
-                'nav' => 'Zaposlenici',
+                'nav' => 'Djelatnici',
                 'lead' => 'Alat za HR administratore za brzo generiranje ugovora o radu, aneksa, odluka o godišnjem odmoru ili potvrda o zaposlenju povlačenjem podataka iz profila radnika u predložak.',
             ],
             self::FAMILY => [
                 'title' => 'Članovi obitelji',
-                'nav' => 'Zaposlenici',
+                'nav' => 'Djelatnici',
                 'lead' => 'Evidencija članova obitelji i djece zaposlenika. U Hrvatskoj je to ključno zbog olakšica na porez na dohodak, dodatnih dana godišnjeg odmora, darivanja djece i kontakta za hitne slučajeve.',
             ],
         ];

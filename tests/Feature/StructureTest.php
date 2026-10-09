@@ -42,7 +42,9 @@ class StructureTest extends TestCase
                 'section' => 'ustroj',
             ]))
             ->assertOk()
-            ->assertSee('Poslovni ustroj')
+            ->assertSee('Jedinice')
+            ->assertSee('Odjeli')
+            ->assertSee('Shema')
             ->assertSee('Stanje na dan');
 
         $this->actingAs($owner)
@@ -77,7 +79,7 @@ class StructureTest extends TestCase
         $this->actingAs($owner)
             ->get($this->ustrojUrl($organization, '2026-09-18', 'funkcijska'))
             ->assertOk()
-            ->assertSee('Funkcionalni ustroj')
+            ->assertSee('Odjeli')
             ->assertSee('Operativa')
             ->assertSee('org-kutija', false);
 
@@ -102,7 +104,41 @@ class StructureTest extends TestCase
             ->get($this->ustrojUrl($organization, '2026-09-18', 'mjesta').'&mjesto='.$position->id)
             ->assertOk()
             ->assertSee('Osobe na ovom mjestu')
-            ->assertSee('Maja NaMjestu');
+            ->assertSee('Maja NaMjestu')
+            ->assertSee('Stolice')
+            ->assertSee('Otvori stolicu');
+
+        $this->actingAs($owner)
+            ->post(route('organization.positions.store', $organization->slug), [
+                'job_position_id' => $position->id,
+                'status' => \App\Enums\OrgSeatStatus::Open->value,
+                'valid_from' => '2026-09-18',
+            ])
+            ->assertRedirect(route('organization.settings.index', [
+                'slug' => $organization->slug,
+                'tab' => 'organizacija',
+                'section' => 'ustroj',
+                'katalog' => 'mjesta',
+                'mjesto' => $position->id,
+            ]));
+
+        $this->actingAs($owner)
+            ->get($this->ustrojUrl($organization, '2026-09-18', 'mjesta').'&mjesto='.$position->id)
+            ->assertOk()
+            ->assertSee('Slobodna')
+            ->assertSee('0 popunjeno · 1 otvoreno');
+
+        $this->actingAs($owner)
+            ->get(route('organization.positions.index', $organization->slug))
+            ->assertRedirect($this->ustrojUrl($organization, null, 'mjesta'));
+
+        $this->actingAs($owner)
+            ->get(route('organization.systematization.plan', $organization->slug))
+            ->assertRedirect($this->ustrojUrl($organization, null, 'mjesta'));
+
+        $this->actingAs($owner)
+            ->get(route('organization.segments.index', $organization->slug))
+            ->assertRedirect($this->ustrojUrl($organization, null, 'poslovna'));
     }
 
     public function test_job_position_rejects_unknown_rad1g_code(): void
@@ -466,7 +502,7 @@ class StructureTest extends TestCase
             ->get($this->ustrojUrl($organization, '2026-09-18', 'poslovna'))
             ->assertOk()
             ->assertSee('Split')
-            ->assertSee('Funkcionalni ustroj');
+            ->assertSee('Odjeli');
 
         $this->actingAs($owner)
             ->get($this->ustrojUrl($organization, '2026-09-18', 'pravne'))

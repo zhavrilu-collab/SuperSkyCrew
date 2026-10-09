@@ -682,6 +682,9 @@ class OrganizationSettingsController extends Controller
             $q = trim((string) $request->input('q', ''));
             $selectedPosition = null;
             if ($katalog === StructureCatalog::MJESTA) {
+                $positions->load(['orgPositions' => function ($query) {
+                    $query->with('person')->orderBy('seat_no');
+                }]);
                 $mjestoId = (int) $request->input('mjesto');
                 $selectedPosition = $mjestoId > 0
                     ? $positions->firstWhere('id', $mjestoId)

@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InternalActController extends Controller
@@ -19,16 +18,12 @@ class InternalActController extends Controller
         private readonly OrganizationRbacService $rbac,
     ) {}
 
-    public function index(): View
+    public function index(): RedirectResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
-        return view('organization.systematization.acts', [
-            'organization' => $organization,
-            'acts' => InternalAct::query()->forOrganization($organization)->orderByDesc('published_at')->orderByDesc('id')->get(),
-            'kinds' => InternalActKind::cases(),
-        ]);
+        return $this->toAkti();
     }
 
     public function store(Request $request): RedirectResponse
@@ -65,7 +60,7 @@ class InternalActController extends Controller
             'mime' => $mime,
         ]);
 
-        return back()->with('status', 'Interni akt je spremljen.');
+        return $this->toAkti()->with('status', 'Interni akt je spremljen.');
     }
 
     public function download(string $slug, InternalAct $act): StreamedResponse
@@ -86,6 +81,16 @@ class InternalActController extends Controller
         $act->deleteFile();
         $act->delete();
 
-        return back()->with('status', 'Interni akt je uklonjen.');
+        return $this->toAkti()->with('status', 'Interni akt je uklonjen.');
+    }
+
+    private function toAkti(): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+
+        return redirect()->route('organization.systematization.index', [
+            'slug' => $organization->slug,
+            'pogled' => 'akti',
+        ]);
     }
 }

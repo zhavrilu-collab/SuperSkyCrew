@@ -10,7 +10,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 class CompetencyController extends Controller
 {
@@ -18,17 +17,12 @@ class CompetencyController extends Controller
         private readonly OrganizationRbacService $rbac,
     ) {}
 
-    public function index(): View
+    public function index(): RedirectResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
-        return view('organization.systematization.competencies', [
-            'organization' => $organization,
-            'competencies' => Competency::query()->forOrganization($organization)->orderBy('name')->get(),
-            'jobs' => JobPosition::query()->forOrganization($organization)->with('competencies')->orderBy('name')->get(),
-            'kinds' => CompetencyKind::cases(),
-        ]);
+        return $this->toOpisi();
     }
 
     public function store(Request $request): RedirectResponse
@@ -45,7 +39,7 @@ class CompetencyController extends Controller
             'kind' => $data['kind'],
         ]);
 
-        return back()->with('status', 'Kompetencija je dodana u šifrarnik.');
+        return $this->toOpisi((int) $request->input('mjesto'))->with('status', 'Kompetencija je dodana u šifrarnik.');
     }
 
     public function destroy(string $slug, Competency $competency): RedirectResponse
@@ -56,7 +50,7 @@ class CompetencyController extends Controller
         $competency->jobPositions()->detach();
         $competency->delete();
 
-        return back()->with('status', 'Kompetencija je uklonjena.');
+        return $this->toOpisi()->with('status', 'Kompetencija je uklonjena.');
     }
 
     public function attach(Request $request): RedirectResponse
@@ -76,7 +70,7 @@ class CompetencyController extends Controller
             ],
         ]);
 
-        return back()->with('status', 'Kompetencija je vezana na radno mjesto.');
+        return $this->toOpisi($job->id)->with('status', 'Kompetencija je vezana na radno mjesto.');
     }
 
     public function detach(Request $request): RedirectResponse
@@ -90,6 +84,16 @@ class CompetencyController extends Controller
         $job = JobPosition::query()->forOrganization($organization)->findOrFail($data['job_position_id']);
         $job->competencies()->detach($data['competency_id']);
 
-        return back()->with('status', 'Veza je uklonjena.');
+        return $this->toOpisi($job->id)->with('status', 'Veza je uklonjena.');
+    }
+
+    private function toOpisi(?int $mjesto = null): RedirectResponse
+    {
+        $organization = app('currentOrganization');
+
+        return redirect()->route('organization.systematization.index', array_filter([
+            'slug' => $organization->slug,
+            'mjesto' => $mjesto ?: null,
+        ]));
     }
 }

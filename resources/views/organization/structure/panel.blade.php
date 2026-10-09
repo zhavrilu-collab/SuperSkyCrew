@@ -56,6 +56,9 @@
 
 @php
     $slojNaslov = $tabs[$katalog] ?? 'Ustroj tvrtke';
+    $canvasTabs = \App\Support\StructureCatalog::canvasTabs();
+    $showCanvasTabs = \App\Support\StructureCatalog::isUstrojTvrtke($katalog);
+    $showProfilTabs = \App\Support\StructureCatalog::isProfil($katalog);
     $dodajModal = match ($katalog) {
         'pravne' => ['#modal-pravna', 'Nova pravna osoba'],
         'poslovnice' => ['#modal-poslovnica', 'Nova poslovnica'],
@@ -71,6 +74,16 @@
         <div>
             <h2>{{ $slojNaslov }}</h2>
             <p>Stanje na dan {{ $on->format('d.m.Y.') }}</p>
+            @if($showCanvasTabs)
+                <div class="ustroj-pilule" role="navigation" aria-label="Pogledi ustroja">
+                    @foreach($canvasTabs as $tabKey => $tabLabel)
+                        <a class="ustroj-pilula @if($katalog === $tabKey) is-active @endif"
+                           href="{{ $ustrojUrl($tabKey, $on->toDateString(), $katalog === $tabKey ? $q : null) }}">{{ $tabLabel }}</a>
+                    @endforeach
+                </div>
+            @elseif($showProfilTabs)
+                @include('partials.profil-pilule', ['profilActive' => $katalog])
+            @endif
         </div>
         <form method="GET" action="{{ route('organization.settings.index', $organization->slug) }}" class="ustroj-toolbar">
             <input type="hidden" name="tab" value="organizacija">

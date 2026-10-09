@@ -43,7 +43,7 @@ class OrgScheduleService
         $push(LegalEntity::query()->forOrganization($organization)->get(), 'Članica grupacije', $named);
         $push(WorkCenter::query()->forOrganization($organization)->get(), 'Poslovnica', $named);
         $push(CostCenter::query()->forOrganization($organization)->get(), 'Mjesto troška', $named);
-        $push(EnterpriseUnit::query()->forOrganization($organization)->get(), 'Poslovni ustroj', $named);
+        $push(EnterpriseUnit::query()->forOrganization($organization)->get(), 'Jedinica', $named);
         $push(Department::query()->forOrganization($organization)->get(), 'Odjel', $named);
         $push(JobPosition::query()->forOrganization($organization)->get(), 'Radno mjesto', $named);
         $push(

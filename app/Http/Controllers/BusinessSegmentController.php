@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\BusinessSegment;
 use App\Models\EnterpriseUnit;
 use App\Services\OrganizationRbacService;
+use App\Support\StructureCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 class BusinessSegmentController extends Controller
 {
@@ -17,15 +17,16 @@ class BusinessSegmentController extends Controller
         private readonly OrganizationRbacService $rbac,
     ) {}
 
-    public function index(): View
+    public function index(): RedirectResponse
     {
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
-        return view('organization.segments.index', [
-            'organization' => $organization,
-            'segments' => BusinessSegment::query()->forOrganization($organization)->orderBy('name')->get(),
-            'units' => EnterpriseUnit::query()->forOrganization($organization)->orderBy('name')->get(),
+        return redirect()->route('organization.settings.index', [
+            'slug' => $organization->slug,
+            'tab' => 'organizacija',
+            'section' => 'ustroj',
+            'katalog' => StructureCatalog::POSLOVNA,
         ]);
     }
 

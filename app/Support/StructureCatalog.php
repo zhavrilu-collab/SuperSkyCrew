@@ -51,10 +51,10 @@ class StructureCatalog
             self::PRAVNE => 'Članice grupacije',
             self::POSLOVNICE => 'Poslovnice',
             self::TROSKOVI => 'Mjesta troška',
-            self::POSLOVNA => 'Poslovni ustroj',
-            self::FUNKCIJSKA => 'Funkcionalni ustroj',
+            self::POSLOVNA => 'Jedinice',
+            self::FUNKCIJSKA => 'Odjeli',
             self::MJESTA => 'Radna mjesta',
-            self::ORGANIGRAM => 'Organizacijska shema',
+            self::ORGANIGRAM => 'Shema',
         ];
     }
 
@@ -76,8 +76,33 @@ class StructureCatalog
         return in_array($katalog, self::PROFIL_KEYS, true);
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public static function profileTabs(): array
+    {
+        return [
+            self::PRAVNE => 'Članice',
+            self::POSLOVNICE => 'Poslovnice',
+            self::TROSKOVI => 'Mjesta troška',
+        ];
+    }
+
     public static function isUstrojTvrtke(string $katalog): bool
     {
         return in_array($katalog, self::USTROJ_KEYS, true);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function canvasTabs(): array
+    {
+        return [
+            self::POSLOVNA => 'Jedinice',
+            self::FUNKCIJSKA => 'Odjeli',
+            self::MJESTA => 'Radna mjesta',
+            self::ORGANIGRAM => 'Shema',
+        ];
     }
 }

@@ -18,7 +18,7 @@
                 data-from="{{ $unit->valid_from?->toDateString() }}"
                 data-to="{{ $unit->valid_to?->toDateString() }}"
                 title="Uredi">✎</button>
-            <a class="org-kutija-akcija" href="{{ $ustrojUrl('funkcijska', $on->toDateString(), null, false, $unit->id) }}" title="Funkcionalni ustroj">↗</a>
+            <a class="org-kutija-akcija" href="{{ $ustrojUrl('funkcijska', $on->toDateString(), null, false, $unit->id) }}" title="Odjeli">↗</a>
         </div>
     </div>
     @if($unit->children->isNotEmpty())

@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CompetencyKind;
+use App\Enums\InternalActKind;
+use App\Models\Competency;
+use App\Models\InternalAct;
 use App\Models\Person;
 use App\Services\DepartmentScopeService;
 use App\Services\OrganizationRbacService;
@@ -22,10 +26,35 @@ class SystematizationController extends Controller
         $organization = app('currentOrganization');
         $this->rbac->authorize($organization->id, (int) Auth::id(), 'people.access');
 
+        $pogled = $request->input('pogled') === 'akti' ? 'akti' : 'opisi';
         $on = Carbon::parse($request->input('na', now()->toDateString()))->startOfDay();
         $q = trim((string) $request->input('q', ''));
 
-        $positions = $this->scope->positionsOn($organization, $on)->load('department.enterpriseUnit');
+        $data = [
+            'organization' => $organization,
+            'pogled' => $pogled,
+            'on' => $on,
+            'q' => $q,
+            'positions' => collect(),
+            'filled' => collect(),
+            'selectedPosition' => null,
+            'competencies' => collect(),
+            'competencyKinds' => CompetencyKind::cases(),
+            'acts' => collect(),
+            'actKinds' => InternalActKind::cases(),
+        ];
+
+        if ($pogled === 'akti') {
+            $data['acts'] = InternalAct::query()
+                ->forOrganization($organization)
+                ->orderByDesc('published_at')
+                ->orderByDesc('id')
+                ->get();
+
+            return view('organization.systematization.index', $data);
+        }
+
+        $positions = $this->scope->positionsOn($organization, $on)->load(['department.enterpriseUnit', 'competencies']);
         if ($q !== '') {
             $needle = mb_strtolower($q);
             $positions = $positions->filter(function ($position) use ($needle) {
@@ -35,6 +64,11 @@ class SystematizationController extends Controller
                     || str_contains(mb_strtolower((string) $position->department?->name), $needle);
             })->values();
         }
+
+        $mjestoId = (int) $request->input('mjesto');
+        $selectedPosition = $mjestoId > 0
+            ? $positions->firstWhere('id', $mjestoId)
+            : $positions->first();
 
         $positionIds = $positions->pluck('id')->filter();
         $filled = $positionIds->isEmpty()
@@ -52,12 +86,11 @@ class SystematizationController extends Controller
                 ->groupBy('job_position_id')
                 ->pluck('filled_count', 'job_position_id');
 
-        return view('organization.systematization.index', [
-            'organization' => $organization,
-            'on' => $on,
-            'q' => $q,
-            'positions' => $positions,
-            'filled' => $filled,
-        ]);
+        $data['positions'] = $positions;
+        $data['filled'] = $filled;
+        $data['selectedPosition'] = $selectedPosition;
+        $data['competencies'] = Competency::query()->forOrganization($organization)->orderBy('name')->get();
+
+        return view('organization.systematization.index', $data);
     }
 }
