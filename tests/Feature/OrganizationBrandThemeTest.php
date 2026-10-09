@@ -172,4 +172,31 @@ class OrganizationBrandThemeTest extends TestCase
 
         return [$user, $organization];
     }
+
+    public function test_error_pages_use_the_selected_color_and_style(): void
+    {
+        $organization = Organization::factory()->create([
+            'status' => OrganizationStatus::Active,
+            'slug' => 'tema-greska',
+            'theme_key' => 'plava',
+            'theme_style' => 'kreda',
+        ]);
+        $palette = OrganizationThemes::paletteFor($organization);
+
+        $missing = $this->get('/tema-greska/nema-ove-stranice');
+        $missing->assertNotFound();
+        $missing->assertSee($palette['logoMark'], false);
+        $missing->assertSee($palette['light'], false);
+        $missing->assertSee($palette['btnBg'], false);
+        $missing->assertSee($palette['btnFg'], false);
+        $missing->assertDontSee('#f7fae9', false);
+
+        $exception = new \Symfony\Component\HttpKernel\Exception\HttpException(403);
+        foreach (['403', '404', '419', '429', '500', '503'] as $code) {
+            $html = view('errors.'.$code, ['exception' => $exception])->render();
+            $this->assertStringContainsString($palette['logoMark'], $html);
+            $this->assertStringContainsString($palette['btnBg'], $html);
+            $this->assertStringContainsString($palette['btnFg'], $html);
+        }
+    }
 }
