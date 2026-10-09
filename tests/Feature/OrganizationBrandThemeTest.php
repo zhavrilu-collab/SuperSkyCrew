@@ -117,7 +117,7 @@ class OrganizationBrandThemeTest extends TestCase
             ->assertSee('data-stil="pruga"', false)
             ->assertSee('data-stil="sjena"', false)
             ->assertSee('data-stil="slovo"', false)
-            ->assertSee('data-stil="noc"', false)
+            ->assertDontSee('data-stil="noc"', false)
             ->assertSee('Početna', false)
             ->assertDontSee('data-stil="tiha"', false)
             ->assertDontSee('data-stil="obrnuto"', false);
