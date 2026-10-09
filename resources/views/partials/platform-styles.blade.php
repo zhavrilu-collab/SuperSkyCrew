@@ -357,7 +357,8 @@
     a:hover { color: var(--primarna-tamna); }
 
     main .container-fluid { max-width: 100%; overflow-x: clip; }
-    .form-label, .forma-label { font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--tekst-tamni); }
+    .form-label, .forma-label { color: var(--tekst-tamni); }
+    @include('partials.form-field-scale')
     .forma-polje { margin-bottom: 0; }
     .form-control, .form-select { border-radius: 9px; min-width: 0; max-width: 100%; }
     .row > * { min-width: 0; }
